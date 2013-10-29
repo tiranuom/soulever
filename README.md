@@ -1,3 +1,9 @@
-soulever
+Souliver
 ========
-This project is initialy created to test the usage of scala macro feature.
+
+TODOs
+-----
+
+- Add Mapping support via method
+- Add Enumeration support
+- Add extra button support
