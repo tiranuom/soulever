@@ -20,7 +20,7 @@
         <init-param>
             <description>Application widgetset</description>
             <param-name>widgetset</param-name>
-            <param-value>hms.vaadin.test.AppWidgetSet</param-value>
+            <param-value>soulever.vaadin.test.AppWidgetSet</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
