@@ -1,7 +1,9 @@
 import sbt._
 import Keys._
-import com.github.siasia.PluginKeys._
-import com.github.siasia.WebPlugin._
+import com.earldouglas.xsbtwebplugin.PluginKeys._
+//import com.github.siasia.PluginKeys._
+import com.earldouglas.xsbtwebplugin.WebPlugin._
+//import com.github.siasia.WebPlugin._
 
 object BuildSettings {
   val buildSettings = Defaults.defaultSettings ++ Seq(
