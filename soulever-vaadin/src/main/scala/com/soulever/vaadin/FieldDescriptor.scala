@@ -46,5 +46,7 @@ class FieldDescriptorImplicits {
 
   implicit val booleanFieldProvider = new BooleanFieldProvider
 
+  implicit val passwordFieldProvider = new PasswordFieldProvider
+
   implicit val optionFieldProvider = new OptionKindFieldProvider
 }

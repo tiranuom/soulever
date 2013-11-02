@@ -6,6 +6,8 @@ import com.vaadin.ui._
 import com.vaadin.data.Validator
 import scala.util.Try
 import com.vaadin.data.Validator.InvalidValueException
+import com.vaadin.ui.Button.{ClickEvent, ClickListener}
+import com.soulever.makro.types.Password
 
 trait BaseField[A] extends CustomField[A]{
   def innerField:AbstractField[_]
@@ -78,14 +80,33 @@ class DoubleFieldProvider extends TypeFieldProvider[Double] {
 }
 
 class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
-  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): AbstractField[Boolean] = new BaseField[Boolean] {
+  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): AbstractField[Boolean] = new CustomField[Boolean] {
     def getType: Class[_ <: Boolean] = classOf[Boolean]
 
-    val innerField: CheckBox = new CheckBox()
+    var selected = false
+    val button: Button = new Button("off")
+    button.setStyleName("boolean-field-off")
+    button.addClickListener(new ClickListener {
+      def buttonClick(event: ClickEvent) = setNewValue(!selected)
+    })
 
-    override def setValue(newFieldValue: Boolean) = innerField.setValue(newFieldValue)
+    override def setValue(newFieldValue: Boolean) = setNewValue(newFieldValue)
 
-    override def getValue: Boolean = innerField.getValue
+    def setNewValue(newFieldValue: Boolean) {
+      selected = newFieldValue
+      if (selected) {
+        button.setCaption("on")
+        button.setStyleName("boolean-field-on")
+      } else {
+        button.setCaption("off")
+        button.setStyleName("boolean-field-off")
+      }
+    }
+
+    override def getValue: Boolean = selected
+    def initContent(): Component = {
+      button
+    }
   }
 }
 
@@ -104,4 +125,17 @@ class ByteFieldProvider extends TypeFieldProvider[Byte]{
 
       override def getValue: Byte = innerField.getValue.toByte
     }
+}
+
+class PasswordFieldProvider extends TypeFieldProvider[Password]{
+  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): AbstractField[Password] = new BaseField[Password] {
+
+    val innerField = new PasswordField()
+
+    def getType: Class[_ <: Password] = classOf[Password]
+
+    override def getValue: Password = innerField.getValue
+
+    override def setValue(newFieldValue: Password) = innerField.setValue(newFieldValue)
+  }
 }
