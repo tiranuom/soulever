@@ -7,7 +7,7 @@ trait MFieldDescriptor[LayoutType] {
 
   def field[A : Manifest](init:A,
                           caption:String,
-                          innerField:FieldType[A],
+                          innerField:Option[A] => FieldType[A],
                           validators:List[A => Either[String, A]] = List.empty,
                           prefix:String = "",
                           postfix:String = "",

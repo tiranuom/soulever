@@ -7,35 +7,39 @@ import com.vaadin.data.Property.{ValueChangeEvent, ValueChangeListener}
 import com.vaadin.data.Property
 
 class OptionKindFieldProvider extends KindFieldProvider[Option] {
-  def field[B, FD <: MFieldDescriptor[_]](inf: AbstractField[B])(implicit fieldDescriptor: FD): AbstractField[Option[B]] =
-    new BaseField[Option[B]] {
-      def getType: Class[_ <: Option[B]] = classOf[Option[B]]
+  def field[B, FD <: MFieldDescriptor[_]](inf: (Option[B]) => AbstractField[B])
+                                         (implicit fieldDescriptor: FD): (Option[Option[B]]) => AbstractField[Option[B]] = {
+    op =>
+      new BaseField[Option[B]] {
+        def getType: Class[_ <: Option[B]] = classOf[Option[B]]
 
-      val checkboxField = {
-        val checkBox = new CheckBox("", true)
-        checkBox.addValueChangeListener(new ValueChangeListener {
-          def valueChange(event: ValueChangeEvent) = {
-            innerField.setEnabled(event.getProperty.asInstanceOf[Property[Boolean]].getValue)
-          }
-        })
-        checkBox
+        val checkboxField = {
+          val checkBox = new CheckBox("", op.flatMap(identity).isDefined)
+          checkBox.addValueChangeListener(new ValueChangeListener {
+            def valueChange(event: ValueChangeEvent) = {
+              innerField.setEnabled(event.getProperty.asInstanceOf[Property[Boolean]].getValue)
+            }
+          })
+          checkBox
+        }
+
+        val innerField: AbstractField[B] = inf(op.flatMap(identity))
+        innerField.setEnabled(op.flatMap(identity).isDefined)
+
+        override def initContent(): Component =
+          new HorizontalLayout(checkboxField, innerField)
+
+        override def setValue(newFieldValue: Option[B]) = {
+          newFieldValue.foreach(innerField.setValue)
+          checkboxField.setValue(newFieldValue.isDefined)
+          innerField.setEnabled(checkboxField.getValue)
+        }
+
+        override def getValue: Option[B] = {
+          if (checkboxField.getValue) Some(innerField.getValue) else None
+        }
+
+        override def validate() = if (checkboxField.getValue) innerField.validate()
       }
-
-      override def initContent(): Component =
-        new HorizontalLayout(checkboxField, innerField)
-
-      override def setValue(newFieldValue: Option[B]) = {
-        newFieldValue.foreach(innerField.setValue)
-        checkboxField.setValue(newFieldValue.isDefined)
-        innerField.setEnabled(checkboxField.getValue)
-      }
-
-      override def getValue: Option[B] = {
-        if (checkboxField.getValue) Some(innerField.getValue) else None
-      }
-
-      override def validate() = if (checkboxField.getValue) innerField.validate()
-
-      def innerField: AbstractField[B] = inf
-    }
+  }
 }

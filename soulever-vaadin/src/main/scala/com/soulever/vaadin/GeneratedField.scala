@@ -7,12 +7,14 @@ import com.soulever.makro.BaseField
 
 class GeneratedField[A : Manifest](init:A,
                                    caption:String,
-                                   innerField:AbstractField[A],
+                                   innerFieldGenerator:Option[A] => AbstractField[A],
                                    validators:List[A => Either[String, A]] = List.empty,
                                    prefix:String = "",
                                    postfix:String = "",
                                    i18n:String => String = identity) extends CustomField[A] with BaseField[A] {
   def getType: Class[_ <: A] = implicitly[Manifest[A]].runtimeClass.asInstanceOf[Class[A]]
+
+  val innerField = innerFieldGenerator(Some(init))
 
   setCaption(i18n(caption))
   setValue(init)
