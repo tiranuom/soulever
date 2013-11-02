@@ -8,11 +8,11 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent
 import com.soulever.makro._
 import com.soulever._
 
-class PersonViewProvider extends ViewProvider{
+class PersonViewProvider(ui:UI) extends ViewProvider{
   def getViewName(viewAndParameters: String): String = viewAndParameters
 
   def printPerson(person:TestCaseClass) = {
-    println(person)
+    new Notification("Operation Successful", s"Following data is saved $person").show(ui.getPage)
     Right[Exception, TestCaseClass](person)
   }
 
@@ -35,7 +35,7 @@ case class TestCaseClass(@field() @nonEmpty() stringField:String = "name",
                          @field() @min[Int](0) @max[Int](60) intField:Int = 0,
                          @field() booleanField:Boolean = false,
                          @field() passwordField:Password = "",
-                         @field() listField:List[Option[String]] = List(Some("hello"), Some("world"), None),
+                         @field() listField:List[Option[Int]] = List(Some(4), Some(8), None),
                          @field() @custom[Option[Int]](_.map(_ > 0).getOrElse(true), message = "op") optionField:Option[Int] = None)
 
 class Imp extends FieldDescriptorImplicits with vaadin.FieldDescriptor
