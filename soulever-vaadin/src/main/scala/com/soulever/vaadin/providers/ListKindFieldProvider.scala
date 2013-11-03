@@ -15,7 +15,7 @@ class ListKindFieldProvider extends KindFieldProvider[List]{
           val layout = new HorizontalLayout()
           val removeButton: Button = new Button("-", new Button.ClickListener {
             def buttonClick(event: Button.ClickEvent) {
-              fieldsList = fieldsList.filter(_.hashCode() != layout.hashCode())
+              fieldsList = fieldsList.filter(_._1.hashCode() != layout.hashCode())
               vLayout.removeAllComponents()
               vLayout.addComponents(fieldsList.map(_._1) ::: List(addButton) : _*)
             }

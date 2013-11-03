@@ -1,6 +1,6 @@
 package com.soulever.makro
 
-import scala.reflect.macros.{Universe, Context}
+import scala.reflect.macros.Context
 import language.experimental.macros
 
 object Macros {

@@ -15,7 +15,7 @@ object BuildSettings {
     addCompilerPlugin("org.scala-lang.plugins" % "macro-paradise" % "2.0.0-SNAPSHOT" cross CrossVersion.full))
 }
 
-object MyBuild extends Build {
+object SouleverBuild extends Build {
   import BuildSettings._
 
   val vaadinVersion = "7.0.2"

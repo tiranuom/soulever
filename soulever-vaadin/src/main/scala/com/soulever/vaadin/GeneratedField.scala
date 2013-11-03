@@ -17,7 +17,6 @@ class GeneratedField[A : Manifest](init:A,
   val innerField = innerFieldGenerator(Some(init))
 
   setCaption(i18n(caption))
-  setValue(init)
 
   private def wrapLabel(style:String)(msg:String) = {
     val label: Label = new Label(msg)
