@@ -33,7 +33,7 @@ trait FieldDescriptor extends MFieldDescriptor[FormLayout] {
 class FieldDescriptorImplicits {
 
   implicit val stringFieldProvider = new TypeFieldProvider[String] {
-    def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): (Option[String]) => AbstractField[String] = {
+    def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD, mapping:Option[List[(String, String)]]): (Option[String]) => AbstractField[String] = {
       op =>
         val field: TextField = new TextField()
         op.foreach(field.setValue)
@@ -56,4 +56,6 @@ class FieldDescriptorImplicits {
   implicit val optionFieldProvider = new OptionKindFieldProvider
 
   implicit val listFieldProvider = new ListKindFieldProvider
+
+  implicit val mappingFieldProvider = new MappingFieldProvider
 }

@@ -8,7 +8,7 @@ import com.vaadin.data.Property
 
 class OptionKindFieldProvider extends KindFieldProvider[Option] {
   def field[B, FD <: MFieldDescriptor[_]](inf: (Option[B]) => AbstractField[B])
-                                         (implicit fieldDescriptor: FD): (Option[Option[B]]) => AbstractField[Option[B]] = {
+                                         (implicit fieldDescriptor: FD, mapping: Option[List[(String, B)]]): (Option[Option[B]]) => AbstractField[Option[B]] = {
     op =>
       new BaseField[Option[B]] {
         def getType: Class[_ <: Option[B]] = classOf[Option[B]]

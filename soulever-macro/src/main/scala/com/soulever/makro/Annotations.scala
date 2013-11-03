@@ -1,6 +1,6 @@
 package com.soulever.makro
 
-import scala.annotation.{StaticAnnotation, ClassfileAnnotation}
+import scala.annotation.StaticAnnotation
 
 case class field(value:String = "") extends StaticAnnotation
 
@@ -37,4 +37,4 @@ case class custom[A](value:A => Boolean, message:String) extends FieldValidation
   def validate(a: A): Boolean = value(a)
 }
 
-case class mapping[A](value: A => Map[String, A]) extends StaticAnnotation
+case class mapping[T, A](value:T => List[(String, A)]) extends StaticAnnotation

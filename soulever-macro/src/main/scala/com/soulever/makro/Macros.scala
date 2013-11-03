@@ -11,13 +11,15 @@ object Macros {
                                                       (init:c.Expr[A], action:c.Expr[A => Either[Exception, A]])
                                                       (moduleDesc:c.Expr[FD]):c.Expr[Rt] = {
 
-    val helper = new MacroHelper[c.type](c)
-
     import c.universe._
 
-    val beanName = implicitly[WeakTypeTag[A]].tpe.typeSymbol.name
+    val helper = new MacroHelper[c.type, FD, A](c)
+    helper.fdWtt = Some(implicitly[WeakTypeTag[FD]])
+    helper.initWtt = Some(implicitly[WeakTypeTag[A]])
 
-    val fields = implicitly[WeakTypeTag[A]].tpe.typeSymbol.companionSymbol.typeSignature.members.collectFirst {
+    val beanTpe = implicitly[WeakTypeTag[A]].tpe
+
+    val fields = beanTpe.typeSymbol.companionSymbol.typeSignature.members.collectFirst {
       case method if method.name.toString == "apply" => method
     }.toList.flatMap(_.asMethod.paramss.flatten)
 
@@ -27,9 +29,7 @@ object Macros {
       i18nKey <- annotation.scalaArgs.toList
     } yield field
 
-    val fieldImplType = implicitly[WeakTypeTag[FD]].tpe.member(newTypeName("FieldType")).asType.toType.normalize.typeConstructor
-
-    val fieldExpansionData = formFields.map(helper.fieldExpansion(init, beanName, fieldImplType))
+    val fieldExpansionData = formFields.map(helper.fieldExpansion(init))
     
     val fieldExpressions = fieldExpansionData.flatMap(_._3)
 
@@ -51,7 +51,7 @@ object Macros {
       import m._
       ..$fieldExpressions
       val fields = $fieldListExpression
-      val $submitButtonName = submitButton(${c.literal(helper.toDotNotation(beanName.toString) + ".submit")}, {() =>
+      val $submitButtonName = submitButton(${c.literal(helper.toDotNotation(beanTpe.typeSymbol.name.toString) + ".submit")}, {() =>
         val valid = (fields.asInstanceOf[List[com.soulever.makro.BaseField[_]]] foldLeft true){ case (b, f) => f.isValid && b } //casting is bad;fix this
         if (valid) $action($init.copy(..$copyParams))
       })

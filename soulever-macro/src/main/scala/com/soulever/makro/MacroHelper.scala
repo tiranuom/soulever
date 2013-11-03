@@ -3,32 +3,66 @@ package com.soulever.makro
 import scala.reflect.macros.Context
 import language.experimental.macros
 
-class MacroHelper[C <: Context](val c:C) {
+class MacroHelper[C <: Context, FD, Init](val c:C) {
 
   import c.universe._
 
-  private def expandParameters(s: Type, collector: List[AppliedTypeTree] = List.empty)(implicit fieldImplType:Type): List[AppliedTypeTree] = {
-    val TypeRef(_, _, args) = s
-    args match {
-      case Nil => tq"com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]" :: collector
-      case x :: Nil => expandParameters(x, tq"com.soulever.makro.KindFieldProvider[${s.typeConstructor}, $fieldImplType]" :: collector)
-      case _ => tq"com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]" :: collector
-    }
-  }
+  var fdWtt:Option[c.WeakTypeTag[FD]] = None
+  var initWtt:Option[c.WeakTypeTag[Init]] = None
 
   def toDotNotation(s:String) = (s.tail foldLeft (s.head | 32).toChar.toString){(s, c) =>
     s + (if(c.isLower) c.toString else s".$c".toLowerCase)
   }
 
-  def fieldExpansion[A : WeakTypeTag](init:Expr[A], beanName:Name, fieldImplType:Type)(field:Symbol) = {
+  def fieldExpansion[A : WeakTypeTag](init:Expr[A])(field:Symbol) = {
+
+    val fieldImplType = fdWtt.get.tpe.member(newTypeName("FieldType")).asType.toType.normalize.typeConstructor
+
+    val mapping = field.annotations.collectFirst {
+      case s if s.tpe.typeConstructor.toString == "com.soulever.makro.mapping" =>
+        val f = s.scalaArgs.head
+        q"Some($f($init))"
+    }
+
+    def expandParameters(s: Type, collector: List[(Tree, Option[Tree])] = List.empty): List[(Tree, Option[Tree])] = {
+      val TypeRef(_, _, args) = s
+      args match {
+        case Nil => (q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]", None) :: collector
+        case x :: Nil if s.typeConstructor.toString == "com.soulever.makro.types.Mapping" =>
+          if (mapping.isEmpty) c.error(implicitly[WeakTypeTag[A]].tpe.typeSymbol.pos, "Cannot find mapping for the given type")
+          (q"""
+          new TypeFieldProvider[$x, $fieldImplType]{
+            def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD, mapping: Option[List[(String, $x)]]) = {
+              _ =>
+                new CustomField[$x] {
+                  def getType: Class[_ <: $x] = ???
+
+                  def initContent(): Component = ???
+                }
+            }
+          }
+          """, None) ::
+            (q"implicitly[com.soulever.makro.KindFieldProvider[${s.typeConstructor}, $fieldImplType]]", mapping) ::
+            collector
+        case x :: Nil =>
+          expandParameters(x, (q"implicitly[com.soulever.makro.KindFieldProvider[${s.typeConstructor}, $fieldImplType]]", None) :: collector)
+        case _ => (q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]", None) :: collector
+      }
+    }
+
     val innerField = {
-      val types = expandParameters(field.typeSignature)(fieldImplType)
-      (types.tail foldLeft q"implicitly[${types.head}].field(m)")((quo, tpe) => q"implicitly[$tpe].field($quo)(m)")
+      val types = expandParameters(field.typeSignature)
+      (types.tail foldLeft q"${types.head._1}.field(m, ${types.head._2.getOrElse(q"None")})"){
+        case (quo, (tpe, m)) =>
+          q"$tpe.field($quo)(m, ${m.getOrElse(q"None")})"
+      }
     }
 
     val fieldName = newTermName(c.fresh() + "Field")
 
-    val i18nKey = c.literal(toDotNotation(beanName.toString) + "." + toDotNotation(field.name.toString))
+    val name = implicitly[WeakTypeTag[A]].tpe.typeSymbol.name
+
+    val i18nKey = c.literal(toDotNotation(name.toString) + "." + toDotNotation(field.name.toString))
 
     val validations = {
       val validations = field.annotations.filter(_.tpe <:< weakTypeOf[FieldValidation[_]])
