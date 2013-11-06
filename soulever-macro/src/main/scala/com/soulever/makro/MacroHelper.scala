@@ -25,9 +25,13 @@ class MacroHelper[C <: Context, FD, Init](val c:C) {
     }
 
     def expandParameters(s: Type, collector: List[Tree] = List.empty): List[Tree] = {
-      val TypeRef(_, _, args) = s
+      val TypeRef(pre, _, args) = s
       args match {
-        case Nil => q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]" :: collector
+        case Nil if s <:< weakTypeOf[Enumeration#Value] =>
+          q"enumFieldProvider[$pre](${pre.termSymbol})" :: collector
+        case Nil =>
+
+          q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]" :: collector
         case x :: Nil if s.typeConstructor.toString == "com.soulever.makro.types.Mapping" =>
           if (mapping.isEmpty) c.error(implicitly[WeakTypeTag[A]].tpe.typeSymbol.pos, "Cannot find mapping for the given type")
           q"mappingFieldProvider[$x](${mapping.get})" :: collector

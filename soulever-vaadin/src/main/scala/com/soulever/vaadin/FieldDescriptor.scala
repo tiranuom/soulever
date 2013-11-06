@@ -32,6 +32,8 @@ trait FieldDescriptor extends MFieldDescriptor[FormLayout] {
     })
 
   def mappingFieldProvider[A](mapping: List[(String, A)]): makro.TypeFieldProvider[Mapping[A], FieldDescriptor#FieldType] = new MappingFieldProvider[A](mapping)
+
+  def enumFieldProvider[A <: Enumeration](enum: A): makro.TypeFieldProvider[A#Value, FieldDescriptor#FieldType] = new EnumerationFieldProvider[A](enum)
 }
 
 trait FieldDescriptorImplicits {

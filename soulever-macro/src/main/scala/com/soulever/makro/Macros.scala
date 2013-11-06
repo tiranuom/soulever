@@ -58,7 +58,7 @@ object Macros {
       form(fields, List($submitButtonName))
     """
 
-    println( s"""comp = ${comp} """)
+//    println( s"""comp = ${comp} """)
 
     c.Expr[Rt](comp)
   }

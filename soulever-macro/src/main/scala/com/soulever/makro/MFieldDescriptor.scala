@@ -22,6 +22,8 @@ trait MFieldDescriptor[LayoutType] {
   def form(fields:List[FieldType[_]], buttons:List[ButtonType]):LayoutType
 
   def mappingFieldProvider[A](mapping:List[(String, A)]):TypeFieldProvider[Mapping[A], FieldType]
+
+  def enumFieldProvider[A <: Enumeration](enum:A):TypeFieldProvider[A#Value, FieldType]
 }
 
 trait BaseField[A] {
