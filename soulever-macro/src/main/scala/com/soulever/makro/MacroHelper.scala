@@ -21,40 +21,27 @@ class MacroHelper[C <: Context, FD, Init](val c:C) {
     val mapping = field.annotations.collectFirst {
       case s if s.tpe.typeConstructor.toString == "com.soulever.makro.mapping" =>
         val f = s.scalaArgs.head
-        q"Some($f($init))"
+        q"$f($init)"
     }
 
-    def expandParameters(s: Type, collector: List[(Tree, Option[Tree])] = List.empty): List[(Tree, Option[Tree])] = {
+    def expandParameters(s: Type, collector: List[Tree] = List.empty): List[Tree] = {
       val TypeRef(_, _, args) = s
       args match {
-        case Nil => (q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]", None) :: collector
+        case Nil => q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]" :: collector
         case x :: Nil if s.typeConstructor.toString == "com.soulever.makro.types.Mapping" =>
           if (mapping.isEmpty) c.error(implicitly[WeakTypeTag[A]].tpe.typeSymbol.pos, "Cannot find mapping for the given type")
-          (q"""
-          new TypeFieldProvider[$x, $fieldImplType]{
-            def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD, mapping: Option[List[(String, $x)]]) = {
-              _ =>
-                new CustomField[$x] {
-                  def getType: Class[_ <: $x] = ???
-
-                  def initContent(): Component = ???
-                }
-            }
-          }
-          """, None) ::
-            (q"implicitly[com.soulever.makro.KindFieldProvider[${s.typeConstructor}, $fieldImplType]]", mapping) ::
-            collector
+          q"mappingFieldProvider[$x](${mapping.get})" :: collector
         case x :: Nil =>
-          expandParameters(x, (q"implicitly[com.soulever.makro.KindFieldProvider[${s.typeConstructor}, $fieldImplType]]", None) :: collector)
-        case _ => (q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]", None) :: collector
+          expandParameters(x, q"implicitly[com.soulever.makro.KindFieldProvider[${s.typeConstructor}, $fieldImplType]]" :: collector)
+        case _ => q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]" :: collector
       }
     }
 
     val innerField = {
       val types = expandParameters(field.typeSignature)
-      (types.tail foldLeft q"${types.head._1}.field(m, ${types.head._2.getOrElse(q"None")})"){
-        case (quo, (tpe, m)) =>
-          q"$tpe.field($quo)(m, ${m.getOrElse(q"None")})"
+      (types.tail foldLeft q"${types.head}.field(m)"){
+        case (quo, tpe) =>
+          q"$tpe.field($quo)(m)"
       }
     }
 

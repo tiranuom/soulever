@@ -4,6 +4,8 @@ import com.vaadin.ui._
 import com.vaadin.ui.Button.{ClickEvent, ClickListener}
 import com.soulever.makro.MFieldDescriptor
 import com.soulever.vaadin.providers._
+import com.soulever.makro
+import com.soulever.makro.types.Mapping
 
 trait FieldDescriptor extends MFieldDescriptor[FormLayout] {
   type ButtonType = Button
@@ -28,12 +30,14 @@ trait FieldDescriptor extends MFieldDescriptor[FormLayout] {
     new Button(i18n(label), new ClickListener {
       def buttonClick(event: ClickEvent) = clickAction()
     })
+
+  def mappingFieldProvider[A](mapping: List[(String, A)]): makro.TypeFieldProvider[Mapping[A], FieldDescriptor#FieldType] = new MappingFieldProvider[A](mapping)
 }
 
-class FieldDescriptorImplicits {
+trait FieldDescriptorImplicits {
 
   implicit val stringFieldProvider = new TypeFieldProvider[String] {
-    def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD, mapping:Option[List[(String, String)]]): (Option[String]) => AbstractField[String] = {
+    def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): (Option[String]) => AbstractField[String] = {
       op =>
         val field: TextField = new TextField()
         op.foreach(field.setValue)
@@ -56,6 +60,4 @@ class FieldDescriptorImplicits {
   implicit val optionFieldProvider = new OptionKindFieldProvider
 
   implicit val listFieldProvider = new ListKindFieldProvider
-
-  implicit val mappingFieldProvider = new MappingFieldProvider
 }

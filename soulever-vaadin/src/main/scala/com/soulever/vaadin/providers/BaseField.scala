@@ -20,7 +20,7 @@ trait BaseField[A] extends CustomField[A]{
 }
 
 class IntFieldProvider extends TypeFieldProvider[Int] {
-  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD, mapping:Option[List[(String, Int)]]): (Option[Int]) => AbstractField[Int] = {
+  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): (Option[Int]) => AbstractField[Int] = {
     op =>
       new BaseField[Int] {
         def getType: Class[_ <: Int] = classOf[Int]
@@ -39,7 +39,7 @@ class IntFieldProvider extends TypeFieldProvider[Int] {
 }
 
 class LongFieldProvider extends TypeFieldProvider[Long] {
-  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD, mapping:Option[List[(String, Long)]]): (Option[Long]) => AbstractField[Long] = {
+  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): (Option[Long]) => AbstractField[Long] = {
     op =>
       new BaseField[Long] {
         def getType: Class[_ <: Long] = classOf[Long]
@@ -58,7 +58,7 @@ class LongFieldProvider extends TypeFieldProvider[Long] {
 }
 
 class FloatFieldProvider extends TypeFieldProvider[Float] {
-  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD, mapping:Option[List[(String, Float)]]): (Option[Float]) => AbstractField[Float] = {
+  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): (Option[Float]) => AbstractField[Float] = {
     op =>
       new BaseField[Float] {
         def getType: Class[_ <: Float] = classOf[Float]
@@ -77,7 +77,7 @@ class FloatFieldProvider extends TypeFieldProvider[Float] {
 }
 
 class DoubleFieldProvider extends TypeFieldProvider[Double] {
-  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD, mapping:Option[List[(String, Double)]]): (Option[Double]) => AbstractField[Double] = {
+  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): (Option[Double]) => AbstractField[Double] = {
     op =>
       new BaseField[Double] {
         def getType: Class[_ <: Double] = classOf[Double]
@@ -96,7 +96,7 @@ class DoubleFieldProvider extends TypeFieldProvider[Double] {
 }
 
 class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
-  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD, mapping:Option[List[(String, Boolean)]]): (Option[Boolean]) => AbstractField[Boolean] = {
+  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): (Option[Boolean]) => AbstractField[Boolean] = {
     op =>
       new CustomField[Boolean] {
         def getType: Class[_ <: Boolean] = classOf[Boolean]
@@ -130,7 +130,7 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
 }
 
 class ByteFieldProvider extends TypeFieldProvider[Byte]{
-  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD, mapping:Option[List[(String, Byte)]]): (Option[Byte]) => AbstractField[Byte] = {
+  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): (Option[Byte]) => AbstractField[Byte] = {
     op =>
       new BaseField[Byte] {
         def getType: Class[_ <: Byte] = classOf[Byte]
@@ -150,7 +150,7 @@ class ByteFieldProvider extends TypeFieldProvider[Byte]{
 }
 
 class PasswordFieldProvider extends TypeFieldProvider[Password]{
-  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD, mapping:Option[List[(String, Password)]]): (Option[Password]) => AbstractField[Password] = {
+  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): (Option[Password]) => AbstractField[Password] = {
     op =>
       new BaseField[Password] {
 

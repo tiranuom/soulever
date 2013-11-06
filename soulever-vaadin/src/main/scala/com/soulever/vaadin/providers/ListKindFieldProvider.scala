@@ -6,7 +6,7 @@ import com.vaadin.ui._
 
 class ListKindFieldProvider extends KindFieldProvider[List]{
   def field[B, FD <: MFieldDescriptor[_]](innerField: (Option[B]) => AbstractField[B])
-                                         (implicit fieldDescriptor: FD, mapping: Option[List[(String, B)]]): (Option[List[B]]) => AbstractField[List[B]] = {
+                                         (implicit fieldDescriptor: FD): (Option[List[B]]) => AbstractField[List[B]] = {
     value =>
       new CustomField[List[B]] {
         def getType: Class[_ <: List[B]] = classOf[List[B]]

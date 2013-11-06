@@ -1,5 +1,7 @@
 package com.soulever.makro
 
+import com.soulever.makro.types.Mapping
+
 trait MFieldDescriptor[LayoutType] {
   type FieldType[_]
   type ButtonType
@@ -18,6 +20,8 @@ trait MFieldDescriptor[LayoutType] {
   def i18n(msg:String):String = msg
 
   def form(fields:List[FieldType[_]], buttons:List[ButtonType]):LayoutType
+
+  def mappingFieldProvider[A](mapping:List[(String, A)]):TypeFieldProvider[Mapping[A], FieldType]
 }
 
 trait BaseField[A] {
