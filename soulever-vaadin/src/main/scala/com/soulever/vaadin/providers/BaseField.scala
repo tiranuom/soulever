@@ -7,7 +7,7 @@ import com.vaadin.data.Validator
 import scala.util.Try
 import com.vaadin.data.Validator.InvalidValueException
 import com.vaadin.ui.Button.{ClickEvent, ClickListener}
-import com.soulever.makro.types.Password
+import com.soulever.makro.types.{LongText, Password}
 
 trait BaseField[A] extends CustomField[A]{
   def innerField:AbstractField[_]
@@ -162,6 +162,25 @@ class PasswordFieldProvider extends TypeFieldProvider[Password]{
         override def getValue: Password = innerField.getValue
 
         override def setValue(newFieldValue: Password) = innerField.setValue(newFieldValue)
+      }
+  }
+}
+
+class LongTextFieldProvider extends TypeFieldProvider[LongText]{
+  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): (Option[LongText]) => AbstractField[LongText] = {
+    value =>
+      new BaseField[LongText] {
+        def getType: Class[_ <: LongText] = classOf[LongText]
+
+        val inf = new TextArea()
+        value.foreach(a => inf.setValue(a))
+        def innerField: AbstractField[_] = inf
+
+        override def getValue: LongText = inf.getValue
+
+        override def setValue(newFieldValue: LongText) {
+          inf.setValue(newFieldValue)
+        }
       }
   }
 }

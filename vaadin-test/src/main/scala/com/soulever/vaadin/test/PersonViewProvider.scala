@@ -31,14 +31,14 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
   }
 }
 
-case class TestCaseClass( @field() bool:Bool.Bool = Bool.TRUE
-                          /*@field() @mapping[TestCaseClass, V](_.intMapping) mappedInt:Mapping[V] = V(0),
-                         @field() @nonEmpty() stringField:String = "name",
-                         @field() @min[Int](0) @max[Int](60) intField:Int = 0,
-                         @field() booleanField:Boolean = false,
-                         @field() passwordField:Password = "",
-                         @field() listField:List[Option[Int]] = List(Some(4), Some(8), None),
-                         @field() @custom[Option[Int]](_.map(_ > 0).getOrElse(true), message = "op") optionField:Option[Int] = None*/){
+case class TestCaseClass( @field() enumeration:Bool.Bool = Bool.TRUE,
+                          @field() @mapping[TestCaseClass, V](_.intMapping) mappedInt:Mapping[V] = V(0),
+                          @field() @nonEmpty() stringField:String = "name",
+                          @field() @min[Int](0) @max[Int](60) intField:Int = 0,
+                          @field() booleanField:Boolean = false,
+                          @field() passwordField:Password = "",
+                          @field() listField:List[Option[Int]] = List(Some(4), Some(8), None),
+                          @field() @custom[Option[Int]](_.map(_ > 0).getOrElse(true), message = "op") optionField:Option[Int] = None){
   def intMapping:List[(String, V)] = (1 to 9).toList.map(i => "value" + i.toString -> V(i))
 }
 
