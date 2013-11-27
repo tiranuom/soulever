@@ -8,6 +8,7 @@ import scala.util.Try
 import com.vaadin.data.Validator.InvalidValueException
 import com.vaadin.ui.Button.{ClickEvent, ClickListener}
 import com.soulever.makro.types.{LongText, Password}
+import java.util.Date
 
 trait BaseField[A] extends CustomField[A]{
   def innerField:AbstractField[_]
@@ -182,5 +183,14 @@ class LongTextFieldProvider extends TypeFieldProvider[LongText]{
           inf.setValue(newFieldValue)
         }
       }
+  }
+}
+
+class DateFieldProvider extends TypeFieldProvider[Date]{
+  def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): (Option[Date]) => AbstractField[Date] = {
+    value =>
+      val dateField = new DateField()
+      value.foreach(dateField.setValue)
+      dateField
   }
 }
