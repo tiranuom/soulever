@@ -24,6 +24,7 @@ object SouleverBuild extends Build {
   val vaadinClient = "com.vaadin" % "vaadin-client" % vaadinVersion
   val vaadinTheme = "com.vaadin" % "vaadin-themes" %  vaadinVersion
   val servletApi = "javax.servlet" % "servlet-api" % "2.4" % "provided"
+  val typesafeConfig = "com.typesafe" % "config" % "1.2.0"
 
   val jettyContainer = "org.eclipse.jetty" % "jetty-webapp" % "8.1.0.RC1" % "container"
 
@@ -53,7 +54,7 @@ object SouleverBuild extends Build {
     file("vaadin-test"),
     settings = buildSettings ++ webSettings ++ Seq(
       libraryDependencies ++= Seq(jettyContainer),
-      libraryDependencies ++= Seq(vaadinServer, vaadinClient, vaadinTheme, servletApi)
+      libraryDependencies ++= Seq(vaadinServer, vaadinClient, vaadinTheme, servletApi, typesafeConfig)
     )
   ) dependsOn souleverVaadin
 

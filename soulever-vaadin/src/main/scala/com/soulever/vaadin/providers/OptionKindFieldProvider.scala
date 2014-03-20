@@ -42,4 +42,6 @@ class OptionKindFieldProvider extends KindFieldProvider[Option] {
         override def validate() = if (checkboxField.getValue) innerField.validate()
       }
   }
+
+  override def empty[B]: Option[B] = None
 }

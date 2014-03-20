@@ -19,8 +19,7 @@ trait FieldDescriptor extends MFieldDescriptor[FormLayout] {
                          innerField: Option[A] => FieldDescriptor#FieldType[A],
                          validators: List[(A) => Either[String, A]],
                          prefix: String,
-                         postfix: String,
-                         i18n:String => String = identity): FieldDescriptor#BaseFieldType[A] =
+                         postfix: String): FieldDescriptor#BaseFieldType[A] =
     new GeneratedField[A](init, caption, innerField, validators, prefix, postfix, i18n)
 
   def form(fields: List[FieldDescriptor#FieldType[_]], buttons: List[FieldDescriptor#ButtonType]): FormLayout =
@@ -45,6 +44,8 @@ trait FieldDescriptorImplicits {
         op.foreach(field.setValue)
         field
     }
+
+    override def empty: String = ""
   }
 
   implicit val intFieldProvider = new IntFieldProvider

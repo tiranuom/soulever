@@ -17,6 +17,7 @@ class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvid
             innerField.addItem(v)
             innerField.setItemCaption(v, n)
         }
+        innerField.setNullSelectionAllowed(false)
         value.foreach(innerField.setValue)
 
         def initContent(): Component = innerField
@@ -28,4 +29,6 @@ class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvid
         override def focus() = innerField.focus()
       }
   }
+
+  override def empty: Mapping[A] = new Mapping[A](mapping.head._2) //Might produce an exception
 }

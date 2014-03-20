@@ -30,7 +30,6 @@ class MacroHelper[C <: Context, FD, Init](val c:C) {
         case Nil if s <:< weakTypeOf[Enumeration#Value] =>
           q"enumFieldProvider[$pre](${pre.termSymbol})" :: collector
         case Nil =>
-
           q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]" :: collector
         case x :: Nil if s.typeConstructor.toString == "com.soulever.makro.types.Mapping" =>
           if (mapping.isEmpty) c.error(implicitly[WeakTypeTag[A]].tpe.typeSymbol.pos, "Cannot find mapping for the given type")
@@ -76,7 +75,7 @@ class MacroHelper[C <: Context, FD, Init](val c:C) {
     }
 
     (fieldName, field, List(
-      q"val $fieldName = m.field[${field.typeSignature}](${q"$init.${field.name.toTermName}"}, $i18nKey, $innerField, List(..$validations), i18n = i18n)"))
+      q"val $fieldName = m.field[${field.typeSignature}](${q"$init.${field.name.toTermName}"}, $i18nKey, $innerField, List(..$validations))"))
   }
 
 

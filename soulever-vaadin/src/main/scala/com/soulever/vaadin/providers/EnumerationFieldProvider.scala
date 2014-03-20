@@ -13,6 +13,7 @@ class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvid
         val innerField: ComboBox = new ComboBox()
         enum.values.foreach(innerField.addItem)
         value.foreach(innerField.setValue)
+        innerField.setNullSelectionAllowed(false)
 
         def initContent(): Component = innerField
 
@@ -23,4 +24,6 @@ class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvid
         override def focus() = innerField.focus()
       }
   }
+
+  override def empty: A#Value = enum.values.head
 }

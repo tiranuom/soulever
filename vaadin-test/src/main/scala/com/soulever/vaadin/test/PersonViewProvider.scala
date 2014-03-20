@@ -7,6 +7,8 @@ import com.vaadin.ui._
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent
 import com.soulever.makro._
 import com.soulever._
+import com.typesafe.config.ConfigFactory
+import scala.util.Try
 
 class PersonViewProvider(ui:UI) extends ViewProvider{
   def getViewName(viewAndParameters: String): String = viewAndParameters
@@ -50,4 +52,11 @@ object Bool extends Enumeration {
   val FALSE = Value("false")
 }
 
-class Imp extends FieldDescriptorImplicits with vaadin.FieldDescriptor
+class Imp extends FieldDescriptorImplicits with vaadin.FieldDescriptor {
+  override def i18n(msg: String): String =
+    Try(Imp.i18n.getString(msg)).toOption.flatMap(x => Option(x)).getOrElse(msg)
+}
+
+object Imp {
+  val i18n = ConfigFactory.load("messages.properties")
+}

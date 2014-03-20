@@ -37,6 +37,8 @@ class IntFieldProvider extends TypeFieldProvider[Int] {
         override def getValue: Int = innerField.getValue.toInt
       }
   }
+
+  override def empty: Int = 0
 }
 
 class LongFieldProvider extends TypeFieldProvider[Long] {
@@ -56,6 +58,8 @@ class LongFieldProvider extends TypeFieldProvider[Long] {
         override def getValue: Long = innerField.getValue.toLong
       }
   }
+
+  override def empty: Long = 0
 }
 
 class FloatFieldProvider extends TypeFieldProvider[Float] {
@@ -75,6 +79,8 @@ class FloatFieldProvider extends TypeFieldProvider[Float] {
         override def setValue(newFieldValue: Float) = innerField.setValue(newFieldValue.toString)
       }
   }
+
+  override def empty: Float = 0
 }
 
 class DoubleFieldProvider extends TypeFieldProvider[Double] {
@@ -94,6 +100,8 @@ class DoubleFieldProvider extends TypeFieldProvider[Double] {
         override def setValue(newFieldValue: Double) = innerField.setValue(newFieldValue.toString)
       }
   }
+
+  override def empty: Double = 0
 }
 
 class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
@@ -128,6 +136,8 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
         }
       }
   }
+
+  override def empty: Boolean = false
 }
 
 class ByteFieldProvider extends TypeFieldProvider[Byte]{
@@ -148,6 +158,8 @@ class ByteFieldProvider extends TypeFieldProvider[Byte]{
         override def getValue: Byte = innerField.getValue.toByte
       }
   }
+
+  override def empty: Byte = 0
 }
 
 class PasswordFieldProvider extends TypeFieldProvider[Password]{
@@ -165,6 +177,8 @@ class PasswordFieldProvider extends TypeFieldProvider[Password]{
         override def setValue(newFieldValue: Password) = innerField.setValue(newFieldValue)
       }
   }
+
+  override def empty: Password = new Password("")
 }
 
 class LongTextFieldProvider extends TypeFieldProvider[LongText]{
@@ -184,6 +198,8 @@ class LongTextFieldProvider extends TypeFieldProvider[LongText]{
         }
       }
   }
+
+  override def empty: LongText = new LongText("")
 }
 
 class DateFieldProvider extends TypeFieldProvider[Date]{
@@ -193,4 +209,6 @@ class DateFieldProvider extends TypeFieldProvider[Date]{
       value.foreach(dateField.setValue)
       dateField
   }
+
+  override def empty: Date = new Date()
 }
