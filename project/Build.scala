@@ -8,11 +8,11 @@ import com.earldouglas.xsbtwebplugin.WebPlugin._
 object BuildSettings {
   val buildSettings = Defaults.defaultSettings ++ Seq(
     organization := "org.scalamacros",
-    version := "1.0.0",
-    scalaVersion := "2.10.2",
+    version := "1.0.1",
+    scalaVersion := "2.11.0-RC3",
     scalacOptions ++= Seq(),
-    resolvers += Resolver.sonatypeRepo("snapshots"),
-    addCompilerPlugin("org.scala-lang.plugins" % "macro-paradise" % "2.0.0-SNAPSHOT" cross CrossVersion.full))
+    resolvers += Resolver.sonatypeRepo("releases"),
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0-M3" cross CrossVersion.full))
 }
 
 object SouleverBuild extends Build {

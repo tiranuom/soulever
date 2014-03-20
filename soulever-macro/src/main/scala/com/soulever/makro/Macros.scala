@@ -1,7 +1,9 @@
 package com.soulever.makro
 
-import scala.reflect.macros.Context
 import language.experimental.macros
+import scala.reflect.macros.blackbox.Context
+import scala.reflect.runtime.{universe => ru}
+import ru._
 
 object Macros {
   def form[A <: Product, FD <: MFieldDescriptor[Rt], Rt](init:A, action:A => Either[Exception, A])
@@ -14,19 +16,19 @@ object Macros {
     import c.universe._
 
     val helper = new MacroHelper[c.type, FD, A](c)
-    helper.fdWtt = Some(implicitly[WeakTypeTag[FD]])
-    helper.initWtt = Some(implicitly[WeakTypeTag[A]])
+    helper.fdWtt = Option(implicitly[WeakTypeTag[FD]])
+    helper.initWtt = Option(implicitly[WeakTypeTag[A]])
 
     val beanTpe = implicitly[WeakTypeTag[A]].tpe
 
-    val fields = beanTpe.typeSymbol.companionSymbol.typeSignature.members.collectFirst {
+    val fields = beanTpe.typeSymbol.companion.typeSignature.members.collectFirst {
       case method if method.name.toString == "apply" => method
-    }.toList.flatMap(_.asMethod.paramss.flatten)
+    }.toList.flatMap(_.asMethod.paramLists.flatten)
 
     val formFields = for {
-      field <- fields if field.annotations.map(_.tpe).contains(weakTypeOf[field])
-      annotation <- field.annotations if annotation.tpe =:= weakTypeOf[field]
-      i18nKey <- annotation.scalaArgs.toList
+      field <- fields if field.annotations.map(_.tree.tpe).contains(weakTypeOf[field])
+      annotation <- field.annotations if annotation.tree.tpe =:= weakTypeOf[field]
+      i18nKey <- annotation.tree.children.tail.toList
     } yield field
 
     val fieldExpansionData = formFields.map(helper.fieldExpansion(init))
@@ -41,11 +43,11 @@ object Macros {
     val copyParams = {
       val fieldDataMap = fieldExpansionData.map{
         case (name, field, _) => field -> q"$name.getValue"
-      }.toMap.withDefault(s => q"$init.${s.name}")
+      }.toMap.withDefault(s => q"$init.${s.name.toTermName}")
       fields.map(fieldDataMap)
     }
 
-    val submitButtonName = newTermName(c.fresh())
+    val submitButtonName = TermName(c.freshName())
 
     val comp = q""" val m = $moduleDesc
       import m._
@@ -58,7 +60,7 @@ object Macros {
       form(fields, List($submitButtonName))
     """
 
-//    println( s"""comp = ${comp} """)
+    println( s"""comp = ${comp} """)
 
     c.Expr[Rt](comp)
   }

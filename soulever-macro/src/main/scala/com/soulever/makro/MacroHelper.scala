@@ -1,6 +1,6 @@
 package com.soulever.makro
 
-import scala.reflect.macros.Context
+import scala.reflect.macros.blackbox.Context
 import language.experimental.macros
 
 class MacroHelper[C <: Context, FD, Init](val c:C) {
@@ -16,11 +16,11 @@ class MacroHelper[C <: Context, FD, Init](val c:C) {
 
   def fieldExpansion[A : WeakTypeTag](init:Expr[A])(field:Symbol) = {
 
-    val fieldImplType = fdWtt.get.tpe.member(newTypeName("FieldType")).asType.toType.normalize.typeConstructor
+    val fieldImplType = fdWtt.get.tpe.member(TypeName("FieldType")).asType.toType.dealias.typeConstructor
 
     val mapping = field.annotations.collectFirst {
-      case s if s.tpe.typeConstructor.toString == "com.soulever.makro.mapping" =>
-        val f = s.scalaArgs.head
+      case s if s.tree.tpe.typeConstructor.toString == "com.soulever.makro.mapping" =>
+        val f = s.tree.children.tail.head
         q"$f($init)"
     }
 
@@ -49,34 +49,34 @@ class MacroHelper[C <: Context, FD, Init](val c:C) {
       }
     }
 
-    val fieldName = newTermName(c.fresh() + "Field")
+    val fieldName = TermName(c.freshName() + "Field")
 
     val name = implicitly[WeakTypeTag[A]].tpe.typeSymbol.name
 
-    val i18nKey = c.literal(toDotNotation(name.toString) + "." + toDotNotation(field.name.toString))
+    val i18nKey = q"${toDotNotation(name.toString) + "." + toDotNotation(field.name.toString)}"
 
     val validations = {
-      val validations = field.annotations.filter(_.tpe <:< weakTypeOf[FieldValidation[_]])
+      val validations = field.annotations.filter(_.tree.tpe <:< weakTypeOf[FieldValidation[_]])
       validations.foreach { v =>
         val fv = weakTypeOf[FieldValidation[_]].typeSymbol.asClass
-        val inner = fv.typeParams(0).asType.toType.asSeenFrom(v.tpe, fv)
+        val inner = fv.typeParams(0).asType.toType.asSeenFrom(v.tree.tpe, fv)
         val valid_? : Boolean = inner <:< field.typeSignature
         if (!valid_?) c.error(implicitly[WeakTypeTag[A]].tpe.typeSymbol.pos,
-          s""" annotated validation ${v.tpe} in field ${implicitly[WeakTypeTag[A]].tpe.typeSymbol.fullName}.${field.name} is incompatible;
+          s""" annotated validation ${v.tree.tpe} in field ${implicitly[WeakTypeTag[A]].tpe.typeSymbol.fullName}.${field.name} is incompatible;
               | found    : FieldValidation[${field.typeSignature}]
               | required : FieldValidation[$inner]
               | """.stripMargin)
       }
       validations map {
         a => q""" { (x:${field.typeSignature}) =>
-        val validator = ${a.tpe.typeSymbol.companionSymbol}(..${a.scalaArgs})
+        val validator = ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})
         Option(x).filter(validator.validate).toRight($i18nKey + s"[$${validator.message}]")
       }"""
       }
     }
 
     (fieldName, field, List(
-      q"val $fieldName = m.field[${field.typeSignature}](${q"$init.${field.name}"}, $i18nKey, $innerField, List(..$validations), i18n = i18n)"))
+      q"val $fieldName = m.field[${field.typeSignature}](${q"$init.${field.name.toTermName}"}, $i18nKey, $innerField, List(..$validations), i18n = i18n)"))
   }
 
 

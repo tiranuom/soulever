@@ -3,6 +3,8 @@ package com.soulever.vaadin
 import com.soulever.makro.Macros
 import com.vaadin.ui.FormLayout
 import language.experimental.macros
+import scala.reflect.runtime.{universe => ru}
+import ru._
 import scala.reflect.macros.Context
 
 object FormUtil {
