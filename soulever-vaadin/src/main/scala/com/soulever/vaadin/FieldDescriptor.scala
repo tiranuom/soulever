@@ -38,14 +38,13 @@ trait FieldDescriptor extends MFieldDescriptor[FormLayout] {
 trait FieldDescriptorImplicits {
 
   implicit val stringFieldProvider = new TypeFieldProvider[String] {
-    def field[FD <: MFieldDescriptor[_]](implicit fieldDescriptor: FD): (Option[String]) => AbstractField[String] = {
-      op =>
-        val field: TextField = new TextField()
-        op.foreach(field.setValue)
-        field
-    }
-
     override def empty: String = ""
+
+    override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[String]): AbstractField[String] = {
+      val field: TextField = new TextField()
+      op.foreach(field.setValue)
+      field
+    }
   }
 
   implicit val intFieldProvider = new IntFieldProvider
