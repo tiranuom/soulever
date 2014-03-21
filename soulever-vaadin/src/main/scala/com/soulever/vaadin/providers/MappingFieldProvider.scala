@@ -19,8 +19,8 @@ class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvid
           innerField.addItem(v)
           innerField.setItemCaption(v, n)
       }
+      innerField.setValue(op.getOrElse(empty).get)
       innerField.setNullSelectionAllowed(false)
-      op.foreach(innerField.setValue)
 
       def initContent(): Component = innerField
 

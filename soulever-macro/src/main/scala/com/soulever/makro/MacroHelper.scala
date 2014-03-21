@@ -42,10 +42,10 @@ class MacroHelper[C <: Context, FD, Init](val c:C) {
 
     val innerField = {
       val types = expandParameters(field.typeSignature)
-      (types.tail foldLeft q"${types.head}.field(m)"){
+      (types.tail foldLeft (q"${types.head}.field(m)", q"${types.head}.empty")){
         case (quo, tpe) =>
-          q"$tpe.field($quo)(m)"
-      }
+          (q"$tpe.field(${quo._1}, ${quo._2})(m)", q"$tpe.empty")
+      }._1
     }
 
     val fieldName = TermName(c.freshName() + "Field")

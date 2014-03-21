@@ -8,7 +8,7 @@ import com.vaadin.data.Property
 
 class OptionKindFieldProvider extends KindFieldProvider[Option] {
 
-  override def field[B, FD <: MFieldDescriptor[_]](inf: (Option[B]) => AbstractField[B])
+  override def field[B, FD <: MFieldDescriptor[_]](inf: (Option[B]) => AbstractField[B], empty:B)
                                                   (fieldDescriptor: FD)
                                                   (op: Option[Option[B]]): AbstractField[Option[B]] =
     new BaseField[Option[B]] {
@@ -24,7 +24,7 @@ class OptionKindFieldProvider extends KindFieldProvider[Option] {
         checkBox
       }
 
-      val innerField: AbstractField[B] = inf(op.flatMap(identity))
+      val innerField: AbstractField[B] = inf(Option(op.flatten.getOrElse(empty)))
       innerField.setEnabled(op.flatMap(identity).isDefined)
 
       override def initContent(): Component =

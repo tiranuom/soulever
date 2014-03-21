@@ -6,7 +6,7 @@ import com.vaadin.ui._
 
 class ListKindFieldProvider extends KindFieldProvider[List]{
 
-  override def field[B, FD <: MFieldDescriptor[_]](innerField: (Option[B]) => AbstractField[B])
+  override def field[B, FD <: MFieldDescriptor[_]](innerField: (Option[B]) => AbstractField[B], empty:B)
                                                   (fieldDescriptor: FD)
                                                   (op: Option[List[B]]): AbstractField[List[B]] =
     new CustomField[List[B]] {
@@ -30,7 +30,7 @@ class ListKindFieldProvider extends KindFieldProvider[List]{
 
       val addButton:Button = new Button("+", new Button.ClickListener {
         def buttonClick(event: Button.ClickEvent) {
-          fieldsList = fieldsList ::: List(createFieldRow(None))
+          fieldsList = fieldsList ::: List(createFieldRow(Option(empty)))
           vLayout.removeAllComponents()
           vLayout.addComponents(fieldsList.map(_._1) ::: List(addButton) : _*)
         }

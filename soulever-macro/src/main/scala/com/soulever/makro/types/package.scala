@@ -8,7 +8,7 @@ package object types {
   implicit def password2String(p:Password):String = p.get
 
   implicit class Mapping[A](val get:A) {
-    override def toString:String = get.toString
+    override def toString:String = Option(get).map(_.toString).getOrElse("")
   }
 
   implicit def mapping2a[A](value:Mapping[A]):A = value.get
