@@ -74,8 +74,30 @@ class MacroHelper[C <: Context, FD, Init](val c:C) {
       }
     }
 
+    val validations2 = {
+      val validations = field.annotations.filter(_.tree.tpe <:< weakTypeOf[FieldValidation2[_, _]])
+      println("validations = " + validations)
+      validations.foreach { v =>
+        val fv = weakTypeOf[FieldValidation2[_, _]].typeSymbol.asClass
+        val inner = fv.typeParams(0).asType.toType.asSeenFrom(v.tree.tpe, fv)
+        val valid_? : Boolean = inner <:< field.typeSignature
+        if (!valid_?) c.error(implicitly[WeakTypeTag[A]].tpe.typeSymbol.pos,
+          s""" annotated validation ${v.tree.tpe} in field ${implicitly[WeakTypeTag[A]].tpe.typeSymbol.fullName}.${field.name} is incompatible;
+              | found    : FieldValidation[${field.typeSignature}, _]
+              | required : FieldValidation[$inner, Init]
+              | """.stripMargin)
+      }
+      validations map {
+        a => q""" { (x:${field.typeSignature}, obj:${initWtt.get}) =>
+        val validator = ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})
+        Option(x).filter(x => validator.validate(x, obj)).toRight($i18nKey + s"[$${validator.message}]")
+      }"""
+      }
+    }
+
+
     (fieldName, field, List(
-      q"val $fieldName = m.field[${field.typeSignature}](${q"$init.${field.name.toTermName}"}, $i18nKey, $innerField, List(..$validations))"))
+      q"val $fieldName = m.field[${field.typeSignature}, ${initWtt.get}](${q"$init.${field.name.toTermName}"}, $i18nKey, $innerField, List(..$validations), List(..$validations2))"))
   }
 
 

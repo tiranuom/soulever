@@ -12,15 +12,16 @@ trait FieldDescriptor extends MFieldDescriptor[FormLayout] {
 
   type FieldType[A] = AbstractField[A]
 
-  type BaseFieldType[A] = GeneratedField[A]
+  type BaseFieldType[A] = GeneratedField[A, _]
 
-  def field[A: Manifest](init: A,
-                         caption: String,
-                         innerField: Option[A] => FieldDescriptor#FieldType[A],
-                         validators: List[(A) => Either[String, A]],
-                         prefix: String,
-                         postfix: String): FieldDescriptor#BaseFieldType[A] =
-    new GeneratedField[A](init, caption, innerField, validators, prefix, postfix, i18n)
+  def field[A: Manifest, Obj](init: A,
+                              caption: String,
+                              innerField: Option[A] => FieldDescriptor#FieldType[A],
+                              validators: List[(A) => Either[String, A]],
+                              secondaryValidators:List[(A, Obj) => Either[String, A]],
+                              prefix: String,
+                              postfix: String): FieldDescriptor#BaseFieldType[A] =
+    new GeneratedField[A, Obj](init, caption, innerField, validators, secondaryValidators, prefix, postfix, i18n)
 
   def form(fields: List[FieldDescriptor#FieldType[_]], buttons: List[FieldDescriptor#ButtonType]): FormLayout =
     new FormLayout(fields ::: buttons :_*)

@@ -54,15 +54,23 @@ object Macros {
       ..$fieldExpressions
       val fields = $fieldListExpression
       val $submitButtonName = submitButton(${c.literal(helper.toDotNotation(beanTpe.typeSymbol.name.toString) + ".submit")}, {() =>
-        val valid = (fields.asInstanceOf[List[com.soulever.makro.BaseField[_]]] foldLeft true){ case (b, f) => f.isValid && b } //casting is bad;fix this
-        if (valid) $action($init.copy(..$copyParams))
+        Option((fields.asInstanceOf[List[com.soulever.makro.BaseField[_, ${helper.initWtt.get}]]] foldLeft true){ case (b, f) => f.isValid && b }).
+          filter(identity).
+          flatMap{ _ =>
+            Option($init.copy(..$copyParams)).
+              filter(ob => (fields.asInstanceOf[List[com.soulever.makro.BaseField[_, ${helper.initWtt.get}]]] foldLeft true){ case (b, f) => f.isValid(ob) && b })
+          }.foreach($action)
       })
       form(fields, List($submitButtonName))
     """
 
-    println( s"""comp = ${comp} """)
+//    println( s"""comp = ${comp} """)
 
     c.Expr[Rt](comp)
   }
 }
 
+/**
+ * //val valid = (fields.asInstanceOf[List[com.soulever.makro.BaseField[_, ${helper.initWtt.get}]]] foldLeft true){ case (b, f) => f.isValid && b } //casting is bad;fix this
+        //if (valid) $action($init.copy(..$copyParams))
+ */

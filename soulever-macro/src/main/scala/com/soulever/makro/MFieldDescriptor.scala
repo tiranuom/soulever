@@ -5,14 +5,15 @@ import com.soulever.makro.types.Mapping
 trait MFieldDescriptor[LayoutType] {
   type FieldType[_]
   type ButtonType
-  type BaseFieldType[A] <: BaseField[A]
+  type BaseFieldType[A] <: BaseField[A, _]
 
-  def field[A : Manifest](init:A,
-                          caption:String,
-                          innerField:Option[A] => FieldType[A],
-                          validators:List[A => Either[String, A]] = List.empty,
-                          prefix:String = "",
-                          postfix:String = ""):BaseFieldType[A]
+  def field[A : Manifest, Obj](init:A,
+                               caption:String,
+                               innerField:Option[A] => FieldType[A],
+                               validators:List[A => Either[String, A]] = List.empty,
+                               secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
+                               prefix:String = "",
+                               postfix:String = ""):BaseFieldType[A]
 
   def submitButton(label:String, clickAction:() => Unit):ButtonType
 
@@ -25,9 +26,11 @@ trait MFieldDescriptor[LayoutType] {
   def enumFieldProvider[A <: Enumeration](enum:A):TypeFieldProvider[A#Value, FieldType]
 }
 
-trait BaseField[A] {
+trait BaseField[A, Obj] {
 
   def isValid:Boolean
+
+  def isValid(obj:Obj):Boolean
 
   def getValue:A
 }

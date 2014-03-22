@@ -37,4 +37,14 @@ case class custom[A](value:A => Boolean, message:String) extends FieldValidation
   def validate(a: A): Boolean = value(a)
 }
 
+trait FieldValidation2[A, Obj] {
+  def validate(a:A, obj:Obj):Boolean
+
+  def message: String
+}
+
+case class fieldDependent[A, Obj](value: (A, Obj) => Boolean, message:String) extends FieldValidation2[A, Obj]{
+  def validate(a:A, obj:Obj) = value(a, obj)
+}
+
 case class mapping[T, A](value:T => List[(String, A)]) extends StaticAnnotation

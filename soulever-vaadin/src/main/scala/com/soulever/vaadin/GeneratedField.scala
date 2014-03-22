@@ -5,13 +5,14 @@ import scala.util.control.Exception._
 import com.vaadin.data.Validator.InvalidValueException
 import com.soulever.makro.BaseField
 
-class GeneratedField[A : Manifest](init:A,
-                                   caption:String,
-                                   innerFieldGenerator:Option[A] => AbstractField[A],
-                                   validators:List[A => Either[String, A]] = List.empty,
-                                   prefix:String = "",
-                                   postfix:String = "",
-                                   i18n:String => String = identity) extends CustomField[A] with BaseField[A] {
+class GeneratedField[A : Manifest, Obj](init:A,
+                                        caption:String,
+                                        innerFieldGenerator:Option[A] => AbstractField[A],
+                                        validators:List[A => Either[String, A]] = List.empty,
+                                        secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
+                                        prefix:String = "",
+                                        postfix:String = "",
+                                        i18n:String => String = identity) extends CustomField[A] with BaseField[A, Obj] {
   def getType: Class[_ <: A] = implicitly[Manifest[A]].runtimeClass.asInstanceOf[Class[A]]
 
   val innerField = innerFieldGenerator(Some(init))
@@ -68,6 +69,20 @@ class GeneratedField[A : Manifest](init:A,
         (validators foldLeft right) {
           case (e, v) => e.right.flatMap(v)
         }
+    }
+    result.left.foreach {
+      msg =>
+        errorLabel.setValue(msg)
+        errorLabel.setVisible(true)
+    }
+    result.isRight
+  }
+
+  override def isValid(obj: Obj): Boolean = {
+    val right: Either[String, A] = Right[String, A](getValue)
+    val result = (secondaryValidators foldLeft right) {
+      case (e, f) =>
+        e.right.flatMap(a => f(a, obj))
     }
     result.left.foreach {
       msg =>
