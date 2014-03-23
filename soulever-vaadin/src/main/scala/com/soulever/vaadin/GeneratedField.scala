@@ -18,7 +18,7 @@ class GeneratedField[A : Manifest, Obj](init:A,
 
   val innerField = innerFieldGenerator(Some(init))
 
-  setCaption(i18n(caption))
+  setCaption(i18n(caption.trim))
 
   private def wrapLabel(style:String)(msg:String) = {
     val label: Label = new Label(msg)
@@ -57,7 +57,7 @@ class GeneratedField[A : Manifest, Obj](init:A,
     }
     result.left.foreach {
       msg =>
-        errorLabel.setValue(msg)
+        errorLabel.setValue(i18n(msg))
         errorLabel.setVisible(true)
     }
   }
@@ -76,7 +76,7 @@ class GeneratedField[A : Manifest, Obj](init:A,
     }
     result.left.foreach {
       msg =>
-        errorLabel.setValue(msg)
+        errorLabel.setValue(i18n(msg))
         errorLabel.setVisible(true)
     }
     result.isRight
@@ -90,7 +90,7 @@ class GeneratedField[A : Manifest, Obj](init:A,
     }
     result.left.foreach {
       msg =>
-        errorLabel.setValue(msg)
+        errorLabel.setValue(i18n(msg))
         errorLabel.setVisible(true)
     }
     result.isRight
@@ -101,6 +101,13 @@ class GeneratedField[A : Manifest, Obj](init:A,
   override def setEnabled(enabled: Boolean) = innerField.setEnabled(enabled)
 
   override def getValue: A = innerField.getValue
+
+  override def innerValidations: scala.List[_root_.scala.Predef.String] = {
+    innerField match {
+      case value: com.soulever.vaadin.providers.InlineValidationProvider => value.inlineValidations
+      case _ => List.empty
+    }
+  }
 
   override def setValue(newFieldValue: A) = innerField.setValue(newFieldValue)
 

@@ -37,7 +37,8 @@ object SouleverBuild extends Build {
     "soulever-macro",
     file("soulever-macro"),
     settings = buildSettings ++ Seq(
-      libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _)
+      libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
+      libraryDependencies ++= Seq(typesafeConfig)
     )
   )
 

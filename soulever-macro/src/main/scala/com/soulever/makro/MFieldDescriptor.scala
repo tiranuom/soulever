@@ -34,4 +34,6 @@ trait BaseField[A, Obj] {
   def isValid(obj:Obj):Boolean
 
   def getValue:A
+
+  def innerValidations:List[String]
 }

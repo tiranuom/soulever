@@ -33,8 +33,10 @@ case class nonEmpty() extends FieldValidation[String]{
   def message: String = "non-empty"
 }
 
-case class custom[A](value:A => Boolean, message:String) extends FieldValidation[A]{
+case class custom[A](value:A => Boolean, msg:String) extends FieldValidation[A]{
   def validate(a: A): Boolean = value(a)
+
+  def message = msg
 }
 
 trait FieldValidation2[A, Obj] {

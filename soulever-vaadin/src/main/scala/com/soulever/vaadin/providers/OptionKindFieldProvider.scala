@@ -41,6 +41,11 @@ class OptionKindFieldProvider extends KindFieldProvider[Option] {
       }
 
       override def validate() = if (checkboxField.getValue) innerField.validate()
+
+      override def inlineValidations: List[String] = innerField match {
+        case value: com.soulever.vaadin.providers.BaseField[_] => value.inlineValidations
+        case _ => List.empty
+      }
     }
 
 

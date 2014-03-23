@@ -9,6 +9,7 @@ import com.soulever.makro._
 import com.soulever._
 import com.typesafe.config.ConfigFactory
 import scala.util.Try
+import java.util.Properties
 
 class PersonViewProvider(ui:UI) extends ViewProvider{
   def getViewName(viewAndParameters: String): String = viewAndParameters
@@ -29,11 +30,13 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
     val person: TestCaseClass = new TestCaseClass()
 
     layout.addComponent(FormUtil.form(person, printPerson))
+    I18nKeyCollector.print
     layout
   }
 }
 
-case class TestCaseClass( @field() @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2, "not-equal") enumeration:Bool.Bool = Bool.TRUE,
+case class TestCaseClass(
+                          @field() @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2, "not-equal") enumeration:Bool.Bool = Bool.TRUE,
                           @field() enumeration2:Bool.Bool = Bool.TRUE,
                           @field() @mapping[TestCaseClass, V](_.intMapping) mappedInt:Mapping[V] = V(1),
                           @field() @nonEmpty() stringField:String = "name",
@@ -41,7 +44,8 @@ case class TestCaseClass( @field() @css("enum") @fieldDependent[Bool.Bool, TestC
                           @field() booleanField:Boolean = false,
                           @field() passwordField:Password = "",
                           @field() listField:List[Option[Int]] = List(Some(4), Some(8), None),
-                          @field() @custom[Option[Int]](_.map(_ > 0).getOrElse(true), message = "op") optionField:Option[Int] = None){
+                          @field() @custom[Option[Int]]((_:Option[Int]).map(_ > 0).getOrElse(true), "op") optionField:Option[Int] = None
+                          ){
   def intMapping:List[(String, V)] = (1 to 9).toList.map(i => "value" + i.toString -> V(i))
 }
 
@@ -54,10 +58,16 @@ object Bool extends Enumeration {
 }
 
 class Imp extends FieldDescriptorImplicits with vaadin.FieldDescriptor {
-  override def i18n(msg: String): String =
-    Try(Imp.i18n.getString(msg)).toOption.flatMap(x => Option(x)).getOrElse(msg)
+  override def i18n(msg: String): String = Try(Imp.i18n.getProperty(msg)).
+    toOption.
+    flatMap { x => Option(x).filter(!_.trim.isEmpty) }.
+    getOrElse(msg)
 }
 
 object Imp {
-  val i18n = ConfigFactory.load("messages.properties")
+  val i18n = {
+    val properties: Properties = new Properties()
+    properties.load(getClass.getClassLoader.getResourceAsStream("messages.properties"))
+    properties
+  }
 }
