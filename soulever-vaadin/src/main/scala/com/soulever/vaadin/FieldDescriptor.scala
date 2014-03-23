@@ -19,9 +19,10 @@ trait FieldDescriptor extends MFieldDescriptor[FormLayout] {
                               innerField: Option[A] => FieldDescriptor#FieldType[A],
                               validators: List[(A) => Either[String, A]],
                               secondaryValidators:List[(A, Obj) => Either[String, A]],
+                              css:String,
                               prefix: String,
                               postfix: String): FieldDescriptor#BaseFieldType[A] =
-    new GeneratedField[A, Obj](init, caption, innerField, validators, secondaryValidators, prefix, postfix, i18n)
+    new GeneratedField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, prefix, postfix, i18n)
 
   def form(fields: List[FieldDescriptor#FieldType[_]], buttons: List[FieldDescriptor#ButtonType]): FormLayout =
     new FormLayout(fields ::: buttons :_*)

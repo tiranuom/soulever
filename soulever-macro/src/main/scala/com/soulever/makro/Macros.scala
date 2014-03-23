@@ -18,7 +18,7 @@ class MacrosImpl(val c:Context) {
 
     val initWtt = implicitly[WeakTypeTag[A]]
 
-    val beanTpe = implicitly[WeakTypeTag[A]].tpe
+    val beanTpe = initWtt.tpe
 
     val fields = beanTpe.typeSymbol.companion.typeSignature.members.collectFirst {
       case method if method.name.toString == "apply" => method
@@ -85,6 +85,11 @@ class MacrosImpl(val c:Context) {
         q"$f($init)"
     }
 
+    val css = field.annotations.collectFirst {
+      case s if s.tree.tpe.typeConstructor == c.weakTypeOf[com.soulever.makro.css]  =>
+        s.tree.children.tail.head
+    }
+
     def expandParameters(s: Type, collector: List[Tree] = List.empty): List[Tree] = {
       val TypeRef(pre, _, args) = s
       args match {
@@ -122,7 +127,7 @@ class MacrosImpl(val c:Context) {
         val inner = fv.typeParams(0).asType.toType.asSeenFrom(v.tree.tpe, fv)
         val valid_? : Boolean = inner <:< field.typeSignature
         if (!valid_?) c.error(initWtt.tpe.typeSymbol.pos,
-          s""" annotated validation ${v.tree.tpe} in field ${implicitly[WeakTypeTag[A]].tpe.typeSymbol.fullName}.${field.name} is incompatible;
+          s""" annotated validation ${v.tree.tpe} in field ${initWtt.tpe.typeSymbol.fullName}.${field.name} is incompatible;
               | found    : FieldValidation[${field.typeSignature}]
               | required : FieldValidation[$inner]
               | """.stripMargin)
@@ -142,7 +147,7 @@ class MacrosImpl(val c:Context) {
         val inner = fv.typeParams(0).asType.toType.asSeenFrom(v.tree.tpe, fv)
         val valid_? : Boolean = inner <:< field.typeSignature
         if (!valid_?) c.error(initWtt.tpe.typeSymbol.pos,
-          s""" annotated validation ${v.tree.tpe} in field ${implicitly[WeakTypeTag[A]].tpe.typeSymbol.fullName}.${field.name} is incompatible;
+          s""" annotated validation ${v.tree.tpe} in field ${initWtt.tpe.typeSymbol.fullName}.${field.name} is incompatible;
               | found    : FieldValidation[${field.typeSignature}, _]
               | required : FieldValidation[$inner, Init]
               | """.stripMargin)
@@ -157,7 +162,7 @@ class MacrosImpl(val c:Context) {
 
 
     (fieldName, field, List(
-      q"val $fieldName = m.field[${field.typeSignature}, $initWtt](${q"$init.${field.name.toTermName}"}, $i18nKey, $innerField, List(..$validations), List(..$validations2))"))
+      q"val $fieldName = m.field[${field.typeSignature}, $initWtt](${q"$init.${field.name.toTermName}"}, $i18nKey, $innerField, List(..$validations), List(..$validations2), ${css.getOrElse(q""" "" """)})"))
   }
 
 }

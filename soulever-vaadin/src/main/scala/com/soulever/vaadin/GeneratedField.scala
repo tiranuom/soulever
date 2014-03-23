@@ -10,6 +10,7 @@ class GeneratedField[A : Manifest, Obj](init:A,
                                         innerFieldGenerator:Option[A] => AbstractField[A],
                                         validators:List[A => Either[String, A]] = List.empty,
                                         secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
+                                        css:String = "",
                                         prefix:String = "",
                                         postfix:String = "",
                                         i18n:String => String = identity) extends CustomField[A] with BaseField[A, Obj] {
@@ -32,12 +33,15 @@ class GeneratedField[A : Manifest, Obj](init:A,
     label
   }
 
-  def initContent(): Component =
-    new HorizontalLayout(
+  def initContent(): Component ={
+    val layout: HorizontalLayout = new HorizontalLayout(
       Option(prefix).filterNot(_.isEmpty).map(wrapLabel("v-field-prefix")).toList :::
         List(innerField) :::
         Option(postfix).filterNot(_.isEmpty).map(wrapLabel("v-field-postfix")).toList :::
-        List(errorLabel) : _*)
+        List(errorLabel): _*)
+    layout.setStyleName(css)
+    layout
+  }
 
   override def validate() = {
     errorLabel.setVisible(false)

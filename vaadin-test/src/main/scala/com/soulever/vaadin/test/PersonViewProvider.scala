@@ -33,7 +33,7 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
   }
 }
 
-case class TestCaseClass( @field() @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2, "not-equal") enumeration:Bool.Bool = Bool.TRUE,
+case class TestCaseClass( @field() @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2, "not-equal") enumeration:Bool.Bool = Bool.TRUE,
                           @field() enumeration2:Bool.Bool = Bool.TRUE,
                           @field() @mapping[TestCaseClass, V](_.intMapping) mappedInt:Mapping[V] = V(1),
                           @field() @nonEmpty() stringField:String = "name",

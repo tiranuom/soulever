@@ -48,3 +48,5 @@ case class fieldDependent[A, Obj](value: (A, Obj) => Boolean, message:String) ex
 }
 
 case class mapping[T, A](value:T => List[(String, A)]) extends StaticAnnotation
+
+case class css(cls:String)
