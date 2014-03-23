@@ -56,6 +56,6 @@ object SouleverBuild extends Build {
       libraryDependencies ++= Seq(jettyContainer),
       libraryDependencies ++= Seq(vaadinServer, vaadinClient, vaadinTheme, servletApi, typesafeConfig)
     )
-  ) dependsOn souleverVaadin
+  ) dependsOn (souleverVaadin, souleverMacro)
 
 }
