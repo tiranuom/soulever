@@ -37,7 +37,7 @@ object I18nKeyCollector {
 object Props {
   val props = ConfigFactory.load("soulever.properties")
 
-  def printableFile = Try(props.getString("i18n.print.directory")).toOption
+  def printableFile = Try(props.getString("i18n.print.path")).toOption
 
   def isPrintable = Try(props.getBoolean("i18n.print.on")).getOrElse(false)
 }

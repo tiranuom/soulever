@@ -26,8 +26,6 @@ class MacrosImpl(val c:Context) {
 
     val formFields = for {
       field <- fields if field.annotations.map(_.tree.tpe).contains(weakTypeOf[field])
-      annotation <- field.annotations if annotation.tree.tpe =:= weakTypeOf[field]
-      i18nKey <- annotation.tree.children.tail.toList
     } yield field
 
     val fieldExpansionData = formFields.map(fieldExpansion[A, FD](init))

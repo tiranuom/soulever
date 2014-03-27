@@ -61,6 +61,12 @@ trait FieldDescriptorImplicits {
 
   implicit val passwordFieldProvider = new PasswordFieldProvider
 
+  implicit val byteFieldProvider = new ByteFieldProvider
+
+  implicit val dateFieldProvider = new DateFieldProvider
+
+  implicit val longTextFieldProvider = new LongTextFieldProvider
+
   implicit val optionFieldProvider = new OptionKindFieldProvider
 
   implicit val listFieldProvider = new ListKindFieldProvider

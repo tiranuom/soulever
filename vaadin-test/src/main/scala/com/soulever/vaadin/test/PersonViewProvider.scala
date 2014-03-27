@@ -36,15 +36,15 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
 }
 
 case class TestCaseClass(
-                          @field() @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2, "not-equal") enumeration:Bool.Bool = Bool.TRUE,
-                          @field() enumeration2:Bool.Bool = Bool.TRUE,
-                          @field() @mapping[TestCaseClass, V](_.intMapping) mappedInt:Mapping[V] = V(1),
-                          @field() @nonEmpty() stringField:String = "name",
-                          @field() @min(0) @max(60) intField:Int = 0,
-                          @field() booleanField:Boolean = false,
-                          @field() passwordField:Password = "",
-                          @field() listField:List[Option[Int]] = List(Some(4), Some(8), None),
-                          @field() @custom[Option[Int]]((_:Option[Int]).map(_ > 0).getOrElse(true), "op") optionField:Option[Int] = None
+                          @field @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2, "not-equal") enumeration:Bool.Bool = Bool.TRUE,
+                          @field enumeration2:Bool.Bool = Bool.TRUE,
+                          @field @mapping[TestCaseClass, V](_.intMapping) mappedInt:Mapping[V] = V(1),
+                          @field @nonEmpty stringField:String = "name",
+                          @field @min(0) @max(60) intField:Int = 0,
+                          @field booleanField:Boolean = false,
+                          @field passwordField:Password = "",
+                          @field listField:List[Option[Int]] = List(Some(4), Some(8), None),
+                          @field @custom[Option[Int]]((_:Option[Int]).map(_ > 0).getOrElse(true), "op") optionField:Option[Int] = None
                           ){
   def intMapping:List[(String, V)] = (1 to 9).toList.map(i => "value" + i.toString -> V(i))
 }
