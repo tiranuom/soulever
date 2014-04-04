@@ -9,7 +9,7 @@ class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvid
 
   override def empty: Mapping[A] = new Mapping[A](mapping.head._2) //Might produce an exception
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Mapping[A]]): AbstractField[Mapping[A]] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Mapping[A]]): AbstractField[Mapping[A]] =
     new CustomField[Mapping[A]] {
       def getType: Class[_ <: Mapping[A]] = classOf[Mapping[A]]
 

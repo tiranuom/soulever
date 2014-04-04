@@ -27,7 +27,7 @@ trait BaseField[A] extends CustomField[A] with InlineValidationProvider{
 }
 
 class IntFieldProvider extends TypeFieldProvider[Int] {
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Int]): AbstractField[Int] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Int]): AbstractField[Int] =
     new BaseField[Int] {
       def getType: Class[_ <: Int] = classOf[Int]
 
@@ -51,7 +51,7 @@ class IntFieldProvider extends TypeFieldProvider[Int] {
 class LongFieldProvider extends TypeFieldProvider[Long] {
 
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Long]): AbstractField[Long] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Long]): AbstractField[Long] =
     new BaseField[Long] {
       def getType: Class[_ <: Long] = classOf[Long]
 
@@ -74,7 +74,7 @@ class LongFieldProvider extends TypeFieldProvider[Long] {
 
 class FloatFieldProvider extends TypeFieldProvider[Float] {
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Float]): AbstractField[Float] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Float]): AbstractField[Float] =
     new BaseField[Float] {
       def getType: Class[_ <: Float] = classOf[Float]
 
@@ -98,7 +98,7 @@ class FloatFieldProvider extends TypeFieldProvider[Float] {
 class DoubleFieldProvider extends TypeFieldProvider[Double] {
 
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Double]): AbstractField[Double] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Double]): AbstractField[Double] =
     new BaseField[Double] {
       def getType: Class[_ <: Double] = classOf[Double]
 
@@ -121,13 +121,13 @@ class DoubleFieldProvider extends TypeFieldProvider[Double] {
 
 class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
 
-
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Boolean]): AbstractField[Boolean] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Boolean]): AbstractField[Boolean] =
     new CustomField[Boolean] {
       def getType: Class[_ <: Boolean] = classOf[Boolean]
-
+      private val offLable: String = fieldDescriptor.i18n(i18nKey + ".off")
+      private val onLable: String = fieldDescriptor.i18n(i18nKey + ".on")
       var selected = false
-      val button: Button = new Button("off")
+      val button: Button = new Button(offLable)
       button.setStyleName("boolean-field-off")
       button.addClickListener(new ClickListener {
         def buttonClick(event: ClickEvent) = setNewValue(!selected)
@@ -138,10 +138,10 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
       def setNewValue(newFieldValue: Boolean) {
         selected = newFieldValue
         if (selected) {
-          button.setCaption("on")
+          button.setCaption(onLable)
           button.setStyleName("boolean-field-on")
         } else {
-          button.setCaption("off")
+          button.setCaption(offLable)
           button.setStyleName("boolean-field-off")
         }
       }
@@ -158,7 +158,7 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
 
 class ByteFieldProvider extends TypeFieldProvider[Byte]{
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Byte]): AbstractField[Byte] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Byte]): AbstractField[Byte] =
     new BaseField[Byte] {
       def getType: Class[_ <: Byte] = classOf[Byte]
 
@@ -181,7 +181,7 @@ class ByteFieldProvider extends TypeFieldProvider[Byte]{
 
 class PasswordFieldProvider extends TypeFieldProvider[Password]{
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Password]): AbstractField[Password] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Password]): AbstractField[Password] =
     new BaseField[Password] {
 
       val innerField = new PasswordField()
@@ -201,7 +201,7 @@ class PasswordFieldProvider extends TypeFieldProvider[Password]{
 
 class LongTextFieldProvider extends TypeFieldProvider[LongText]{
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[LongText]): AbstractField[LongText] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[LongText]): AbstractField[LongText] =
     new BaseField[LongText] {
       def getType: Class[_ <: LongText] = classOf[LongText]
 
@@ -223,7 +223,7 @@ class LongTextFieldProvider extends TypeFieldProvider[LongText]{
 
 class DateFieldProvider extends TypeFieldProvider[Date]{
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Date]): AbstractField[Date] = {
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Date]): AbstractField[Date] = {
     val dateField = new DateField()
     op.foreach(dateField.setValue)
     dateField

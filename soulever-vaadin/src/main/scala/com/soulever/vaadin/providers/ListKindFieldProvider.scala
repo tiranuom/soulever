@@ -7,7 +7,7 @@ import com.vaadin.ui._
 class ListKindFieldProvider extends KindFieldProvider[List]{
 
   override def field[B, FD <: MFieldDescriptor[_]](innerField: (Option[B]) => AbstractField[B], empty:B)
-                                                  (fieldDescriptor: FD)
+                                                  (fieldDescriptor: FD, i18nKey:String)
                                                   (op: Option[List[B]]): AbstractField[List[B]] =
     new CustomField[List[B]] with InlineValidationProvider {
       def getType: Class[_ <: List[B]] = classOf[List[B]]

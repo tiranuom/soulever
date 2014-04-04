@@ -6,7 +6,7 @@ import com.vaadin.ui.{ComboBox, Component, CustomField, AbstractField}
 
 class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvider[A#Value]{
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[A#Value]): AbstractField[A#Value] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[A#Value]): AbstractField[A#Value] =
     new CustomField[A#Value] {
       def getType: Class[_ <: A#Value] = classOf[A#Value]
 

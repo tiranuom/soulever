@@ -103,19 +103,19 @@ class MacrosImpl(val c:Context) {
       }
     }
 
+    val name = initWtt.tpe.typeSymbol.name
+
+    val i18nKey = q"${toDotNotation(name.toString) + "." + toDotNotation(field.name.toString)}"
+
     val innerField = {
       val types = expandParameters(field.typeSignature)
-      (types.tail foldLeft (q"${types.head}.field(m)", q"${types.head}.empty")){
+      (types.tail foldLeft (q"${types.head}.field(m, $i18nKey)", q"${types.head}.empty")){
         case (quo, tpe) =>
-          (q"$tpe.field(${quo._1}, ${quo._2})(m)", q"$tpe.empty")
+          (q"$tpe.field(${quo._1}, ${quo._2})(m, $i18nKey)", q"$tpe.empty")
       }._1
     }
 
     val fieldName = TermName(c.freshName() + "Field")
-
-    val name = initWtt.tpe.typeSymbol.name
-
-    val i18nKey = q"${toDotNotation(name.toString) + "." + toDotNotation(field.name.toString)}"
 
     val validations = {
       val validations = field.annotations.filter(_.tree.tpe <:< weakTypeOf[FieldValidation[_]])

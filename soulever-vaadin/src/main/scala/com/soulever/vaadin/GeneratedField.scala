@@ -11,8 +11,6 @@ class GeneratedField[A : Manifest, Obj](init:A,
                                         validators:List[A => Either[String, A]] = List.empty,
                                         secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
                                         css:String = "",
-                                        prefix:String = "",
-                                        postfix:String = "",
                                         i18n:String => String = identity) extends CustomField[A] with BaseField[A, Obj] {
   def getType: Class[_ <: A] = implicitly[Manifest[A]].runtimeClass.asInstanceOf[Class[A]]
 
@@ -35,9 +33,9 @@ class GeneratedField[A : Manifest, Obj](init:A,
 
   def initContent(): Component ={
     val layout: HorizontalLayout = new HorizontalLayout(
-      Option(prefix).filterNot(_.isEmpty).map(wrapLabel("v-field-prefix")).toList :::
+      Option(i18n(caption.trim + ".prefix")).filterNot(_ == caption.trim + ".prefix").map(wrapLabel("v-field-prefix")).toList :::
         List(innerField) :::
-        Option(postfix).filterNot(_.isEmpty).map(wrapLabel("v-field-postfix")).toList :::
+        Option(i18n(caption.trim + ".postfix")).filterNot(_ == caption.trim + ".postfix").map(wrapLabel("v-field-postfix")).toList :::
         List(errorLabel): _*)
     layout.setStyleName(css)
     layout

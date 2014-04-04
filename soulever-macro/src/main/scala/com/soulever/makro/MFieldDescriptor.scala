@@ -12,9 +12,7 @@ trait MFieldDescriptor[LayoutType] {
                                innerField:Option[A] => FieldType[A],
                                validators:List[A => Either[String, A]] = List.empty,
                                secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
-                               css:String = "",
-                               prefix:String = "",
-                               postfix:String = ""):BaseFieldType[A]
+                               css:String = ""):BaseFieldType[A]
 
   def submitButton(label:String, clickAction:() => Unit):ButtonType
 
