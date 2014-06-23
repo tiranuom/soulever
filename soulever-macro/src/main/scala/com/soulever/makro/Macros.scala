@@ -62,14 +62,15 @@ class MacrosImpl(val c:Context) {
       form(fields, List($submitButtonName))
     """
 
-//    println( s"""comp = ${comp} """)
+    //    println( s"""comp = ${comp} """)
 
     comp
   }
 
-  def toDotNotation(s:String) = (s.tail foldLeft (s.head | 32).toChar.toString){(s, c) =>
-    s + (if(c.isLower) c.toString else s".$c".toLowerCase)
-  }
+  def toDotNotation(s:String) = s.replaceAll(
+    String.format("%s|%s|%s", "(?<=[A-Z])(?=[A-Z][a-z])", "(?<=[^A-Z])(?=[A-Z])", "(?<=[A-Za-z])(?=[^A-Za-z])"),
+    "."
+  ).toLowerCase
 
   def fieldExpansion[A :c.WeakTypeTag, FD:c.WeakTypeTag](init:c.Expr[A])(field:Symbol) = {
 
@@ -78,9 +79,9 @@ class MacrosImpl(val c:Context) {
     val fieldImplType = fdWtt.tpe.member(TypeName("FieldType")).asType.toType.dealias.typeConstructor
 
     val mapping = field.annotations.collectFirst {
-      case s if s.tree.tpe.typeConstructor =:= weakTypeOf[com.soulever.makro.mapping[Any, Any]].typeConstructor =>
+      case s if s.tree.tpe.typeConstructor =:= weakTypeOf[com.soulever.makro.mapping[Any, Any, Any]].typeConstructor =>
         val f = s.tree.children.tail.head
-        q"$f($init)"
+        q"$f($init, m)"
     }
 
     val css = field.annotations.collectFirst {
@@ -118,8 +119,7 @@ class MacrosImpl(val c:Context) {
     val fieldName = TermName(c.freshName() + "Field")
 
     val validations = {
-      val validations = field.annotations.filter(_.tree.tpe <:< weakTypeOf[FieldValidation[_]])
-      validations.foreach { v =>
+      def validate(v:Annotation) = {
         val fv = weakTypeOf[FieldValidation[_]].typeSymbol.asClass
         val inner = fv.typeParams(0).asType.toType.asSeenFrom(v.tree.tpe, fv)
         val valid_? : Boolean = inner <:< field.typeSignature
@@ -130,27 +130,32 @@ class MacrosImpl(val c:Context) {
               | required : FieldValidation[$inner]
               | """.stripMargin)
       }
-      validations map {
-        a =>
-          val tr = if (a.tree.children.tail.length == 2) {
-            q""" $i18nKey + "[" + ${a.tree.children.tail.last} + "]" """
-          } else {
-            q"""
+
+      def generateCodeBlock(a:Annotation) = {
+        val tr = if (a.tree.children.tail.length == 2) {
+          q""" $i18nKey + "[" + ${a.tree.children.tail.last} + "]" """
+        } else {
+          q"""
             $i18nKey + "[" + ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail}).message + "]"
             """
-          }
-          ( tr,
+        }
+        ( tr,
           q"""
           { (x:${field.typeSignature}) =>
             val validator = ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})
             Option(x).filter(validator.validate).toRight($i18nKey + s"[$${validator.message}]")
           }""")
       }
+
+      type AnnotationType = FieldValidation[_]
+
+      val validations = field.annotations.filter(_.tree.tpe <:< weakTypeOf[AnnotationType])
+      validations.foreach(validate)
+      validations.map(generateCodeBlock)
     }
 
     val validations2 = {
-      val validations = field.annotations.filter(_.tree.tpe <:< weakTypeOf[FieldValidation2[_, _]])
-      validations.foreach { v =>
+      def validate(v:Annotation) = {
         val fv = weakTypeOf[FieldValidation2[_, _]].typeSymbol.asClass
         val inner = fv.typeParams(0).asType.toType.asSeenFrom(v.tree.tpe, fv)
         val valid_? : Boolean = inner <:< field.typeSignature
@@ -160,16 +165,16 @@ class MacrosImpl(val c:Context) {
               | required : FieldValidation[$inner, Init]
               | """.stripMargin)
       }
-      validations map {
-        a =>
-          val tr = if (a.tree.children.tail.length == 2) {
-            q""" $i18nKey + "[" + ${a.tree.children.tail.last} + "]" """
-          } else {
-            q"""
+
+      def generateCodeBlock(a:Annotation) = {
+        val tr = if (a.tree.children.tail.length == 2) {
+          q""" $i18nKey + "[" + ${a.tree.children.tail.last} + "]" """
+        } else {
+          q"""
             $i18nKey + "[" + ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail}).message + "]"
             """
-          }
-          (tr,
+        }
+        (tr,
           q"""
         { (x:${field.typeSignature}, obj:$initWtt) =>
           val validator = ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})
@@ -177,6 +182,12 @@ class MacrosImpl(val c:Context) {
           Option(x).filter(x => validator.validate(x, obj)).toRight($i18nKey + s"[$${validator.message}]")
         }""")
       }
+
+      type AnnotationType = FieldValidation2[_, _]
+
+      val validations = field.annotations.filter(_.tree.tpe <:< weakTypeOf[AnnotationType])
+      validations.foreach(validate)
+      validations.map(generateCodeBlock)
     }
 
     (fieldName, field, List(

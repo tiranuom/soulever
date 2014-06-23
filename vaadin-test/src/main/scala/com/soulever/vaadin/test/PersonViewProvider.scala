@@ -38,15 +38,15 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
 case class TestCaseClass(
                           @field @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2, "not-equal") enumeration:Bool.Bool = Bool.TRUE,
                           @field enumeration2:Bool.Bool = Bool.TRUE,
-                          @field @mapping[TestCaseClass, V](_.intMapping) mappedInt:Mapping[V] = V(1),
+                          @field @mapping[TestCaseClass, Imp, V]((a, b) => a.intMapping(b)) mappedInt:Mapping[V] = V(1),
                           @field @nonEmpty stringField:String = "name",
                           @field @min(0) @max(60) intField:Int = 0,
                           @field booleanField:Boolean = false,
                           @field passwordField:Password = "",
-                          @field listField:List[Option[Int]] = List(Some(4), Some(8), None),
+                          @field @mapping[TestCaseClass, Imp, V]((a, b) => a.intMapping(b)) listField:List[Option[Mapping[V]]] = List(None),
                           @field @custom[Option[Int]]((_:Option[Int]).map(_ > 0).getOrElse(true), "op") optionField:Option[Int] = None
                           ){
-  def intMapping:List[(String, V)] = (1 to 9).toList.map(i => "value" + i.toString -> V(i))
+  def intMapping(b:Imp):List[(String, V)] = b.intMapping //(1 to 9).toList.map(i => "value" + i.toString -> V(i))
 }
 
 case class V(i:Int)
@@ -57,7 +57,11 @@ object Bool extends Enumeration {
   val FALSE = Value("false")
 }
 
-class Imp extends FieldDescriptorImplicits with vaadin.FieldDescriptor {
+trait ServiceRegistry {
+  lazy val intMapping:List[(String, V)] = (1 to 9).toList.map(i => "value" + i.toString -> V(i))
+}
+
+class Imp extends FieldDescriptorImplicits with vaadin.FieldDescriptor with ServiceRegistry {
   override def i18n(msg: String): String = Try(Imp.i18n.getProperty(msg)).
     toOption.
     flatMap { x => Option(x).filter(!_.trim.isEmpty) }.
