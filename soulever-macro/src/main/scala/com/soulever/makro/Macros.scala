@@ -62,7 +62,7 @@ class MacrosImpl(val c:Context) {
       form(fields, List($submitButtonName))
     """
 
-    //    println( s"""comp = ${comp} """)
+    println( s"""comp = ${comp} """)
 
     comp
   }
@@ -70,7 +70,7 @@ class MacrosImpl(val c:Context) {
   def toDotNotation(s:String) = s.replaceAll(
     String.format("%s|%s|%s", "(?<=[A-Z])(?=[A-Z][a-z])", "(?<=[^A-Z])(?=[A-Z])", "(?<=[A-Za-z])(?=[^A-Za-z])"),
     "."
-  ).toLowerCase
+  ).toLowerCase.trim
 
   def fieldExpansion[A :c.WeakTypeTag, FD:c.WeakTypeTag](init:c.Expr[A])(field:Symbol) = {
 
@@ -78,37 +78,39 @@ class MacrosImpl(val c:Context) {
     val initWtt = implicitly[WeakTypeTag[A]]
     val fieldImplType = fdWtt.tpe.member(TypeName("FieldType")).asType.toType.dealias.typeConstructor
 
-    val mapping = field.annotations.collectFirst {
-      case s if s.tree.tpe.typeConstructor =:= weakTypeOf[com.soulever.makro.mapping[Any, Any, Any]].typeConstructor =>
-        val f = s.tree.children.tail.head
-        q"$f($init, m)"
-    }
+    val fieldName = TermName(c.freshName() + "Field")
 
     val css = field.annotations.collectFirst {
       case s if s.tree.tpe.typeConstructor == c.weakTypeOf[com.soulever.makro.css]  =>
         s.tree.children.tail.head
     }
-    def expandParameters(s: Type, collector: List[Tree] = List.empty): List[Tree] = {
-      val TypeRef(pre, _, args) = s
-      args match {
-        case Nil if s <:< weakTypeOf[Enumeration#Value] =>
-          q"enumFieldProvider[$pre](${pre.termSymbol})" :: collector
-        case Nil =>
-          q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]" :: collector
-        case x :: Nil if s.typeConstructor =:= c.weakTypeOf[com.soulever.makro.types.Mapping[Any]].typeConstructor =>
-          if (mapping.isEmpty) c.error(initWtt.tpe.typeSymbol.pos, "Cannot find mapping for the given type")
-          q"mappingFieldProvider[$x](${mapping.get})" :: collector
-        case x :: Nil =>
-          expandParameters(x, q"implicitly[com.soulever.makro.KindFieldProvider[${s.typeConstructor}, $fieldImplType]]" :: collector)
-        case _ => q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]" :: collector
-      }
-    }
 
-    val name = initWtt.tpe.typeSymbol.name
-
-    val i18nKey = q"${toDotNotation(name.toString) + "." + toDotNotation(field.name.toString)}"
+    val i18nKey = q"${toDotNotation(initWtt.tpe.typeSymbol.name.toString.trim) + "." + toDotNotation(field.name.toString.trim)}"
 
     val innerField = {
+
+      val mapping = field.annotations.collectFirst {
+        case s if s.tree.tpe.typeConstructor =:= weakTypeOf[com.soulever.makro.mapping[Any, Any, Any]].typeConstructor =>
+          val f = s.tree.children.tail.head
+          q"$f($init, m)"
+      }
+
+      def expandParameters(s: Type, collector: List[Tree] = List.empty): List[Tree] = {
+        val TypeRef(pre, _, args) = s
+        args match {
+          case Nil if s <:< weakTypeOf[Enumeration#Value] =>
+            q"enumFieldProvider[$pre](${pre.termSymbol})" :: collector
+          case Nil =>
+            q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]" :: collector
+          case x :: Nil if s.typeConstructor =:= c.weakTypeOf[com.soulever.makro.types.Mapping[Any]].typeConstructor =>
+            if (mapping.isEmpty) c.error(initWtt.tpe.typeSymbol.pos, "Cannot find mapping for the given type")
+            q"mappingFieldProvider[$x](${mapping.get})" :: collector
+          case x :: Nil =>
+            expandParameters(x, q"implicitly[com.soulever.makro.KindFieldProvider[${s.typeConstructor}, $fieldImplType]]" :: collector)
+          case _ => q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]" :: collector
+        }
+      }
+
       val types = expandParameters(field.typeSignature)
       (types.tail foldLeft (q"${types.head}.field(m, $i18nKey)", q"${types.head}.empty")){
         case (quo, tpe) =>
@@ -116,90 +118,25 @@ class MacrosImpl(val c:Context) {
       }._1
     }
 
-    val fieldName = TermName(c.freshName() + "Field")
-
-    val validations = {
-      def validate(v:Annotation) = {
-        val fv = weakTypeOf[FieldValidation[_]].typeSymbol.asClass
-        val inner = fv.typeParams(0).asType.toType.asSeenFrom(v.tree.tpe, fv)
-        val valid_? : Boolean = inner <:< field.typeSignature
-        if (!valid_?) c.error(initWtt.tpe.typeSymbol.pos,
-          s"""
-              | annotated validation ${v.tree.tpe} in field ${initWtt.tpe.typeSymbol.fullName}.${field.name} is incompatible;
-              | found    : FieldValidation[${field.typeSignature}]
-              | required : FieldValidation[$inner]
-              | """.stripMargin)
-      }
-
-      def generateCodeBlock(a:Annotation) = {
-        val tr = if (a.tree.children.tail.length == 2) {
-          q""" $i18nKey + "[" + ${a.tree.children.tail.last} + "]" """
-        } else {
-          q"""
-            $i18nKey + "[" + ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail}).message + "]"
-            """
-        }
-        ( tr,
-          q"""
-          { (x:${field.typeSignature}) =>
-            val validator = ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})
-            Option(x).filter(validator.validate).toRight($i18nKey + s"[$${validator.message}]")
-          }""")
-      }
-
-      type AnnotationType = FieldValidation[_]
-
-      val validations = field.annotations.filter(_.tree.tpe <:< weakTypeOf[AnnotationType])
-      validations.foreach(validate)
-      validations.map(generateCodeBlock)
+    def generateTree(provider:FieldBlockProvider) = {
+      val provided = field.annotations.filter(_.tree.tpe <:< weakTypeOf[provider.AnnotationType])
+      provided.foreach(provider.validate[A](c)(field))
+      provided.map(provider.generateCodeBlock[A](c)(field, i18nKey))
     }
 
-    val validations2 = {
-      def validate(v:Annotation) = {
-        val fv = weakTypeOf[FieldValidation2[_, _]].typeSymbol.asClass
-        val inner = fv.typeParams(0).asType.toType.asSeenFrom(v.tree.tpe, fv)
-        val valid_? : Boolean = inner <:< field.typeSignature
-        if (!valid_?) c.error(initWtt.tpe.typeSymbol.pos,
-          s""" annotated validation ${v.tree.tpe} in field ${initWtt.tpe.typeSymbol.fullName}.${field.name} is incompatible;
-              | found    : FieldValidation[${field.typeSignature}, _]
-              | required : FieldValidation[$inner, Init]
-              | """.stripMargin)
-      }
+    val validations = generateTree(FieldValidation)
 
-      def generateCodeBlock(a:Annotation) = {
-        val tr = if (a.tree.children.tail.length == 2) {
-          q""" $i18nKey + "[" + ${a.tree.children.tail.last} + "]" """
-        } else {
-          q"""
-            $i18nKey + "[" + ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail}).message + "]"
-            """
-        }
-        (tr,
-          q"""
-        { (x:${field.typeSignature}, obj:$initWtt) =>
-          val validator = ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})
-          I18nKeyCollector.insert($i18nKey + s"[$${validator.message}]")
-          Option(x).filter(x => validator.validate(x, obj)).toRight($i18nKey + s"[$${validator.message}]")
-        }""")
-      }
-
-      type AnnotationType = FieldValidation2[_, _]
-
-      val validations = field.annotations.filter(_.tree.tpe <:< weakTypeOf[AnnotationType])
-      validations.foreach(validate)
-      validations.map(generateCodeBlock)
-    }
+    val validations2 = generateTree(FieldValidation2)
 
     (fieldName, field, List(
-      q"I18nKeyCollector.insert($i18nKey)",
-      q""" List(..${validations.map(_._1)}, ..${validations2.map(_._1)}).filter(_ != null).foreach(I18nKeyCollector.insert) """,
       q"""
       val $fieldName = {
         val field = m.field[${field.typeSignature}, $initWtt](${q"$init.${field.name.toTermName}"}, $i18nKey.trim, $innerField, List(..${validations.map(_._2)}), List(..${validations2.map(_._2)}), ${css.getOrElse(q""" "" """)})
+        List(..${validations.map(_._1)}, ..${validations2.map(_._1)}).filter(_ != null).foreach(I18nKeyCollector.insert)
+        I18nKeyCollector.insert($i18nKey)
         field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.map(s => $i18nKey + "[" + s + "]").foreach(I18nKeyCollector.insert)
         field
       }
-
       """))
   }
 }
