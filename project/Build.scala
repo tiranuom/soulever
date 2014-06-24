@@ -30,7 +30,16 @@ object SouleverBuild extends Build {
   lazy val root:Project = Project(
     id  = "root",
     base = file(".")
-  ) aggregate(souleverMacro, souleverVaadin, vaadinTest)
+  ) aggregate(souleverMetamacro, souleverMacro, souleverVaadin, vaadinTest)
+
+  lazy val souleverMetamacro:Project = Project(
+    "soulever-metamacro",
+    file("soulever-metamacro"),
+    settings = buildSettings ++ Seq(
+      libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
+      libraryDependencies ++= Seq(typesafeConfig)
+    )
+  )
 
   lazy val souleverMacro:Project = Project(
     "soulever-macro",

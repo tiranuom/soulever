@@ -102,7 +102,7 @@ object FieldValidation2 extends FieldBlockProvider {
     }
     (tr,
       q"""
-        { (x:${field.typeSignature}, obj:$initWtt) =>
+        { (x:${field.typeSignature}, obj:${initWtt.tpe.finalResultType}) =>
           val validator = ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})
           I18nKeyCollector.insert($i18nKey + s"[$${validator.message}]")
           Option(x).filter(x => validator.validate(x, obj)).toRight($i18nKey + s"[$${validator.message}]")
@@ -127,6 +127,6 @@ case class fieldDependent[A, Obj](value: (A, Obj) => Boolean, message:String) ex
   def validate(a:A, obj:Obj) = value(a, obj)
 }
 
-case class mapping[T, FD, A](value:(T, FD) => List[(String, A)]) extends StaticAnnotation
+case class mapping[FD, A](value:(FD) => List[(String, A)]) extends StaticAnnotation
 
 case class css(cls:String)

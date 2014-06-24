@@ -1,7 +1,7 @@
 package com.soulever.vaadin.test
 
 import com.soulever.makro.types.{Mapping, Password}
-import com.soulever.vaadin.{FieldDescriptorImplicits, FormUtil}
+import com.soulever.vaadin.{FieldDescriptor, GeneratedField, FieldDescriptorImplicits, FormUtil}
 import com.vaadin.navigator.{View, ViewProvider}
 import com.vaadin.ui._
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent
@@ -19,17 +19,24 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
     Right[Exception, TestCaseClass](person)
   }
 
+  implicit val imp = new Imp
+
   def getView(viewName: String): View = {
 
-    val layout: VerticalLayout with View {def enter(event: ViewChangeEvent): Unit} = new VerticalLayout() with View {
+  val layout: VerticalLayout with View {def enter(event: ViewChangeEvent): Unit} = new VerticalLayout() with View {
       def enter(event: ViewChangeEvent) = {}
     }
 
-    implicit val imp = new Imp
+    import types._
+
+    @mapping[Imp, V](_.intMapping)
+    val i:Option[Mapping[V]] = Some(V(3))
+
+    val intField = FormUtil.field(i, "test.key", List.empty, List.empty, "", this)
 
     val person: TestCaseClass = new TestCaseClass()
 
-    layout.addComponent(FormUtil.form(person, printPerson))
+    layout.addComponent(new HorizontalLayout(FormUtil.form(person, printPerson), intField))
     I18nKeyCollector.print
     layout
   }
@@ -38,15 +45,14 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
 case class TestCaseClass(
                           @field @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2, "not-equal") enumeration:Bool.Bool = Bool.TRUE,
                           @field enumeration2:Bool.Bool = Bool.TRUE,
-                          @field @mapping[TestCaseClass, Imp, V]((a, b) => a.intMapping(b)) mappedInt:Mapping[V] = V(1),
+                          @field @mapping[Imp, V](_.intMapping) mappedInt:Mapping[V] = V(1),
                           @field @nonEmpty stringField:String = "name",
                           @field @min(0) @max(60) intField:Int = 0,
                           @field booleanField:Boolean = false,
                           @field passwordField:Password = "",
-                          @field @mapping[TestCaseClass, Imp, V]((a, b) => a.intMapping(b)) listField:List[Option[Mapping[V]]] = List(None),
+                          @field @mapping[Imp, V](_.intMapping) listField:List[Option[Mapping[V]]] = List(None),
                           @field @custom[Option[Int]]((_:Option[Int]).map(_ > 0).getOrElse(true), "op") optionField:Option[Int] = None
                           ){
-  def intMapping(b:Imp):List[(String, V)] = b.intMapping //(1 to 9).toList.map(i => "value" + i.toString -> V(i))
 }
 
 case class V(i:Int)

@@ -35,12 +35,12 @@ class FieldDescriptor extends MFieldDescriptor[TestForm] {
                                        innerField: (Option[A]) => FieldType[A],
                                        validators: List[(A) => Either[String, A]],
                                        secondaryValidators: List[(A, Obj) => Either[String, A]],
-                                       css: String): BaseFieldType[A] =
+                                       css: String): BaseFieldType[A, Obj] =
     TestBaseField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, innerValidations)
 
   def innerValidations:List[String] = List.empty
 
-  override type BaseFieldType[A] = TestBaseField[A, _]
+  override type BaseFieldType[A, Obj] = TestBaseField[A, Obj]
   override type ButtonType = TestButton
   override type FieldType[A] = TestField[A]
 }
