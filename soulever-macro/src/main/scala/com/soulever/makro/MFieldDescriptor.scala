@@ -33,7 +33,7 @@ trait BaseField[A, Obj] {
 
   def getValue:A
 
-  def innerValidations:List[String]
+  def innerValidations:List[(String, String)]
 
-  def innerI18nKeys:List[String]
+  def innerI18nKeys:List[(String,String)]
 }

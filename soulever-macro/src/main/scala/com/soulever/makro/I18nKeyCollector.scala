@@ -12,9 +12,15 @@ object I18nKeyCollector {
     keyList = keyList + (key -> replaceKey)
   }
 
+//  def insert(key:String, defaultValue:String) = keyList = keyList + (key -> defaultValue)
+
   private val errorList = Map(
     "not-equal" -> "value should be equal to []",
     "integer" -> "value should be an integer",
+    "long" -> "should be a long",
+    "float" -> "should be a float value",
+    "double" -> "should be a double value",
+    "byte" -> "should be a byte value",
     "max" -> "value should be lesser than []",
     "min" -> "value should be greater than []",
     "non-empty" -> "value should not be empty",

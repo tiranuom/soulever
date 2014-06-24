@@ -12,17 +12,17 @@ import java.util.Date
 
 trait InlineValidationProvider {
 
-  def inlineValidations:List[String]
+  def inlineValidations:List[(String,String)]
 
 }
 
 trait InlineKeyProvider {
 
-  def inlineKeys:List[String]
+  def inlineKeys:List[(String,String)]
 
 }
 
-trait BaseField[A] extends CustomField[A] with InlineValidationProvider{
+trait BaseField[A] extends CustomField[A] with InlineValidationProvider {
   def innerField:AbstractField[_]
 
   override def validate() = innerField.validate()
@@ -40,14 +40,14 @@ class IntFieldProvider extends TypeFieldProvider[Int] {
       val innerField = new TextField()
       op.map(_.toString).foreach(innerField.setValue)
       innerField.addValidator(new Validator {
-        def validate(value: scala.Any) = if(Try(value.toString.toInt).isFailure) throw new InvalidValueException(inlineValidations.head)
+        def validate(value: scala.Any) = if(Try(value.toString.toInt).isFailure) throw new InvalidValueException(inlineValidations.head._1)
       })
 
       override def setValue(newFieldValue: Int) = innerField.setValue(newFieldValue.toString)
 
       override def getValue: Int = innerField.getValue.toInt
 
-      override def inlineValidations: List[String] = List("integer")
+      override def inlineValidations: List[(String,String)] = List("integer" -> "should be an integer")
     }
 
 
@@ -64,14 +64,14 @@ class LongFieldProvider extends TypeFieldProvider[Long] {
       val innerField = new TextField()
       op.map(_.toString).foreach(innerField.setValue)
       innerField.addValidator(new Validator(){
-        def validate(value: scala.Any) = if(Try(value.toString.toLong).isFailure) throw new InvalidValueException(inlineValidations.head)
+        def validate(value: scala.Any) = if(Try(value.toString.toLong).isFailure) throw new InvalidValueException(inlineValidations.head._1)
       })
 
       override def setValue(newFieldValue: Long) = innerField.setValue(newFieldValue.toString)
 
       override def getValue: Long = innerField.getValue.toLong
 
-      override def inlineValidations: List[String] = List("long")
+      override def inlineValidations: List[(String,String)] = List("long" -> "should be a long")
     }
 
 
@@ -87,14 +87,14 @@ class FloatFieldProvider extends TypeFieldProvider[Float] {
       val innerField = new TextField()
       op.map(_.toString).foreach(innerField.setValue)
       innerField.addValidator(new Validator {
-        def validate(value: scala.Any) = if(Try(value.toString.toFloat).isFailure) throw new InvalidValueException(inlineValidations.head)
+        def validate(value: scala.Any) = if(Try(value.toString.toFloat).isFailure) throw new InvalidValueException(inlineValidations.head._1)
       })
 
       override def getValue: Float = innerField.getValue.toFloat
 
       override def setValue(newFieldValue: Float) = innerField.setValue(newFieldValue.toString)
 
-      override def inlineValidations: List[String] = List("float")
+      override def inlineValidations: List[(String,String)] = List("float" -> "should be a float value")
     }
 
 
@@ -111,14 +111,14 @@ class DoubleFieldProvider extends TypeFieldProvider[Double] {
       val innerField = new TextField()
       op.map(_.toString).foreach(innerField.setValue)
       innerField.addValidator(new Validator {
-        def validate(value: scala.Any) = if(Try(value.toString.toDouble).isFailure) throw new InvalidValueException(inlineValidations.head)
+        def validate(value: scala.Any) = if(Try(value.toString.toDouble).isFailure) throw new InvalidValueException(inlineValidations.head._1)
       })
 
       override def getValue: Double = innerField.getValue.toDouble
 
       override def setValue(newFieldValue: Double) = innerField.setValue(newFieldValue.toString)
 
-      override def inlineValidations: List[String] = List("double")
+      override def inlineValidations: List[(String,String)] = List("double" -> "should be a double value")
     }
 
 
@@ -157,7 +157,7 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
         button
       }
 
-      override def inlineKeys: List[String] = List("on", "off")
+      override def inlineKeys: List[(String,String)] = List("on" -> "On", "off" -> "Off")
     }
 
 
@@ -174,14 +174,14 @@ class ByteFieldProvider extends TypeFieldProvider[Byte]{
       op.map(b => (b & 0xFF).toString).foreach(innerField.setValue)
       innerField.addValidator(new Validator {
         def validate(value: scala.Any) =
-          if(Try(value.toString.toByte).isFailure) throw new InvalidValueException(inlineValidations.head)
+          if(Try(value.toString.toByte).isFailure) throw new InvalidValueException(inlineValidations.head._1)
       })
 
       override def setValue(newFieldValue: Byte) = innerField.setValue((newFieldValue & 0xFF).toString)
 
       override def getValue: Byte = innerField.getValue.toByte
 
-      override def inlineValidations: List[String] = List("byte")
+      override def inlineValidations: List[(String,String)] = List("byte" -> "should be a byte value")
     }
 
   override def empty: Byte = 0
@@ -201,7 +201,7 @@ class PasswordFieldProvider extends TypeFieldProvider[Password]{
 
       override def setValue(newFieldValue: Password) = innerField.setValue(newFieldValue)
 
-      override def inlineValidations: List[String] = List.empty
+      override def inlineValidations: List[(String, String)] = List.empty
     }
 
   override def empty: Password = new Password("")
@@ -223,7 +223,7 @@ class LongTextFieldProvider extends TypeFieldProvider[LongText]{
         inf.setValue(newFieldValue)
       }
 
-      override def inlineValidations: List[String] = List.empty
+      override def inlineValidations: List[(String, String)] = List.empty
     }
 
   override def empty: LongText = new LongText("")

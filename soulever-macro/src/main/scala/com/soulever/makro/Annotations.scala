@@ -14,6 +14,7 @@ trait FieldBlockProvider {
 trait FieldValidation[A] extends StaticAnnotation {
   def validate(a:A):Boolean
   def message:String
+  def defaultErrorMessage:String
 }
 
 object FieldValidation extends FieldBlockProvider {
@@ -55,36 +56,48 @@ case class min[A : Ordering](value:A) extends FieldValidation[A]{
   def validate(a: A): Boolean = implicitly[Ordering[A]].lteq(value, a)
 
   def message: String = "min"
+
+  override def defaultErrorMessage: String = s"should be greater than $value"
 }
 
 case class max[A : Ordering](value:A) extends FieldValidation[A]{
   def validate(a: A): Boolean = implicitly[Ordering[A]].lteq(a, value)
 
   def message: String = "max"
+
+  override def defaultErrorMessage: String = s"should be lesser than $value"
 }
 
 case class regex(value:String) extends FieldValidation[String]{
   def validate(a: String): Boolean = a.matches(value)
 
   def message: String = "regex"
+
+  override def defaultErrorMessage: String = s"should match with $value"
 }
 
 case class nonEmpty() extends FieldValidation[String]{
   def validate(a: String): Boolean = !a.trim.isEmpty
 
   def message: String = "non-empty"
+
+  override def defaultErrorMessage: String = "should not be empty"
 }
 
 case class custom[A](value:A => Boolean, msg:String) extends FieldValidation[A]{
   def validate(a: A): Boolean = value(a)
 
   def message = msg
+
+  override def defaultErrorMessage: String = s"should not be []"
 }
 
 trait FieldValidation2[A, Obj] {
   def validate(a:A, obj:Obj):Boolean
 
   def message: String
+
+  def defaultErrorMessage:String
 }
 
 object FieldValidation2 extends FieldBlockProvider {
@@ -104,7 +117,6 @@ object FieldValidation2 extends FieldBlockProvider {
       q"""
         { (x:${field.typeSignature}, obj:${initWtt.tpe.finalResultType}) =>
           val validator = ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})
-          I18nKeyCollector.insert($i18nKey)($i18nKey + s"[$${validator.message}]")
           Option(x).filter(x => validator.validate(x, obj)).toRight($i18nKey + s"[$${validator.message}]")
         }""")
   }
@@ -125,6 +137,8 @@ object FieldValidation2 extends FieldBlockProvider {
 
 case class fieldDependent[A, Obj](value: (A, Obj) => Boolean, message:String) extends FieldValidation2[A, Obj]{
   def validate(a:A, obj:Obj) = value(a, obj)
+
+  override def defaultErrorMessage: String = s"should be [$message]"
 }
 
 case class mapping[FD, A](value:(FD) => List[(String, A)]) extends StaticAnnotation

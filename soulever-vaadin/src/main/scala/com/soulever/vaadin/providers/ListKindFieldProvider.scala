@@ -55,12 +55,12 @@ class ListKindFieldProvider extends KindFieldProvider[List]{
         vLayout.addComponents(fieldsList.map(_._1) ::: List(addButton) : _*)
       }
 
-      override def inlineValidations: List[String] = innerField(None) match {
+      override def inlineValidations: List[(String,String)] = innerField(None) match {
         case value: com.soulever.vaadin.providers.InlineValidationProvider => value.inlineValidations
         case _ => List.empty
       }
 
-      override def inlineKeys: List[String] = innerField(None) match {
+      override def inlineKeys: List[(String,String)] = innerField(None) match {
         case value: com.soulever.vaadin.providers.InlineKeyProvider => value.inlineKeys
         case _ => List.empty
       }

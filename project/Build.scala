@@ -18,7 +18,7 @@ object SouleverBuild extends Build {
   import BuildSettings._
   import com.typesafe.sbt.SbtGit.GitKeys._
 
-  val vaadinVersion = "7.2.3"
+  val vaadinVersion = "7.0.2"
 
   val vaadinServer = "com.vaadin" % "vaadin-server" % vaadinVersion
   val vaadinClient = "com.vaadin" % "vaadin-client" % vaadinVersion

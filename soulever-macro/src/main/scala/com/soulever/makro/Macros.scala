@@ -226,14 +226,16 @@ class MacrosImpl(val c:Context) {
       provided.map(FieldValidation2.generateCodeBlock[ClassType](c)(field, i18nKey))
     }
 
+    //List(..${validations.map(_._1)}, ..${validations2.map(_._1)}).foreach(I18nKeyCollector.insert($i18nPrefix))
+
     (fieldName, field, List(
       q"""
       val $fieldName = {
         val field = m.field($value, $i18nKey.trim, $innerField, List(..${validations.map(_._2)}), List(..${validations2.map(_._2)}), ${css.getOrElse(q""" "" """)})
-        List(..${validations.map(_._1)}, ..${validations2.map(_._1)}).filter(_ != null).foreach(I18nKeyCollector.insert($i18nPrefix))
+        println(List(..${validations.map(_._1)}, ..${validations2.map(_._1)}))
         I18nKeyCollector.insert($i18nPrefix)($i18nKey)
-        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.map(s => $i18nKey + "[" + s + "]").foreach(I18nKeyCollector.insert($i18nPrefix))
-        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerI18nKeys.map(s => $i18nKey + "{" + s + "}").foreach(I18nKeyCollector.insert($i18nPrefix))
+        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.map(s => $i18nKey + "[" + s._1 + "]").foreach(I18nKeyCollector.insert($i18nPrefix))
+        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerI18nKeys.map(s => $i18nKey + "{" + s._1 + "}").foreach(I18nKeyCollector.insert($i18nPrefix))
         field
       }
       """))

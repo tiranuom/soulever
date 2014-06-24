@@ -32,11 +32,11 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
     @mapping[Imp, V](_.intMapping)
     val i:Option[Mapping[V]] = Some(V(3))
 
-    val intField = FormUtil.field(i, "test.key", List.empty, List.empty, "", this)
+//    val intField = FormUtil.field(i, "test.key", List.empty, List.empty, "", this)
 
     val person: TestCaseClass = new TestCaseClass()
 
-    layout.addComponent(new HorizontalLayout(FormUtil.form(person, printPerson), intField))
+    layout.addComponent(new HorizontalLayout(FormUtil.form(person, printPerson)/*, intField*/))
     I18nKeyCollector.print
     layout
   }
@@ -51,7 +51,7 @@ case class TestCaseClass(
                           @field booleanField:Boolean = false,
                           @field passwordField:Password = "",
                           @field @mapping[Imp, V](_.intMapping) listField:List[Option[Mapping[V]]] = List(None),
-                          @field @custom[Option[Int]]((_:Option[Int]).map(_ > 0).getOrElse(true), "op") optionField:Option[Int] = None
+                          @field @custom[Option[Int]]({(_:Option[Int]).map(_ > 0).getOrElse(true)}, "op") optionField:Option[Int] = None
                           ){
 }
 
