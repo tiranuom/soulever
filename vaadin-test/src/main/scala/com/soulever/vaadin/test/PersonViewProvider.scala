@@ -43,9 +43,9 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
 }
 
 case class TestCaseClass(
-                          @field @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2, "not-equal") enumeration:Bool.Bool = Bool.TRUE,
-                          @field enumeration2:Bool.Bool = Bool.TRUE,
-                          @field @mapping[Imp, V](_.intMapping) mappedInt:Mapping[V] = V(1),
+                          @field @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2Field, "not-equal") enumerationField:Bool.Bool = Bool.TRUE,
+                          @field enumeration2Field:Bool.Bool = Bool.TRUE,
+                          @field @mapping[Imp, V](_.intMapping) mappedIntField:Mapping[V] = V(1),
                           @field @nonEmpty stringField:String = "name",
                           @field @min(0) @max(60) intField:Int = 0,
                           @field booleanField:Boolean = false,
@@ -70,7 +70,7 @@ trait ServiceRegistry {
 class Imp extends FieldDescriptorImplicits with vaadin.FieldDescriptor with ServiceRegistry {
   override def i18n(msg: String): String = Try(Imp.i18n.getProperty(msg)).
     toOption.
-    flatMap { x => Option(x).filter(!_.trim.isEmpty) }.
+    flatMap { x => Option(x)}.
     getOrElse(msg)
 }
 

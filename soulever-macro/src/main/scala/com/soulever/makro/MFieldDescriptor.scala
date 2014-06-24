@@ -34,4 +34,6 @@ trait BaseField[A, Obj] {
   def getValue:A
 
   def innerValidations:List[String]
+
+  def innerI18nKeys:List[String]
 }

@@ -16,6 +16,12 @@ trait InlineValidationProvider {
 
 }
 
+trait InlineKeyProvider {
+
+  def inlineKeys:List[String]
+
+}
+
 trait BaseField[A] extends CustomField[A] with InlineValidationProvider{
   def innerField:AbstractField[_]
 
@@ -122,10 +128,10 @@ class DoubleFieldProvider extends TypeFieldProvider[Double] {
 class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
 
   override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Boolean]): AbstractField[Boolean] =
-    new CustomField[Boolean] {
+    new CustomField[Boolean] with InlineKeyProvider {
       def getType: Class[_ <: Boolean] = classOf[Boolean]
-      private val offLable: String = fieldDescriptor.i18n(i18nKey + ".off")
-      private val onLable: String = fieldDescriptor.i18n(i18nKey + ".on")
+      private val offLable: String = fieldDescriptor.i18n(i18nKey + "{off}")
+      private val onLable: String = fieldDescriptor.i18n(i18nKey + "{on}")
       var selected = false
       val button: Button = new Button(offLable)
       button.setStyleName("boolean-field-off")
@@ -150,6 +156,8 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
       def initContent(): Component = {
         button
       }
+
+      override def inlineKeys: List[String] = List("on", "off")
     }
 
 

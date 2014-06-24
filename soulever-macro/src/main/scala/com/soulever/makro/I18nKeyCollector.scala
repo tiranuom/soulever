@@ -6,10 +6,33 @@ import scala.io.{BufferedSource, Source}
 import java.io.{File, PrintWriter}
 
 object I18nKeyCollector {
-  var keyList:Set[String] = Set.empty
+  var keyList:Set[(String, String)] = Set.empty
 
-  def insert(key:String) = {
-    keyList = keyList + key
+  def insert(replaceKey:String = "")(key:String) = {
+    keyList = keyList + (key -> replaceKey)
+  }
+
+  private val errorList = Map(
+    "not-equal" -> "value should be equal to []",
+    "integer" -> "value should be an integer",
+    "max" -> "value should be lesser than []",
+    "min" -> "value should be greater than []",
+    "non-empty" -> "value should not be empty",
+    "regex" -> "value should match with []"
+  ).withDefault(a => dotNotationToValue(a))
+
+  private def dotNotationToValue(s:String, replaceKey:String = ""):String = {
+
+    s match {
+      case s if s.matches("(.)+\\[(.)+\\]") =>
+        val strings = s.split("[\\[\\]]")
+        s"${dotNotationToValue(strings(0), replaceKey)} ${errorList(strings(1))}"
+      case s if s.matches("(.)+\\{(.)+\\}") =>
+        val strings = s.split("[\\{\\}]")
+        s"${strings(1)}"
+      case s =>
+        s.replace(replaceKey, "").split("\\.").map(_.capitalize).mkString(" ").trim()
+    }
   }
 
   def print = if(Props.isPrintable) {
@@ -18,7 +41,7 @@ object I18nKeyCollector {
       fileName =>
         val f: File = new File(fileName)
         val file: BufferedSource = Source.fromFile(f)
-        var keyMap = keyList.map(_ -> "").toMap
+        var keyMap = keyList.map{ case (a, b) => a -> dotNotationToValue(a, b)}.toMap
 
         val lines: List[String] = file.getLines().toList
         file.close()

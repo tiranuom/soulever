@@ -9,7 +9,7 @@ class ListKindFieldProvider extends KindFieldProvider[List]{
   override def field[B, FD <: MFieldDescriptor[_]](innerField: (Option[B]) => AbstractField[B], empty:B)
                                                   (fieldDescriptor: FD, i18nKey:String)
                                                   (op: Option[List[B]]): AbstractField[List[B]] =
-    new CustomField[List[B]] with InlineValidationProvider {
+    new CustomField[List[B]] with InlineValidationProvider with InlineKeyProvider {
       def getType: Class[_ <: List[B]] = classOf[List[B]]
 
       def createFieldRow(o:Option[B]) = {
@@ -57,6 +57,11 @@ class ListKindFieldProvider extends KindFieldProvider[List]{
 
       override def inlineValidations: List[String] = innerField(None) match {
         case value: com.soulever.vaadin.providers.InlineValidationProvider => value.inlineValidations
+        case _ => List.empty
+      }
+
+      override def inlineKeys: List[String] = innerField(None) match {
+        case value: com.soulever.vaadin.providers.InlineKeyProvider => value.inlineKeys
         case _ => List.empty
       }
     }

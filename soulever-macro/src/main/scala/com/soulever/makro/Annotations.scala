@@ -104,7 +104,7 @@ object FieldValidation2 extends FieldBlockProvider {
       q"""
         { (x:${field.typeSignature}, obj:${initWtt.tpe.finalResultType}) =>
           val validator = ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})
-          I18nKeyCollector.insert($i18nKey + s"[$${validator.message}]")
+          I18nKeyCollector.insert($i18nKey)($i18nKey + s"[$${validator.message}]")
           Option(x).filter(x => validator.validate(x, obj)).toRight($i18nKey + s"[$${validator.message}]")
         }""")
   }

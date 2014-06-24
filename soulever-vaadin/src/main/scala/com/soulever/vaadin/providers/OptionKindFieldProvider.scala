@@ -11,7 +11,7 @@ class OptionKindFieldProvider extends KindFieldProvider[Option] {
   override def field[B, FD <: MFieldDescriptor[_]](inf: (Option[B]) => AbstractField[B], empty:B)
                                                   (fieldDescriptor: FD, i18nKey:String)
                                                   (op: Option[Option[B]]): AbstractField[Option[B]] =
-    new BaseField[Option[B]] {
+    new BaseField[Option[B]] with InlineKeyProvider with InlineValidationProvider {
       def getType: Class[_ <: Option[B]] = classOf[Option[B]]
 
       val checkboxField = {
@@ -43,7 +43,12 @@ class OptionKindFieldProvider extends KindFieldProvider[Option] {
       override def validate() = if (checkboxField.getValue) innerField.validate()
 
       override def inlineValidations: List[String] = innerField match {
-        case value: com.soulever.vaadin.providers.BaseField[_] => value.inlineValidations
+        case value: com.soulever.vaadin.providers.InlineValidationProvider => value.inlineValidations
+        case _ => List.empty
+      }
+
+      override def inlineKeys: List[String] = innerField match {
+        case value: com.soulever.vaadin.providers.InlineKeyProvider => value.inlineKeys
         case _ => List.empty
       }
     }

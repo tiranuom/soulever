@@ -100,7 +100,7 @@ class GeneratedField[A : Manifest, Obj](init:A,
 
   override def getValue: A = innerField.getValue
 
-  override def innerValidations: scala.List[_root_.scala.Predef.String] = {
+  override def innerValidations: scala.List[String] = {
     innerField match {
       case value: com.soulever.vaadin.providers.InlineValidationProvider => value.inlineValidations
       case _ => List.empty
@@ -110,4 +110,11 @@ class GeneratedField[A : Manifest, Obj](init:A,
   override def setValue(newFieldValue: A) = innerField.setValue(newFieldValue)
 
   override def isEnabled: Boolean = innerField.isEnabled
+
+  override def innerI18nKeys: List[String] = {
+    innerField match {
+      case value:com.soulever.vaadin.providers.InlineKeyProvider => value.inlineKeys
+      case _ => List.empty
+    }
+  }
 }

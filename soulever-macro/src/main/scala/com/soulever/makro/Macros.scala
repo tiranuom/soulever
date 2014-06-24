@@ -4,6 +4,7 @@ import language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import scala.reflect.runtime.{universe => ru}
 import ru._
+import java.io.{File, PrintWriter}
 
 object Macros {
   def form[ClassType <: Product, FD <: MFieldDescriptor[Rt], Rt](init:ClassType, action:ClassType => Either[Exception, ClassType])
@@ -56,12 +57,15 @@ class MacrosImpl(val c:Context) {
 
     val submitButtonName = TermName(c.freshName())
 
+    val submitButtonKey = toDotNotation(beanTpe.typeSymbol.name.toString) + ".submit"
+
     val comp = q"""
     val m = $moduleDesc
       import m._
       ..$fieldExpressions
       val fields = $fieldListExpression
-      val $submitButtonName = submitButton(${c.literal(toDotNotation(beanTpe.typeSymbol.name.toString) + ".submit")}, {() =>
+      I18nKeyCollector.insert(${toDotNotation(beanTpe.typeSymbol.name.toString)})($submitButtonKey)
+      val $submitButtonName = submitButton($submitButtonKey, {() =>
         Option((fields.asInstanceOf[List[com.soulever.makro.BaseField[_, $initWtt]]] foldLeft true){ case (b, f) => f.isValid && b }).
           filter(identity).
           flatMap{ _ =>
@@ -71,8 +75,11 @@ class MacrosImpl(val c:Context) {
       })
       form(fields, List($submitButtonName))
     """
-
-    //    println( s"""comp = ${show(comp)} """)
+    val file = new File("/tmp/test.txt")
+    val writer = new PrintWriter(file)
+    writer.write(show(comp))
+    writer.close()
+//        println( s"""comp = ${show(comp)} """)
 
     comp
   }
@@ -137,7 +144,7 @@ class MacrosImpl(val c:Context) {
        }"""
     val classDependentValidatorFuncs: Tree = q"""
         $classDependentValidations.map { (validator:FieldValidation2[$ftt, ${ths.actualType}]) =>
-        I18nKeyCollector.insert($i18nKey + s"[$${validator.message}]")
+        I18nKeyCollector.insert($i18nKey)($i18nKey + s"[$${validator.message}]")
         (x:$ftt, ths:${ths.actualType}) => Option(x).filter(a => validator.validate(a, ths)).toRight($i18nKey + s"[$${validator.message}]")
        }"""
 
@@ -145,9 +152,10 @@ class MacrosImpl(val c:Context) {
       q"""
       val $fieldName = {
         val field = m.field[$ftt, ${ths.actualType}]($init, $i18nKey.trim, $innerField, $validatorFuncs, $classDependentValidatorFuncs, $css)
-        ($validationMessages ::: $classDependentValidaitonMessages).filter(_ != null).foreach(I18nKeyCollector.insert)
-        I18nKeyCollector.insert($i18nKey)
-        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.map(s => $i18nKey + "[" + s + "]").foreach(I18nKeyCollector.insert)
+        ($validationMessages ::: $classDependentValidaitonMessages).filter(_ != null).foreach(I18nKeyCollector.insert($i18nKey))
+        I18nKeyCollector.insert()($i18nKey)
+        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.map(s => $i18nKey + "[" + s + "]").foreach(I18nKeyCollector.insert($i18nKey))
+        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerI18nKeys.map(s => $i18nKey + "{" + s + "}").foreach(I18nKeyCollector.insert($i18nKey))
         field
       }
       """)
@@ -222,9 +230,10 @@ class MacrosImpl(val c:Context) {
       q"""
       val $fieldName = {
         val field = m.field($value, $i18nKey.trim, $innerField, List(..${validations.map(_._2)}), List(..${validations2.map(_._2)}), ${css.getOrElse(q""" "" """)})
-        List(..${validations.map(_._1)}, ..${validations2.map(_._1)}).filter(_ != null).foreach(I18nKeyCollector.insert)
-        I18nKeyCollector.insert($i18nKey)
-        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.map(s => $i18nKey + "[" + s + "]").foreach(I18nKeyCollector.insert)
+        List(..${validations.map(_._1)}, ..${validations2.map(_._1)}).filter(_ != null).foreach(I18nKeyCollector.insert($i18nPrefix))
+        I18nKeyCollector.insert($i18nPrefix)($i18nKey)
+        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.map(s => $i18nKey + "[" + s + "]").foreach(I18nKeyCollector.insert($i18nPrefix))
+        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerI18nKeys.map(s => $i18nKey + "{" + s + "}").foreach(I18nKeyCollector.insert($i18nPrefix))
         field
       }
       """))
