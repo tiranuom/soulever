@@ -14,7 +14,7 @@ trait MFieldDescriptor[LayoutType] {
                                secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
                                css:String = ""):BaseFieldType[A, Obj]
 
-  def submitButton(label:String, clickAction:() => Unit):ButtonType
+  def button(label:String, clickAction:() => Unit):ButtonType
 
   def i18n(msg:String):String = I18nKeyCollector.i18n(msg)
 

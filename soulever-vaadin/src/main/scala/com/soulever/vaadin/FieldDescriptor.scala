@@ -25,7 +25,7 @@ trait FieldDescriptor extends MFieldDescriptor[FormLayout] {
   def form(fields: List[FieldDescriptor#FieldType[_]], buttons: List[FieldDescriptor#ButtonType]): FormLayout =
     new FormLayout(fields ::: buttons :_*)
 
-  def submitButton(label:String, clickAction: () => Unit): FieldDescriptor#ButtonType =
+  def button(label:String, clickAction: () => Unit): FieldDescriptor#ButtonType =
     new Button(i18n(label), new ClickListener {
       def buttonClick(event: ClickEvent) = clickAction()
     })

@@ -13,9 +13,6 @@ object FormUtil {
 
   def field[FieldType, FD <: FieldDescriptor, ClassType](init:FieldType,
                                                          i18nKey:String,
-                                                         validations:List[FieldValidation[FieldType]],
-                                                         classDependentValidations:List[FieldValidation2[FieldType, ClassType]],
-                                                         css:String,
                                                          ths:ClassType)
                                                         (implicit moduleDesc:FD):FD#BaseFieldType[FieldType, ClassType] = macro field_macro[FieldType, FD, ClassType]
 
@@ -33,14 +30,11 @@ object FormUtil {
   def field_macro[FieldType:c.WeakTypeTag, FD:c.WeakTypeTag, ClassType](c:Context)
                                                                        (init:c.Expr[FieldType],
                                                                         i18nKey:c.Expr[String],
-                                                                        validations:c.Expr[List[FieldValidation[FieldType]]],
-                                                                        classDependentValidations:c.Expr[List[FieldValidation2[FieldType, ClassType]]],
-                                                                        css:c.Expr[String],
                                                                         ths:c.Expr[ClassType])
                                                                        (moduleDesc:c.Expr[FD]) = {
     import c.universe._
     q"""
-       com.soulever.makro.Macros.field[${init.actualType}, ${moduleDesc.actualType}, ${ths.actualType}]($init, $i18nKey, $validations, $classDependentValidations, $css, $ths)
+       com.soulever.makro.Macros.field[${init.actualType}, ${moduleDesc.actualType}, ${ths.actualType}]($init, $i18nKey, $ths)
        """
   }
 }

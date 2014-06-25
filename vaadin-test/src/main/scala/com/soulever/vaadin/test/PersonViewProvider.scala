@@ -29,14 +29,14 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
 
     import types._
 
-    @mapping[Imp, V](_.intMapping)
-    val i:Option[Mapping[V]] = Some(V(3))
+    @min(0)
+    val i:Int = 3
 
-//    val intField = FormUtil.field(i, "test.key", List.empty, List.empty, "", this)
+    val intField = FormUtil.field(i, "test.key", this)
 
     val person: TestCaseClass = new TestCaseClass()
 
-    layout.addComponent(new HorizontalLayout(FormUtil.form(person, printPerson)/*, intField*/))
+    layout.addComponent(new HorizontalLayout(FormUtil.form(person, printPerson), intField, imp.button("Submit", () => println(Try(intField.validate())))))
     I18nKeyCollector.print
     layout
   }
