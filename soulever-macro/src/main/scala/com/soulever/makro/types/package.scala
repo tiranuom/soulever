@@ -12,14 +12,6 @@ package object types {
   }
 
   implicit def mapping2a[A](value:Mapping[A]):A = value.get
-//
-//  implicit class Mapped[A](val get:(A, Map[String, A])) {
-//    def value = get._1
-//    def mapping = get._2
-//    override def toString: String = value.toString
-//  }
-//
-//  implicit def mapped2a[A](value:Mapped[A]):A = value.value
 
   implicit class LongText(val value:String) {
     override def toString:String = value

@@ -23,7 +23,7 @@ trait FieldDescriptor extends MFieldDescriptor[FormLayout] {
     new GeneratedField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, i18n)
 
   def form(fields: List[FieldDescriptor#FieldType[_]], buttons: List[FieldDescriptor#ButtonType]): FormLayout =
-    new FormLayout(fields ::: buttons :_*)
+    new FormLayout(fields ::: List(new HorizontalLayout(buttons: _*)): _*)
 
   def button(label:String, clickAction: () => Unit): FieldDescriptor#ButtonType =
     new Button(i18n(label), new ClickListener {

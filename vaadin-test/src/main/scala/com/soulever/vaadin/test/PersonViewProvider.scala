@@ -34,7 +34,7 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
 
     val intField = FormUtil.field(i, "test.key", this)
 
-    val person: TestCaseClass = new TestCaseClass()
+    val person: TestCaseClass = new TestCaseClass(stringField = "name")
 
     layout.addComponent(new HorizontalLayout(FormUtil.form(person, printPerson), intField, imp.button("Submit", () => println(Try(intField.validate())))))
     I18nKeyCollector.print
@@ -46,7 +46,7 @@ case class TestCaseClass(
                           @field @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2Field, "not-equal") enumerationField:Bool.Bool = Bool.TRUE,
                           @field enumeration2Field:Bool.Bool = Bool.TRUE,
                           @field @mapping[Imp, V](_.intMapping) mappedIntField:Mapping[V] = V(1),
-                          @field @nonEmpty stringField:String = "name",
+                          @field @nonEmpty stringField:String,
                           @field @min(0) @max(60) intField:Int = 0,
                           @field @min(0) @max(60) newIntField:Int = 0,
                           @field booleanField:Boolean = false,
