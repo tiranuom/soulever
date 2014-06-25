@@ -103,12 +103,12 @@ class MacrosImpl(val c:Context) {
 
     val innerField = {
 
-      def expandParameters(s: Type, collector: List[Tree] = List.empty): List[Tree] = {
+      val mapping = Option(init.tree.symbol).flatMap(_.annotations.collectFirst {
+        case s if s.tree.tpe.typeConstructor =:= weakTypeOf[com.soulever.makro.mapping[Any, Any]].typeConstructor =>
+          q"${s.tree.children.tail.head}(m)"  //this is broken
+      })
 
-        val m = Option(init.tree.symbol).flatMap(_.annotations.collectFirst {
-          case s if s.tree.tpe.typeConstructor =:= weakTypeOf[com.soulever.makro.mapping[Any, Any]].typeConstructor =>
-            q"${s.tree.children.tail.head}(m)"  //this is broken
-        })
+      def expandParameters(s: Type, collector: List[Tree] = List.empty): List[Tree] = {
 
         val TypeRef(pre, _, args) = s
         args match {
@@ -117,7 +117,7 @@ class MacrosImpl(val c:Context) {
           case Nil =>
             q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]" :: collector
           case x :: Nil if s.typeConstructor =:= c.weakTypeOf[com.soulever.makro.types.Mapping[Any]].typeConstructor =>
-            q"mappingFieldProvider[$x]($m.getOrElse(List.empty))" :: collector
+            q"mappingFieldProvider[$x]($mapping.getOrElse(List.empty))" :: collector
           case x :: Nil =>
             expandParameters(x, q"implicitly[com.soulever.makro.KindFieldProvider[${s.typeConstructor}, $fieldImplType]]" :: collector)
           case _ => q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldImplType]]" :: collector
@@ -151,9 +151,9 @@ class MacrosImpl(val c:Context) {
     val code = List(
       q"""
       val $fieldName = {
+        I18nKeyCollector.insert()($i18nKey)
         val field = m.field[$ftt, ${ths.actualType}]($init, $i18nKey.trim, $innerField, $validatorFuncs, $classDependentValidatorFuncs, $css)
         ($validationMessages ::: $classDependentValidaitonMessages).filter(_ != null).foreach(I18nKeyCollector.insert($i18nKey))
-        I18nKeyCollector.insert()($i18nKey)
         field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.map(s => $i18nKey + "[" + s + "]").foreach(I18nKeyCollector.insert($i18nKey))
         field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerI18nKeys.map(s => $i18nKey + "{" + s + "}").foreach(I18nKeyCollector.insert($i18nKey))
         field
@@ -214,26 +214,25 @@ class MacrosImpl(val c:Context) {
     }
 
 
-    val validations = {
+    val (validationMessages, validators) = {
       val provided = field.annotations.filter(_.tree.tpe <:< weakTypeOf[FieldValidation.AnnotationType])
       provided.foreach(FieldValidation.validate[ClassType](c)(field))
       provided.map(FieldValidation.generateCodeBlock[ClassType](c)(field, i18nKey))
-    }
+    }.unzip(identity)
 
-    val validations2 = {
+    val (classDependentValidationMessages, classDependentValidators) = {
       val provided = field.annotations.filter(_.tree.tpe <:< weakTypeOf[FieldValidation2.AnnotationType])
       provided.foreach(FieldValidation2.validate[ClassType](c)(field))
       provided.map(FieldValidation2.generateCodeBlock[ClassType](c)(field, i18nKey))
-    }
-
+    }.unzip(identity)
     //List(..${validations.map(_._1)}, ..${validations2.map(_._1)}).foreach(I18nKeyCollector.insert($i18nPrefix))
 
     (fieldName, field, List(
       q"""
       val $fieldName = {
-        val field = m.field($value, $i18nKey.trim, $innerField, List(..${validations.map(_._2)}), List(..${validations2.map(_._2)}), ${css.getOrElse(q""" "" """)})
-        println(List(..${validations.map(_._1)}, ..${validations2.map(_._1)}))
         I18nKeyCollector.insert($i18nPrefix)($i18nKey)
+        val field = m.field($value, $i18nKey.trim, $innerField, List(..$validators), List(..$classDependentValidators), ${css.getOrElse(q""" "" """)})
+        List(..$validationMessages, ..$classDependentValidationMessages).foreach(I18nKeyCollector.insert($i18nPrefix))
         field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.map(s => $i18nKey + "[" + s._1 + "]").foreach(I18nKeyCollector.insert($i18nPrefix))
         field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerI18nKeys.map(s => $i18nKey + "{" + s._1 + "}").foreach(I18nKeyCollector.insert($i18nPrefix))
         field

@@ -48,10 +48,11 @@ case class TestCaseClass(
                           @field @mapping[Imp, V](_.intMapping) mappedIntField:Mapping[V] = V(1),
                           @field @nonEmpty stringField:String = "name",
                           @field @min(0) @max(60) intField:Int = 0,
+                          @field @min(0) @max(60) newIntField:Int = 0,
                           @field booleanField:Boolean = false,
                           @field passwordField:Password = "",
                           @field @mapping[Imp, V](_.intMapping) listField:List[Option[Mapping[V]]] = List(None),
-                          @field @custom[Option[Int]]({(_:Option[Int]).map(_ > 0).getOrElse(true)}, "op") optionField:Option[Int] = None
+                          @field @custom[Option[Int]]({(_:Option[Int]).map(_ > 0).getOrElse(true)}, "all.positive") optionField:Option[Int] = None
                           ){
 }
 
@@ -67,17 +68,4 @@ trait ServiceRegistry {
   lazy val intMapping:List[(String, V)] = (1 to 9).toList.map(i => "value" + i.toString -> V(i))
 }
 
-class Imp extends FieldDescriptorImplicits with vaadin.FieldDescriptor with ServiceRegistry {
-  override def i18n(msg: String): String = Try(Imp.i18n.getProperty(msg)).
-    toOption.
-    flatMap { x => Option(x)}.
-    getOrElse(msg)
-}
-
-object Imp {
-  val i18n = {
-    val properties: Properties = new Properties()
-    properties.load(getClass.getClassLoader.getResourceAsStream("messages.properties"))
-    properties
-  }
-}
+class Imp extends FieldDescriptorImplicits with vaadin.FieldDescriptor with ServiceRegistry

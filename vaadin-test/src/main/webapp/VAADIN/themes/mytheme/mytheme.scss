@@ -9,4 +9,8 @@
   @include reindeer;
 
   /* Insert your theme rules here */
+  div.v-label.v-widget.v-field-error.v-label-v-field-error.v-label-undef-w {
+    color: red;
+    margin-left: 10px;
+  }
 }

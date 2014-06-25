@@ -16,7 +16,7 @@ trait MFieldDescriptor[LayoutType] {
 
   def submitButton(label:String, clickAction:() => Unit):ButtonType
 
-  def i18n(msg:String):String = msg
+  def i18n(msg:String):String = I18nKeyCollector.i18n(msg)
 
   def form(fields:List[FieldType[_]], buttons:List[ButtonType]):LayoutType
 
