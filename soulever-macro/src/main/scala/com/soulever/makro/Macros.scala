@@ -28,7 +28,7 @@ class MacrosImpl(val c:Context) {
       toList.
       flatMap(_.asMethod.paramLists.flatten)
 
-    val i18nPrefix = toDotNotation(classWTT.tpe.typeSymbol.name.toString.trim)
+    val i18nPrefix = classWTT.tpe.typeSymbol.name.toString.trim.dotNotation
 
     val (fieldsCode, fieldNamesList, gettersList, emptyValuesList) = fieldsList.
       collect{
@@ -37,7 +37,7 @@ class MacrosImpl(val c:Context) {
           q"$classExpr.${field.name.toTermName}",
           field,
           i18nPrefix,
-          q"${i18nPrefix + "." + toDotNotation(field.name.toString.trim)}",
+          q"${i18nPrefix + "." + field.name.toString.trim.dotNotation}",
           classExpr)
 
         (code, q"$fieldName", field -> q"$fieldName.getValue", (field, fieldName, emptyValue))
@@ -99,9 +99,6 @@ class MacrosImpl(val c:Context) {
     """
     comp
   }
-
-  def toDotNotation(s:String) =
-    s.replaceAll("(?<=[A-Z])(?=[A-Z][a-z])|(?<=[^A-Z])(?=[A-Z])|(?<=[A-Za-z])(?=[^A-Za-z])", ".").toLowerCase.trim
 
   def field_impl[FieldType:c.WeakTypeTag, FD:c.WeakTypeTag, ClassType](value:c.Expr[FieldType],
                                                                        i18nKey:c.Expr[String],

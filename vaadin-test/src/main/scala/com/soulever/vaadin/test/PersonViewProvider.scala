@@ -1,15 +1,13 @@
 package com.soulever.vaadin.test
 
 import com.soulever.makro.types.{Mapping, Password}
-import com.soulever.vaadin.{FieldDescriptor, GeneratedField, FieldDescriptorImplicits, FormUtil}
+import com.soulever.vaadin.{FieldDescriptorImplicits, FormUtil}
 import com.vaadin.navigator.{View, ViewProvider}
 import com.vaadin.ui._
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent
 import com.soulever.makro._
 import com.soulever._
-import com.typesafe.config.ConfigFactory
 import scala.util.Try
-import java.util.Properties
 
 class PersonViewProvider(ui:UI) extends ViewProvider{
   def getViewName(viewAndParameters: String): String = viewAndParameters
@@ -53,8 +51,7 @@ case class TestCaseClass(
                           @field passwordField:Password = "",
                           @field @mapping[Imp, V](_.intMapping) listField:List[Option[Mapping[V]]] = List(None),
                           @field @custom[Option[Int]]({(_:Option[Int]).map(_ > 0).getOrElse(true)}, "all.positive") optionField:Option[Int] = None
-                          ){
-}
+                          )
 
 case class V(i:Int)
 

@@ -19,8 +19,6 @@ object I18nKeyCollector {
     props = props + (key -> dotNotationToValue(key, replaceKey))
   }
 
-//  def insert(key:String, defaultValue:String) = keyList = keyList + (key -> defaultValue)
-
   private val errorList = Map(
     "not-equal" -> "value should be equal to []",
     "integer" -> "value should be an integer",
@@ -34,17 +32,15 @@ object I18nKeyCollector {
     "regex" -> "value should match with []"
   ).withDefault(a => s"should be [${dotNotationToValue(a)}]")
 
-  private def dotNotationToValue(s:String, replaceKey:String = ""):String = {
-    s match {
-      case s if s.matches("(.)+\\[(.)+\\]") =>
-        val strings = s.split("[\\[\\]]")
-        s"${dotNotationToValue(strings(0), replaceKey)} ${errorList(strings(1))}"
-      case s if s.matches("(.)+\\{(.)+\\}") =>
-        val strings = s.split("[\\{\\}]")
-        s"${strings(1)}"
-      case s =>
-        s.replace(replaceKey, "").split("\\.").map(_.capitalize).mkString(" ").trim()
-    }
+  private def dotNotationToValue(s:String, replaceKey:String = ""):String = s match {
+    case s if s.matches("(.)+\\[(.)+\\]") =>
+      val strings = s.split("[\\[\\]]")
+      s"${dotNotationToValue(strings(0), replaceKey)} ${errorList(strings(1))}"
+    case s if s.matches("(.)+\\{(.)+\\}") =>
+      val strings = s.split("[\\{\\}]")
+      s"${strings(1)}"
+    case s =>
+      s.replace(replaceKey, "").split("\\.").map(_.capitalize).mkString(" ").trim()
   }
 
   def print = if(Props.isPrintable) {
