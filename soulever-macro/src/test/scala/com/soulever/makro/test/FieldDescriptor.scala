@@ -28,7 +28,7 @@ class FieldDescriptor extends MFieldDescriptor[TestForm] {
 
   override def form(fields: List[FieldType[_]], buttons: List[ButtonType]): TestForm = TestForm()
 
-  override def submitButton(label: String, clickAction: () => Unit): ButtonType = TestButton()
+  override def button(label: String, clickAction: () => Unit): ButtonType = TestButton()
 
   override def field[A: Manifest, Obj](init: A,
                                        caption: String,
@@ -38,7 +38,7 @@ class FieldDescriptor extends MFieldDescriptor[TestForm] {
                                        css: String): BaseFieldType[A, Obj] =
     TestBaseField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, innerValidations)
 
-  def innerValidations:List[String] = List.empty
+  def innerValidations:List[(String, String)] = List.empty
 
   override type BaseFieldType[A, Obj] = TestBaseField[A, Obj]
   override type ButtonType = TestButton
@@ -69,7 +69,7 @@ case class TestBaseField[A, Obj](init: A,
                                  validators: List[(A) => Either[String, A]],
                                  secondaryValidators: List[(A, Obj) => Either[String, A]],
                                  css: String,
-                                 innerValidations:List[String]) extends BaseField[A, Obj]() {
+                                 innerValidations:List[(String, String)]) extends BaseField[A, Obj]() {
 
   val inf = innerField(Option(init))
 
@@ -92,6 +92,8 @@ case class TestBaseField[A, Obj](init: A,
           case (e, f) => e.right.flatMap(f)
         }
     }.isRight
+
+  override def innerI18nKeys: List[(String, String)] = ???
 }
 
 case class TestButton()

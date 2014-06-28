@@ -83,9 +83,8 @@ object SouleverBuild extends Build {
   lazy val souleverLift:Project = Project(
     "soulever-lift",
     file("soulever-lift"),
-    settings = buildSettings ++ webSettings ++ Seq(
-      libraryDependencies ++= Seq(liftweb, liftModules, liftServlet, liftJetty, liftJettyPlus),
-      port in container.Configuration := 8081
+    settings = buildSettings ++ Seq(
+      libraryDependencies ++= Seq(liftweb, liftModules)
     )
   ) dependsOn souleverMacro
 
