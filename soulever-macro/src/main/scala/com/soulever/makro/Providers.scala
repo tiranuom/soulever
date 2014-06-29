@@ -1,14 +1,15 @@
 package com.soulever.makro
 
-trait TypeFieldProvider[A, Field[_]] {
-  def field[FD <: MFieldDescriptor[_]](fieldDescriptor:FD, i18nKey:String)(op:Option[A]): Field[A]
+trait TypeFieldProvider[A, Field[_], IFD <: MFieldDescriptor[IFD]] {
+  def field[FD <: MFieldDescriptor[_]](fieldDescriptor:FD)
+                                      (op:Option[A], baseField: IFD#BaseFieldType[_, _]): Field[A]
 
   def empty:A
 }
 
-trait KindFieldProvider[A[_], Field[_]]{
-  def field[B, FD <: MFieldDescriptor[_]](innerField:Option[B] => Field[B], empty:B)
-                                         (fieldDescriptor:FD, i18nKey:String)(op:Option[A[B]]): Field[A[B]]
+trait KindFieldProvider[A[_], Field[_], IFD <: MFieldDescriptor[IFD]]{
+  def field[B, FD <: MFieldDescriptor[_]](innerField:(Option[B], IFD#BaseFieldType[_, _]) => Field[B], empty:B, fieldDescriptor:FD)
+                                         (op:Option[A[B]], baseField: IFD#BaseFieldType[_, _]): Field[A[B]]
 
   def empty[B]:A[B]
 }

@@ -4,8 +4,8 @@ import language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
 object Macros {
-  def form[ClassType <: Product, FD <: MFieldDescriptor[Rt], Rt](caseClass:ClassType, action:ClassType => Either[Exception, ClassType])
-                                                                (implicit moduleDesc:FD):Rt = macro MacrosImpl.form_impl[ClassType, FD, Rt]
+  def form[ClassType <: Product, FD <: MFieldDescriptor[_]](caseClass:ClassType, action:ClassType => Either[Exception, ClassType])
+                                                                (implicit moduleDesc:FD):FD#LayoutType= macro MacrosImpl.form_impl[ClassType, FD]
 
   def field[FieldType, FD <: MFieldDescriptor[_], ClassType](value:FieldType,
                                                              i18nKey:String,
@@ -15,7 +15,7 @@ object Macros {
 
 class MacrosImpl(val c:Context) {
   import c.universe._
-  def form_impl[ClassType:c.WeakTypeTag, FD:c.WeakTypeTag, Rt](caseClass:c.Expr[ClassType],
+  def form_impl[ClassType:c.WeakTypeTag, FD:c.WeakTypeTag](caseClass:c.Expr[ClassType],
                                                                action:c.Expr[ClassType => Either[Exception, ClassType]])
                                                               (moduleDesc:c.Expr[FD]) = {
 
@@ -139,26 +139,38 @@ class MacrosImpl(val c:Context) {
           q"${s.tree.children.tail.head}(m)"
       })
 
+      val fieldDescriptorType = {
+        val tpe: Type = implicitly[WeakTypeTag[FD]].tpe
+        val mdfClass: ClassSymbol = typeOf[MFieldDescriptor[_]].typeSymbol.asClass
+        val selfType: Type = mdfClass.typeParams.head.asType.toType
+        selfType.asSeenFrom(tpe, mdfClass)
+      }
+
       def expandParameters(s: Type = valueType, collector: List[Tree] = List.empty): List[Tree] = {
-        val TypeRef(pre, _, args) = s
+        val (pre, args) = s match {
+          case NullaryMethodType(TypeRef(a:Type, _, b)) => a -> b
+          case NullaryMethodType(a:Type) => a -> List.empty
+          case TypeRef(pre, _, args) => pre -> args
+          case _ => c.abort(c.enclosingPosition, "Cannot decode the position")
+        }
         args match {
           case Nil if s <:< weakTypeOf[Enumeration#Value] =>
             q"enumFieldProvider[$pre](${pre.termSymbol})" :: collector
           case Nil =>
-            q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldType]]" :: collector
+            q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldType, $fieldDescriptorType]]" :: collector
           case x :: Nil if s.typeConstructor =:= c.weakTypeOf[com.soulever.makro.types.Mapping[Any]].typeConstructor =>
             if (mapping.isEmpty) c.error(valueTree.pos, "Cannot find mapping for the given type")
             q"mappingFieldProvider[$x]($mapping.getOrElse(List.empty))" :: collector
           case x :: Nil =>
-            expandParameters(x, q"implicitly[com.soulever.makro.KindFieldProvider[${s.typeConstructor}, $fieldType]]" :: collector)
-          case _ => q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldType]]" :: collector
+            expandParameters(x, q"implicitly[com.soulever.makro.KindFieldProvider[${s.typeConstructor}, $fieldType, $fieldDescriptorType]]" :: collector)
+          case _ => q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldType, $fieldDescriptorType]]" :: collector
         }
       }
 
       val fieldProviders = expandParameters()
-      (fieldProviders.tail foldLeft (q"${fieldProviders.head}.field(m, $i18nKey)", q"${fieldProviders.head}.empty")){
+      (fieldProviders.tail foldLeft (q"${fieldProviders.head}.field(m)", q"${fieldProviders.head}.empty")){
         case ((underlyingFieldProvider, underlyingEmpty), thisFieldProvider) =>
-          (q"$thisFieldProvider.field($underlyingFieldProvider, $underlyingEmpty)(m, $i18nKey)", q"$thisFieldProvider.empty")
+          (q"$thisFieldProvider.field($underlyingFieldProvider, $underlyingEmpty, m)", q"$thisFieldProvider.empty")
       }
     }
 
@@ -177,11 +189,11 @@ class MacrosImpl(val c:Context) {
     (List(
       q"""
       val $fieldName = {
-        I18nKeyCollector.insert($i18nPrefix)($i18nKey)
-        ($validationMessages ::: $classDependentValidationMessages).foreach(I18nKeyCollector.insert($i18nPrefix))
+        com.soulever.makro.I18nKeyCollector.insert($i18nPrefix)($i18nKey)
+        ($validationMessages ::: $classDependentValidationMessages).foreach(com.soulever.makro.I18nKeyCollector.insert($i18nPrefix))
         val field = m.field[$valueType, ${ths.actualType}]($valueTree, $i18nKey.trim, $innerField, $validators, $classDependentValidators, $css.getOrElse(""))
-        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.map(s => $i18nKey + "[" + s._1 + "]").foreach(I18nKeyCollector.insert($i18nPrefix))
-        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerI18nKeys.map(s => $i18nKey + "{" + s._1 + "}").foreach(I18nKeyCollector.insert($i18nPrefix))
+        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.map(s => $i18nKey + "[" + s._1 + "]").foreach(com.soulever.makro.I18nKeyCollector.insert($i18nPrefix))
+        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerI18nKeys.map(s => $i18nKey + "{" + s._1 + "}").foreach(com.soulever.makro.I18nKeyCollector.insert($i18nPrefix))
         field
       }
       """), fieldName, emptyValue)

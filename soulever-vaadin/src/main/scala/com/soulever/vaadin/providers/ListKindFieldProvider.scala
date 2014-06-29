@@ -1,14 +1,13 @@
 package com.soulever.vaadin.providers
 
-import com.soulever.vaadin.KindFieldProvider
+import com.soulever.vaadin.{FieldDescriptor, GeneratedField, KindFieldProvider}
 import com.soulever.makro.MFieldDescriptor
 import com.vaadin.ui._
 
-class ListKindFieldProvider extends KindFieldProvider[List]{
+class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
 
-  override def field[B, FD <: MFieldDescriptor[_]](innerField: (Option[B]) => AbstractField[B], empty:B)
-                                                  (fieldDescriptor: FD, i18nKey:String)
-                                                  (op: Option[List[B]]): AbstractField[List[B]] =
+  override def field[B, FD <: MFieldDescriptor[_]](innerField: (Option[B], FieldDescriptor#BaseFieldType[_, _]) => AbstractField[B], empty: B, fieldDescriptor: FD)
+                                                  (op: Option[List[B]], baseField: FieldDescriptor#BaseFieldType[_, _]): AbstractField[List[B]] =
     new CustomField[List[B]] with InlineValidationProvider with InlineKeyProvider {
       def getType: Class[_ <: List[B]] = classOf[List[B]]
 
@@ -21,7 +20,7 @@ class ListKindFieldProvider extends KindFieldProvider[List]{
             vLayout.addComponents(fieldsList.map(_._1) ::: List(addButton) : _*)
           }
         })
-        val field: AbstractField[B] = innerField(o)
+        val field: AbstractField[B] = innerField(o, baseField)
         layout.addComponents(field, removeButton)
         layout -> field
       }
@@ -55,12 +54,12 @@ class ListKindFieldProvider extends KindFieldProvider[List]{
         vLayout.addComponents(fieldsList.map(_._1) ::: List(addButton) : _*)
       }
 
-      override def inlineValidations: List[(String,String)] = innerField(None) match {
+      override def inlineValidations: List[(String,String)] = innerField(None, baseField) match {
         case value: com.soulever.vaadin.providers.InlineValidationProvider => value.inlineValidations
         case _ => List.empty
       }
 
-      override def inlineKeys: List[(String,String)] = innerField(None) match {
+      override def inlineKeys: List[(String,String)] = innerField(None, baseField) match {
         case value: com.soulever.vaadin.providers.InlineKeyProvider => value.inlineKeys
         case _ => List.empty
       }

@@ -7,7 +7,10 @@ import com.soulever.vaadin.providers._
 import com.soulever.makro
 import com.soulever.makro.types.Mapping
 
-trait FieldDescriptor extends MFieldDescriptor[FormLayout] {
+trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
+
+  type LayoutType = FormLayout
+
   type ButtonType = Button
 
   type FieldType[A] = AbstractField[A]
@@ -16,7 +19,7 @@ trait FieldDescriptor extends MFieldDescriptor[FormLayout] {
 
   def field[A: Manifest, Obj](init: A,
                               caption: String,
-                              innerField: Option[A] => FieldDescriptor#FieldType[A],
+                              innerField: (Option[A], GeneratedField[A, Obj]) => FieldDescriptor#FieldType[A],
                               validators: List[(A) => Either[String, A]],
                               secondaryValidators:List[(A, Obj) => Either[String, A]],
                               css:String): FieldDescriptor#BaseFieldType[A, Obj] =
@@ -30,17 +33,17 @@ trait FieldDescriptor extends MFieldDescriptor[FormLayout] {
       def buttonClick(event: ClickEvent) = clickAction()
     })
 
-  def mappingFieldProvider[A](mapping: List[(String, A)]): makro.TypeFieldProvider[Mapping[A], FieldDescriptor#FieldType] = new MappingFieldProvider[A](mapping)
+  def mappingFieldProvider[A](mapping: List[(String, A)]): makro.TypeFieldProvider[Mapping[A], FieldDescriptor#FieldType, FieldDescriptor] = new MappingFieldProvider[A](mapping)
 
-  def enumFieldProvider[A <: Enumeration](enum: A): makro.TypeFieldProvider[A#Value, FieldDescriptor#FieldType] = new EnumerationFieldProvider[A](enum)
+  def enumFieldProvider[A <: Enumeration](enum: A): makro.TypeFieldProvider[A#Value, FieldDescriptor#FieldType, FieldDescriptor] = new EnumerationFieldProvider[A](enum)
 }
 
 trait FieldDescriptorImplicits {
 
-  implicit val stringFieldProvider = new TypeFieldProvider[String] {
+  implicit val stringFieldProvider = new TypeFieldProvider[String, FieldDescriptor] {
     override def empty: String = ""
 
-    override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[String]): AbstractField[String] = {
+    override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[String], baseField: GeneratedField[_, _]): AbstractField[String] = {
       val field: TextField = new TextField()
       op.foreach(field.setValue)
       field

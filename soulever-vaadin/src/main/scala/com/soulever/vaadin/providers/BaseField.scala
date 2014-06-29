@@ -1,6 +1,6 @@
 package com.soulever.vaadin.providers
 
-import com.soulever.vaadin.TypeFieldProvider
+import com.soulever.vaadin.{GeneratedField, FieldDescriptor, TypeFieldProvider}
 import com.soulever.makro.MFieldDescriptor
 import com.vaadin.ui._
 import com.vaadin.data.Validator
@@ -32,8 +32,8 @@ trait BaseField[A] extends CustomField[A] with InlineValidationProvider {
   def initContent(): Component = innerField
 }
 
-class IntFieldProvider extends TypeFieldProvider[Int] {
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Int]): AbstractField[Int] =
+class IntFieldProvider extends TypeFieldProvider[Int, FieldDescriptor] {
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Int], baseField: GeneratedField[_,_]): AbstractField[Int] =
     new BaseField[Int] {
       def getType: Class[_ <: Int] = classOf[Int]
 
@@ -54,10 +54,10 @@ class IntFieldProvider extends TypeFieldProvider[Int] {
   override def empty: Int = 0
 }
 
-class LongFieldProvider extends TypeFieldProvider[Long] {
+class LongFieldProvider extends TypeFieldProvider[Long, FieldDescriptor] {
 
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Long]): AbstractField[Long] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Long], baseField: GeneratedField[_,_]): AbstractField[Long] =
     new BaseField[Long] {
       def getType: Class[_ <: Long] = classOf[Long]
 
@@ -78,9 +78,9 @@ class LongFieldProvider extends TypeFieldProvider[Long] {
   override def empty: Long = 0
 }
 
-class FloatFieldProvider extends TypeFieldProvider[Float] {
+class FloatFieldProvider extends TypeFieldProvider[Float, FieldDescriptor] {
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Float]): AbstractField[Float] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Float], baseField: GeneratedField[_,_]): AbstractField[Float] =
     new BaseField[Float] {
       def getType: Class[_ <: Float] = classOf[Float]
 
@@ -101,10 +101,10 @@ class FloatFieldProvider extends TypeFieldProvider[Float] {
   override def empty: Float = 0
 }
 
-class DoubleFieldProvider extends TypeFieldProvider[Double] {
+class DoubleFieldProvider extends TypeFieldProvider[Double, FieldDescriptor] {
 
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Double]): AbstractField[Double] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Double], baseField: GeneratedField[_,_]): AbstractField[Double] =
     new BaseField[Double] {
       def getType: Class[_ <: Double] = classOf[Double]
 
@@ -125,11 +125,12 @@ class DoubleFieldProvider extends TypeFieldProvider[Double] {
   override def empty: Double = 0
 }
 
-class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
+class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Boolean]): AbstractField[Boolean] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Boolean], baseField: GeneratedField[_,_]): AbstractField[Boolean] =
     new CustomField[Boolean] with InlineKeyProvider {
       def getType: Class[_ <: Boolean] = classOf[Boolean]
+      val i18nKey = baseField.i18nKey
       private val offLable: String = fieldDescriptor.i18n(i18nKey + "{off}")
       private val onLable: String = fieldDescriptor.i18n(i18nKey + "{on}")
       var selected = false
@@ -164,9 +165,9 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
   override def empty: Boolean = false
 }
 
-class ByteFieldProvider extends TypeFieldProvider[Byte]{
+class ByteFieldProvider extends TypeFieldProvider[Byte, FieldDescriptor]{
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Byte]): AbstractField[Byte] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Byte], baseField: GeneratedField[_,_]): AbstractField[Byte] =
     new BaseField[Byte] {
       def getType: Class[_ <: Byte] = classOf[Byte]
 
@@ -187,9 +188,9 @@ class ByteFieldProvider extends TypeFieldProvider[Byte]{
   override def empty: Byte = 0
 }
 
-class PasswordFieldProvider extends TypeFieldProvider[Password]{
+class PasswordFieldProvider extends TypeFieldProvider[Password, FieldDescriptor]{
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Password]): AbstractField[Password] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Password], baseField: GeneratedField[_,_]): AbstractField[Password] =
     new BaseField[Password] {
 
       val innerField = new PasswordField()
@@ -207,9 +208,9 @@ class PasswordFieldProvider extends TypeFieldProvider[Password]{
   override def empty: Password = new Password("")
 }
 
-class LongTextFieldProvider extends TypeFieldProvider[LongText]{
+class LongTextFieldProvider extends TypeFieldProvider[LongText, FieldDescriptor]{
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[LongText]): AbstractField[LongText] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[LongText], baseField: GeneratedField[_,_]): AbstractField[LongText] =
     new BaseField[LongText] {
       def getType: Class[_ <: LongText] = classOf[LongText]
 
@@ -229,9 +230,9 @@ class LongTextFieldProvider extends TypeFieldProvider[LongText]{
   override def empty: LongText = new LongText("")
 }
 
-class DateFieldProvider extends TypeFieldProvider[Date]{
+class DateFieldProvider extends TypeFieldProvider[Date, FieldDescriptor]{
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Date]): AbstractField[Date] = {
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Date], baseField: GeneratedField[_,_]): AbstractField[Date] = {
     val dateField = new DateField()
     op.foreach(dateField.setValue)
     dateField

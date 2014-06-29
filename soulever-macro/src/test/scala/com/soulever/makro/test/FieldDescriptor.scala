@@ -4,13 +4,13 @@ import com.soulever.makro.{BaseField, MFieldDescriptor}
 import com.soulever.makro.types.Mapping
 import com.soulever.makro
 
-class FieldDescriptor extends MFieldDescriptor[TestForm] {
+class FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
   override def enumFieldProvider[A <: Enumeration](enum: A): TypeFieldProvider[A#Value] =
     new TypeFieldProvider[A#Value] {
 
       override def empty: A#Value = enum.values.head
 
-      override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[A#Value]): FieldType[A#Value] =
+      override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[A#Value]): FieldType[A#Value] =
         new TestField[A#Value] {
           override var value: A#Value = op.getOrElse(empty)
         }
@@ -20,7 +20,7 @@ class FieldDescriptor extends MFieldDescriptor[TestForm] {
     new TypeFieldProvider[Mapping[A]] {
       override def empty: Mapping[A] = mapping.head._2
 
-      override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD, i18nKey:String)(op: Option[Mapping[A]]): FieldType[Mapping[A]] =
+      override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Mapping[A]]): FieldType[Mapping[A]] =
         new TestField[Mapping[A]]() {
           override var value: Mapping[A] = op.getOrElse(empty)
         }
@@ -43,11 +43,12 @@ class FieldDescriptor extends MFieldDescriptor[TestForm] {
   override type BaseFieldType[A, Obj] = TestBaseField[A, Obj]
   override type ButtonType = TestButton
   override type FieldType[A] = TestField[A]
+  override type LayoutType = TestForm
 }
 
-trait TypeFieldProvider[A] extends makro.TypeFieldProvider[A, TestField]
+trait TypeFieldProvider[A] extends makro.TypeFieldProvider[A, TestField, FieldDescriptor]
 
-trait KindFieldProvider[A[_]] extends makro.KindFieldProvider[A, TestField]
+trait KindFieldProvider[A[_]] extends makro.KindFieldProvider[A, TestField, FieldDescriptor]
 
 trait FieldDescriptorImplicits {
 
@@ -70,6 +71,8 @@ case class TestBaseField[A, Obj](init: A,
                                  secondaryValidators: List[(A, Obj) => Either[String, A]],
                                  css: String,
                                  innerValidations:List[(String, String)]) extends BaseField[A, Obj]() {
+
+  val i18nKey = caption
 
   val inf = innerField(Option(init))
 
@@ -94,6 +97,8 @@ case class TestBaseField[A, Obj](init: A,
     }.isRight
 
   override def innerI18nKeys: List[(String, String)] = ???
+
+  override def setValue(value: A): Unit = ???
 }
 
 case class TestButton()

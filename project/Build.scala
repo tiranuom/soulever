@@ -12,7 +12,8 @@ object BuildSettings {
     scalaVersion := "2.11.1",
     scalacOptions ++= Seq(),
     resolvers += Resolver.sonatypeRepo("releases"),
-    resolvers += Resolver.sonatypeRepo("snapshots")
+    resolvers += Resolver.sonatypeRepo("snapshots"),
+    offline := true
   )
 }
 

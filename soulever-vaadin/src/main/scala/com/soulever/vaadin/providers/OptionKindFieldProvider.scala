@@ -1,16 +1,15 @@
 package com.soulever.vaadin.providers
 
-import com.soulever.vaadin.KindFieldProvider
+import com.soulever.vaadin.{FieldDescriptor, KindFieldProvider}
 import com.soulever.makro.MFieldDescriptor
 import com.vaadin.ui.{HorizontalLayout, Component, CheckBox, AbstractField}
 import com.vaadin.data.Property.{ValueChangeEvent, ValueChangeListener}
 import com.vaadin.data.Property
 
-class OptionKindFieldProvider extends KindFieldProvider[Option] {
+class OptionKindFieldProvider extends KindFieldProvider[Option, FieldDescriptor] {
 
-  override def field[B, FD <: MFieldDescriptor[_]](inf: (Option[B]) => AbstractField[B], empty:B)
-                                                  (fieldDescriptor: FD, i18nKey:String)
-                                                  (op: Option[Option[B]]): AbstractField[Option[B]] =
+  override def field[B, FD <: MFieldDescriptor[_]](inf: (Option[B], FieldDescriptor#BaseFieldType[_,_]) => AbstractField[B], empty:B, fieldDescriptor: FD)
+                                                  (op: Option[Option[B]], baseField: FieldDescriptor#BaseFieldType[_, _]): AbstractField[Option[B]] =
     new BaseField[Option[B]] with InlineKeyProvider with InlineValidationProvider {
       def getType: Class[_ <: Option[B]] = classOf[Option[B]]
 
@@ -24,7 +23,7 @@ class OptionKindFieldProvider extends KindFieldProvider[Option] {
         checkBox
       }
 
-      val innerField: AbstractField[B] = inf(Option(op.flatten.getOrElse(empty)))
+      val innerField: AbstractField[B] = inf(Option(op.flatten.getOrElse(empty)), baseField)
       innerField.setEnabled(op.flatMap(identity).isDefined)
 
       override def initContent(): Component =
