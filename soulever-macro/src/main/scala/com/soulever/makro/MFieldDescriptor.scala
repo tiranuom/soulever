@@ -15,7 +15,7 @@ trait MFieldDescriptor[SelfType <: MFieldDescriptor[SelfType]] {
                                secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
                                css:String = ""):SelfType#BaseFieldType[A, Obj]
 
-  def button(label:String, clickAction:() => Unit):SelfType#ButtonType
+  def button(label:String, clickAction:() => Unit, fieldsList:List[SelfType#FieldType[_]]):SelfType#ButtonType
 
   def i18n(msg:String):String = I18nKeyCollector.i18n(msg)
 

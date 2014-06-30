@@ -60,7 +60,7 @@ class MacrosImpl(val c:Context) {
                 Option($classExpr.copy(..$getterExpressions)).
                 filter(ob => (fields.asInstanceOf[List[com.soulever.makro.BaseField[_, $classWTT]]] foldLeft true){ case (b, f) => f.isValid(ob) && b })
               }.foreach($action)
-            })
+            }, $fieldNamesList)
           }
        """
       }
@@ -78,10 +78,10 @@ class MacrosImpl(val c:Context) {
         buttonName -> q"""
           val $buttonName = {
             I18nKeyCollector.insert($i18nPrefix)($i18nKey)
-            button($i18nKey, {() =>
+            button($i18nKey,{() =>
               val empty = new $classWTT(..$emptyValueExpressionsList)
               ..$settersList
-            })
+            }, $fieldNamesList)
           }
        """
       }

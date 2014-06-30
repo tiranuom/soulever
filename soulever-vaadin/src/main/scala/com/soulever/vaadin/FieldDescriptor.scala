@@ -19,23 +19,23 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
 
   def field[A: Manifest, Obj](init: A,
                               caption: String,
-                              innerField: (Option[A], GeneratedField[A, Obj]) => FieldDescriptor#FieldType[A],
+                              innerField: (Option[A], GeneratedField[A, Obj]) => AbstractField[A],
                               validators: List[(A) => Either[String, A]],
                               secondaryValidators:List[(A, Obj) => Either[String, A]],
                               css:String): FieldDescriptor#BaseFieldType[A, Obj] =
     new GeneratedField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, i18n)
 
-  def form(fields: List[FieldDescriptor#FieldType[_]], buttons: List[FieldDescriptor#ButtonType]): FormLayout =
+  def form(fields: List[AbstractField[_]], buttons: List[Button]): FormLayout =
     new FormLayout(fields ::: List(new HorizontalLayout(buttons: _*)): _*)
 
-  def button(label:String, clickAction: () => Unit): FieldDescriptor#ButtonType =
+  def button(label:String, clickAction: () => Unit, fieldsList:List[AbstractField[_]] = List.empty): Button =
     new Button(i18n(label), new ClickListener {
       def buttonClick(event: ClickEvent) = clickAction()
     })
 
-  def mappingFieldProvider[A](mapping: List[(String, A)]): makro.TypeFieldProvider[Mapping[A], FieldDescriptor#FieldType, FieldDescriptor] = new MappingFieldProvider[A](mapping)
+  def mappingFieldProvider[A](mapping: List[(String, A)]): makro.TypeFieldProvider[Mapping[A], AbstractField, FieldDescriptor] = new MappingFieldProvider[A](mapping)
 
-  def enumFieldProvider[A <: Enumeration](enum: A): makro.TypeFieldProvider[A#Value, FieldDescriptor#FieldType, FieldDescriptor] = new EnumerationFieldProvider[A](enum)
+  def enumFieldProvider[A <: Enumeration](enum: A): makro.TypeFieldProvider[A#Value, AbstractField, FieldDescriptor] = new EnumerationFieldProvider[A](enum)
 }
 
 trait FieldDescriptorImplicits {

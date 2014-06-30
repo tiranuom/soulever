@@ -46,7 +46,7 @@ class HelloWorld {
 
   implicit val imp = Imp
 
-  val s = "hello"
+  val s = 3
 
   def howdy = {
     val field = FormUtil.field(s, "test", this)

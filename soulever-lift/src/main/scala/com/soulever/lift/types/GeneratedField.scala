@@ -4,9 +4,9 @@ import com.soulever.lift.FieldDescriptor
 import com.soulever.makro.BaseField
 import net.liftweb.http.LiftRules
 import net.liftweb.http.js.JsCmd
-import net.liftweb.http.js.jquery.JqJE
-import net.liftweb.http.js.jquery.JqJE.{JqEmptyAfter, JqId}
+import net.liftweb.http.js.JsCmds.Replace
 
+import scala.util.Try
 import scala.xml.NodeSeq
 
 /**
@@ -24,9 +24,11 @@ class GeneratedField[A :Manifest, Obj](init: A,
 
   private val errorFieldId = fieldId + "-ERROR"
 
-  def setError(error:String) = toBeEvaluated = JqId(errorFieldId).~>(JqEmptyAfter(<span>{i18n(caption + "[" + error + "]")}</span>)).cmd
+  def updateError(error:String) = toBeEvaluated = Replace(errorFieldId, <span>{i18n(caption + "[" + error + "]")}</span>)
 
-  def clearError = toBeEvaluated = JqId(errorFieldId).~>(JqEmptyAfter(<span></span>)).cmd
+  def clearError = toBeEvaluated = Replace(errorFieldId, <span></span>)
+
+  def updateExpression(cmd:JsCmd) = toBeEvaluated = cmd
 
   var toBeEvaluated:JsCmd = JsCmd.unitToJsCmd()
 
@@ -36,7 +38,7 @@ class GeneratedField[A :Manifest, Obj](init: A,
 
   override def isValid: Boolean = innerField.isValid && {
     val result: Either[String, A] = validators.foldLeft(Right(getValue):Either[String, A])(_.right.flatMap(_))
-    result.left.foreach(setError)
+    result.left.foreach(updateError)
     result.right.foreach(_ => clearError)
     result.isRight
   }
@@ -45,7 +47,7 @@ class GeneratedField[A :Manifest, Obj](init: A,
     val result: Either[String, A] = secondaryValidators.foldLeft(Right(getValue):Either[String, A]){
       case (v, f) => v.right.flatMap(a => f(a, obj))
     }
-    result.left.foreach(setError)
+    result.left.foreach(updateError)
     result.right.foreach(_ => clearError)
     result.isRight
   }
@@ -80,4 +82,5 @@ trait InnerField[A] {
   def elem: NodeSeq
 
   def updateJs = jsUpdate
+
 }
