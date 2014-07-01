@@ -5,6 +5,7 @@ import com.soulever.lift.types.{GeneratedField, InnerField, TypeFieldProvider}
 import com.soulever.makro.MFieldDescriptor
 import com.soulever.makro.types.Mapping
 import net.liftweb.http.js.JE.Value
+import net.liftweb.http.js.JsCmd
 
 import scala.xml.NodeSeq
 
@@ -23,11 +24,11 @@ class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvid
 
       override def getValue: A#Value = field.getValue
 
-      override def setValue(value: A#Value): Unit = field.setValue(value)
-
       override def elem: NodeSeq = field.elem
 
-      override def isValid(obj: Any): Boolean = field.isValid(obj)
+      override def validate: Either[String, A#Value] = field.validate.right.map(_.get)
+
+      override def setValueWithJsCmd(value: A#Value): JsCmd = field.setValueWithJsCmd(value)
     }
 
   override def empty: A#Value = enum.values.head

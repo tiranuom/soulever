@@ -29,26 +29,20 @@ class BasicTypedField[A, FD <: MFieldDescriptor[_]](baseField: GeneratedField[_,
 
   var curValue = op.getOrElse(empty).toString
 
-  var tempValue = empty.toString
-
   protected val field:Elem = SHtml.ajaxText(curValue, { s =>
-    tempValue = s
-    if (baseField.isValid) curValue = s
-    baseField.toBeEvaluated
+    curValue = s
+    val res: Either[String, Any] = baseField.validate
+    baseField.toJsCmd(res)
   }, List("id" -> uniqueId) ++ tpe.map("type" -> _).toList:_*)
 
   def getValue: A = Try(decode(curValue)).getOrElse(empty)
 
-  def setValue(value: A): Unit = {
+  override def setValueWithJsCmd(value: A): JsCmd = {
     curValue = value.toString
-    baseField.updateExpression(SetElemById(uniqueId, curValue, "value"))
+    SetElemById(uniqueId, curValue, "value")
   }
 
-  override def isValid: Boolean = {
-    val t = Try(decode(tempValue)).isSuccess
-    if(t) baseField.clearError else baseField.updateError(errorMsg)
-    t
-  }
+  override def validate: Either[String, A] = Try(decode(curValue)).toOption.toRight(errorMsg)
 
   override def innerValidations: List[(String, String)] = List(errorMsg -> errorMsg)
 
@@ -137,12 +131,14 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
 
       override def getValue: Boolean = state
 
-      override def setValue(value: Boolean): Unit = {
+      override def setValueWithJsCmd(value: Boolean): JsCmd = {
         state = value
-        baseField.updateExpression(updateState)
+        updateState
       }
 
       override def elem: NodeSeq = field
+
+      override def validate: Either[String, Boolean] = Right(true)
     }
 
   override def empty: Boolean = true
@@ -175,9 +171,8 @@ class LongTextFieldProvider extends TypeFieldProvider[LongText, FieldDescriptor]
                                                (op: Option[LongText], baseField: FieldDescriptor#BaseFieldType[_, _]): InnerField[LongText] =
     new BasicTypedField[LongText, FD](baseField, op, empty, _.value, LongText) {
       override protected val field: Elem = SHtml.ajaxTextarea(curValue, { s =>
-        tempValue = s
-        if (baseField.isValid) curValue = s
-        baseField.toBeEvaluated
+        curValue = s
+        baseField.toJsCmd(baseField.validate)
       }, "id" -> uniqueId)
     }
 

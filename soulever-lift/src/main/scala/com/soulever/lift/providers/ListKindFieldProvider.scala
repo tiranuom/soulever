@@ -43,9 +43,14 @@ class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
 
     override def getValue: List[B] = fieldsList.map{ case (_, field, _) => field.getValue }
 
-    override def setValue(value: List[B]): Unit = {
+    override def setValueWithJsCmd(value: List[B]): JsCmd = {
       fieldsList = value.map(createField)
       JqSetHtml(listId, {fieldsList.map(_._3)})
+    }
+
+    override def validate: Either[String, List[B]] = fieldsList.
+      foldLeft(Right(List.empty):Either[String, List[B]]) {
+      case (res, (_, field, _)) => res.right.flatMap(list => field.validate.right.map(list ::: List(_)))
     }
 
     override def elem: NodeSeq = <div><ul id={listId}>{fieldsList.map(_._3)}</ul><div>{addButton}</div></div>

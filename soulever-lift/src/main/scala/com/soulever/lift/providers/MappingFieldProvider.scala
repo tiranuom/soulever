@@ -8,7 +8,7 @@ import net.liftweb.common.{Full, Box}
 import net.liftweb.http.{LiftRules, SHtml}
 import net.liftweb.http.SHtml.SelectableOption
 import net.liftweb.http.js.JsCmd
-import net.liftweb.http.js.JsCmds.{SetValById, ReplaceOptions}
+import net.liftweb.http.js.JsCmds.{Run, SetValById, ReplaceOptions}
 
 import scala.xml.NodeSeq
 
@@ -26,22 +26,33 @@ class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvid
 
       var value = op.getOrElse(empty)
 
-      val field = SHtml.ajaxSelectObj[A](mapping.map{ case (id, a) => SelectableOption(a, id)}, Full(value.get), { (a:A) =>
-        value = a
-        JsCmd.unitToJsCmd();
-      }, "id" -> uniqueId)
+      val options: List[SelectableOption[A]] = mapping.map { case (id, a) => SelectableOption(a, id, "id" -> s"$uniqueId-$id")}
+
+      val field = {
+        SHtml.ajaxSelectObj[A](options, Full(value.get), { (a: A) =>
+          value = a
+          JsCmd.unitToJsCmd();
+        }, "id" -> uniqueId)
+      }
 
       override def getValue: Mapping[A] = value
 
-      override def setValue(v: Mapping[A]): Unit = {
-        mapping.find(_._2 == v).foreach{
-          v =>
-            value = v._2
-            baseField.updateExpression(SetValById(uniqueId, v._1))
-        }
+      override def setValueWithJsCmd(v: Mapping[A]): JsCmd = {
+        mapping.find(_._2 == v.get).map{ v =>
+          println(v)
+          value = v._2
+          println(options.collect{ case a if a.label == v._1 => a.attrs.toList})
+
+          Run(
+            s"""jQuery("#$uniqueId").
+                val("$uniqueId-${options.collectFirst{ case a if a.label == v._1 => a.label}.getOrElse(options.head.label)}")
+               """)
+        }.getOrElse(JsCmd.unitToJsCmd())
       }
 
       override def elem: NodeSeq = field
+
+      override def validate: Either[String, Mapping[A]] = Right(value)
     }
   }
 

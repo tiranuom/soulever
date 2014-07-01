@@ -38,7 +38,7 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor]{
   override def button(label: String, clickAction: () => Unit, fieldsList:List[GeneratedField[_, _]] = List.empty): ButtonType =
     SHtml.ajaxButton(i18n(label), () => {
       clickAction()
-      fieldsList.map(_.toBeEvaluated).foldRight(JsCmd.unitToJsCmd())(_ & _)
+      fieldsList.map(_.collectUpdate).foldRight(JsCmd.unitToJsCmd())(_ & _)
     })
 
   override def form(fields: List[GeneratedField[_, _]], buttons: List[ButtonType]): Elem =
