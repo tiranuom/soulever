@@ -24,11 +24,11 @@ class GeneratedField[A :Manifest, Obj](init: A,
 
   private val errorFieldId = fieldId + "-ERROR"
 
-  def updateError(error:String) = toBeEvaluated = Replace(errorFieldId, <span>{i18n(caption + "[" + error + "]")}</span>)
+  def updateError(error:String) = toBeEvaluated = Replace(errorFieldId, <span id={errorFieldId} class="soulever-field-error">{error}</span>)
 
-  def clearError = toBeEvaluated = Replace(errorFieldId, <span></span>)
+  def clearError = toBeEvaluated = Replace(errorFieldId, <span id={errorFieldId}></span>)
 
-  def updateExpression(cmd:JsCmd) = toBeEvaluated = cmd
+  def updateExpression(cmd:JsCmd) = toBeEvaluated = cmd & clearError
 
   var toBeEvaluated:JsCmd = JsCmd.unitToJsCmd()
 
@@ -36,11 +36,13 @@ class GeneratedField[A :Manifest, Obj](init: A,
 
   val innerField = innerFieldGenerator(Option(init), this)
 
-  override def isValid: Boolean = innerField.isValid && {
-    val result: Either[String, A] = validators.foldLeft(Right(getValue):Either[String, A])(_.right.flatMap(_))
-    result.left.foreach(updateError)
-    result.right.foreach(_ => clearError)
-    result.isRight
+  override def isValid: Boolean = {
+    if (innerField.isValid) {
+      val result: Either[String, A] = validators.foldLeft(Right(getValue):Either[String, A])(_.right.flatMap(_))
+      result.left.foreach(updateError)
+      result.right.foreach(_ => clearError)
+      result.isRight
+    } else false
   }
 
   override def isValid(obj: Obj): Boolean = innerField.isValid(obj) && {
@@ -60,7 +62,7 @@ class GeneratedField[A :Manifest, Obj](init: A,
 
   override def innerValidations: List[(String, String)] = innerField.innerValidations
 
-  def elem:NodeSeq = <tr><td>{i18n(caption)}</td><td>{innerField.elem}</td><tr><span id={errorFieldId} class="soulever-field-error"></span></tr></tr>
+  def elem:NodeSeq = <tr><td>{i18n(caption)}</td><td>{innerField.elem}</td><td><span id={errorFieldId} class="soulever-field-error"></span></td></tr>
 }
 
 trait InnerField[A] {

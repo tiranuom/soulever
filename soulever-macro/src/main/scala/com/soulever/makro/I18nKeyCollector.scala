@@ -6,11 +6,13 @@ import scala.io.{BufferedSource, Source}
 import java.io.{File, PrintWriter}
 import java.util.Properties
 
-object I18nKeyCollector {
+class I18nKeyCollector(printableFile:Option[String]) {
 
   var props = Map.empty[String,String]
+
   val fileProps = new Properties()
-  Props.printableFile.foreach(name => Try(fileProps.load(Source.fromFile(name).bufferedReader())) )
+
+  printableFile.foreach(name => Try(fileProps.load(Source.fromFile(new File(".").getAbsoluteFile + name).bufferedReader())) )
 
   var keyList:Set[(String, String)] = Set.empty
 
@@ -43,14 +45,14 @@ object I18nKeyCollector {
       s.replace(replaceKey, "").split("\\.").map(_.capitalize).mkString(" ").trim()
   }
 
-  def print = if(Props.isPrintable) {
+  def print = {
     keyList.toList.sortBy(identity).map(_ + "=").mkString("\n")
-    Props.printableFile.foreach {
+    printableFile.map(new File(".").getAbsoluteFile + _).foreach {
       fileName =>
         val f: File = new File(fileName)
+        println("can write" + f.canWrite)
         val file: BufferedSource = Source.fromFile(f)
         var keyMap = keyList.map{ case (a, b) => a -> dotNotationToValue(a, b)}.toMap
-
         val lines: List[String] = file.getLines().toList
         file.close()
         val writer: PrintWriter = new PrintWriter(f)
@@ -61,6 +63,7 @@ object I18nKeyCollector {
         }
         keyMap.toList.sortBy(_._1).foreach{
           case (key,value) =>
+            println(s"$key=$value\n")
             writer.write(s"$key=$value\n")
         }
 
@@ -69,12 +72,4 @@ object I18nKeyCollector {
   }
 
   def i18n(s:String) = Try(fileProps.getProperty(s)).toOption.flatMap(Option.apply).getOrElse(props.withDefaultValue(s)(s))
-}
-
-object Props {
-  val props = ConfigFactory.load("soulever.properties")
-
-  def printableFile = Try(props.getString("i18n.print.path")).toOption
-
-  def isPrintable = Try(props.getBoolean("i18n.print.on")).getOrElse(false)
 }

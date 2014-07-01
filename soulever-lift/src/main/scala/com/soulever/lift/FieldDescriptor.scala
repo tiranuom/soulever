@@ -1,11 +1,16 @@
 package com.soulever.lift
 
+import java.io.File
+
+import com.soulever.lift.providers.{EnumerationFieldProvider, MappingFieldProvider}
 import com.soulever.lift.types.{GeneratedField, InnerField, TypeFieldProvider}
-import com.soulever.makro.MFieldDescriptor
+import com.soulever.makro.{I18nKeyCollector, MFieldDescriptor}
 import com.soulever.makro.types.Mapping
 import net.liftweb.http.SHtml
 import net.liftweb.http.js.JsCmd
+import net.liftweb.util.Props
 
+import scala.io.Source
 import scala.xml.{Elem, NodeSeq}
 
 /**
@@ -14,7 +19,7 @@ import scala.xml.{Elem, NodeSeq}
  */
 trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor]{
 
-  override type LayoutType = NodeSeq
+  override type LayoutType = Elem
 
   override type ButtonType = NodeSeq
 
@@ -30,13 +35,13 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor]{
                                        css: String): BaseFieldType[A, Obj] =
     new GeneratedField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, i18n)
 
-  override def button(label: String, clickAction: () => Unit, fieldsList:List[InnerField[_]] = List.empty): ButtonType =
-    SHtml.ajaxButton(label, () => {
+  override def button(label: String, clickAction: () => Unit, fieldsList:List[GeneratedField[_, _]] = List.empty): ButtonType =
+    SHtml.ajaxButton(i18n(label), () => {
       clickAction()
-      fieldsList.map(_.updateJs).foldRight(JsCmd.unitToJsCmd())(_ & _)
+      fieldsList.map(_.toBeEvaluated).foldRight(JsCmd.unitToJsCmd())(_ & _)
     })
 
-  override def form(fields: List[InnerField[_]], buttons: List[ButtonType]): Elem =
+  override def form(fields: List[GeneratedField[_, _]], buttons: List[ButtonType]): Elem =
     <span>
       <table>
         <tbody>
@@ -46,9 +51,11 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor]{
       </table>
     </span>
 
-  override def mappingFieldProvider[A](mapping: List[(String, A)]): TypeFieldProvider[Mapping[A], FieldDescriptor] = ???
+  override def mappingFieldProvider[A](mapping: List[(String, A)]): TypeFieldProvider[Mapping[A], FieldDescriptor] = new MappingFieldProvider(mapping)
 
-  override def enumFieldProvider[A <: Enumeration](enum: A): TypeFieldProvider[A#Value, FieldDescriptor] = ???
+  override def enumFieldProvider[A <: Enumeration](enum: A): TypeFieldProvider[A#Value, FieldDescriptor] = new EnumerationFieldProvider(enum)
+
+  override val i18nKeyCollector: I18nKeyCollector = new I18nKeyCollector(Props.get("i18n.print.path"))
 }
 
 trait FieldDescriptorImplicits {
@@ -72,6 +79,9 @@ trait FieldDescriptorImplicits {
 
   implicit val dateFieldProvider = new DateFieldProvider
 
-  //  implicit val longTextFieldProvider = new LongTextFieldProvider
+  implicit val longTextFieldProvider = new LongTextFieldProvider
 
+  implicit val optionKindFieldProvider = new OptionKindFieldProvider
+
+  implicit val listKindFieldProvider = new ListKindFieldProvider
 }

@@ -10,8 +10,8 @@ object JsCmdHelpers {
   case class ReplaceClass(id:String, oldClass: String, newClass: String) extends JsCmd {
     def toJsCmd =
       s"""try {
-         val elem = document.getElementById("$id")
-         elem.className = elem.className.replace("$oldClass", "") + $newClass
+         var elem = document.getElementById("$id")
+         elem.className = elem.className.replace("$oldClass", "") + "$newClass"
          } catch (e) {}
       """
 //      """try {

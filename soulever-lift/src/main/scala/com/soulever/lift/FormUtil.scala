@@ -23,7 +23,7 @@ object FormUtil {
     import c.universe._
 
     c.Expr[Elem]( q"""
-    com.soulever.makro.Macros.form[${init.actualType}, ${modleDesc.actualType}, com.vaadin.ui.FormLayout]($init, $action)
+    com.soulever.makro.Macros.form[${init.actualType}, ${modleDesc.actualType}]($init, $action)
     """)
   }
 

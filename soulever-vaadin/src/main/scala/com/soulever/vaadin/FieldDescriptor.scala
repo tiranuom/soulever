@@ -1,11 +1,14 @@
 package com.soulever.vaadin
 
+import com.typesafe.config.ConfigFactory
 import com.vaadin.ui._
 import com.vaadin.ui.Button.{ClickEvent, ClickListener}
-import com.soulever.makro.MFieldDescriptor
+import com.soulever.makro.{I18nKeyCollector, MFieldDescriptor}
 import com.soulever.vaadin.providers._
 import com.soulever.makro
 import com.soulever.makro.types.Mapping
+
+import scala.util.Try
 
 trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
 
@@ -25,10 +28,10 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
                               css:String): FieldDescriptor#BaseFieldType[A, Obj] =
     new GeneratedField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, i18n)
 
-  def form(fields: List[AbstractField[_]], buttons: List[Button]): FormLayout =
+  override def form(fields: List[GeneratedField[_, _]], buttons: List[Button]): FormLayout =
     new FormLayout(fields ::: List(new HorizontalLayout(buttons: _*)): _*)
 
-  def button(label:String, clickAction: () => Unit, fieldsList:List[AbstractField[_]] = List.empty): Button =
+  override def button(label:String, clickAction: () => Unit, fieldsList:List[GeneratedField[_, _]] = List.empty): Button =
     new Button(i18n(label), new ClickListener {
       def buttonClick(event: ClickEvent) = clickAction()
     })
@@ -36,6 +39,16 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
   def mappingFieldProvider[A](mapping: List[(String, A)]): makro.TypeFieldProvider[Mapping[A], AbstractField, FieldDescriptor] = new MappingFieldProvider[A](mapping)
 
   def enumFieldProvider[A <: Enumeration](enum: A): makro.TypeFieldProvider[A#Value, AbstractField, FieldDescriptor] = new EnumerationFieldProvider[A](enum)
+
+  override val i18nKeyCollector: I18nKeyCollector = new I18nKeyCollector(Props.printableFile)
+}
+
+object Props {
+  val props = ConfigFactory.load(getClass.getClassLoader, "/soulever.properties")
+
+  def printableFile = Try(props.getString("i18n.print.path")).toOption.filter(_ =>isPrintable)
+
+  def isPrintable = Try(props.getBoolean("i18n.print.on")).getOrElse(false)
 }
 
 trait FieldDescriptorImplicits {
