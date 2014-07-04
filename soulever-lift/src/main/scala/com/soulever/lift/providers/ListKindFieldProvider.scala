@@ -15,15 +15,15 @@ import scala.xml.{Elem, NodeSeq}
  * @Date 7/1/14.
  */
 class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
-  override def field[B, FD <: MFieldDescriptor[_]](innerField: (Option[B], GeneratedField[_, _]) => InnerField[B],
+  override def field[B, FD <: MFieldDescriptor[_]](innerField: (B, GeneratedField[_, _]) => InnerField[B],
                                                    innerEmpty: B,
                                                    fieldDescriptor: FD)
-                                                  (op: Option[List[B]],
+                                                  (op: List[B],
                                                    baseField: GeneratedField[_, _]): InnerField[List[B]] = new InnerField[List[B]] {
 
     def createField(value:B):(String, InnerField[B], Elem) = {
       val fieldId = LiftRules.funcNameGenerator()
-      val field: InnerField[B] = innerField(Option(value), baseField)
+      val field: InnerField[B] = innerField(value, baseField)
       val remove = SHtml.ajaxButton("-", () => {
         fieldsList = fieldsList.filterNot(_._1 == fieldId)
         JqId(fieldId).~>(JqRemove()).cmd
@@ -39,7 +39,7 @@ class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
       AppendHtml(listId, innerField._3)
     })
 
-    var fieldsList = op.getOrElse(empty).map(createField)
+    var fieldsList = op.map(createField)
 
     override def getValue: List[B] = fieldsList.map{ case (_, field, _) => field.getValue }
 

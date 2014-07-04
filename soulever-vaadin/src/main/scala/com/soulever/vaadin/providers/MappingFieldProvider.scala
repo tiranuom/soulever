@@ -1,6 +1,7 @@
 package com.soulever.vaadin.providers
 
-import com.soulever.vaadin.{GeneratedField, FieldDescriptor, TypeFieldProvider, KindFieldProvider}
+import com.soulever.vaadin.types.{TypeFieldProvider, GeneratedField}
+import com.soulever.vaadin.FieldDescriptor
 import com.soulever.makro.MFieldDescriptor
 import com.vaadin.ui._
 import com.soulever.makro.types.Mapping
@@ -9,7 +10,7 @@ class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvid
 
   override def empty: Mapping[A] = new Mapping[A](mapping.head._2) //Might produce an exception
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Mapping[A]], baseField: GeneratedField[_,_]): AbstractField[Mapping[A]] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Mapping[A], baseField: GeneratedField[_,_]): AbstractField[Mapping[A]] =
     new CustomField[Mapping[A]] {
       def getType: Class[_ <: Mapping[A]] = classOf[Mapping[A]]
 
@@ -19,7 +20,7 @@ class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvid
           innerField.addItem(v)
           innerField.setItemCaption(v, n)
       }
-      innerField.setValue(op.getOrElse(empty).get)
+      innerField.setValue(op.get)
       innerField.setNullSelectionAllowed(false)
 
       def initContent(): Component = innerField

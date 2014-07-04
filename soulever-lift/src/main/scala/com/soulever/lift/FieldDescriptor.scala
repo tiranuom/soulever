@@ -29,7 +29,7 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor]{
 
   override def field[A: Manifest, Obj](init: A,
                                        caption: String,
-                                       innerField: (Option[A], BaseFieldType[A, Obj]) => FieldType[A],
+                                       innerField: (A, BaseFieldType[A, Obj]) => FieldType[A],
                                        validators: List[(A) => Either[String, A]],
                                        secondaryValidators: List[(A, Obj) => Either[String, A]],
                                        css: String): BaseFieldType[A, Obj] =

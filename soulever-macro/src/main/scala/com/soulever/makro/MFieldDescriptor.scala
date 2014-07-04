@@ -1,5 +1,6 @@
 package com.soulever.makro
 
+import com.soulever.makro.providers.TypeFieldProvider
 import com.soulever.makro.types.Mapping
 
 trait MFieldDescriptor[SelfType <: MFieldDescriptor[SelfType]] {
@@ -10,7 +11,7 @@ trait MFieldDescriptor[SelfType <: MFieldDescriptor[SelfType]] {
 
   def field[A : Manifest, Obj](init:A,
                                caption:String,
-                               innerField:(Option[A], SelfType#BaseFieldType[A, Obj]) => SelfType#FieldType[A],
+                               innerField:(A, SelfType#BaseFieldType[A, Obj]) => SelfType#FieldType[A],
                                validators:List[A => Either[String, A]] = List.empty,
                                secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
                                css:String = ""):SelfType#BaseFieldType[A, Obj]

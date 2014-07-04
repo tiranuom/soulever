@@ -35,7 +35,6 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
     val person: TestCaseClass = new TestCaseClass(stringField = "name")
 
     layout.addComponent(new HorizontalLayout(FormUtil.form(person, printPerson), intField, imp.button("Submit", () => println(Try(intField.validate())))))
-    I18nKeyCollector.print
     layout
   }
 }

@@ -10,9 +10,9 @@ class FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
 
       override def empty: A#Value = enum.values.head
 
-      override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[A#Value]): FieldType[A#Value] =
+      override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: A#Value): FieldType[A#Value] =
         new TestField[A#Value] {
-          override var value: A#Value = op.getOrElse(empty)
+          override var value: A#Value = op
         }
     }
 
@@ -20,9 +20,9 @@ class FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
     new TypeFieldProvider[Mapping[A]] {
       override def empty: Mapping[A] = mapping.head._2
 
-      override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Mapping[A]]): FieldType[Mapping[A]] =
+      override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Mapping[A]): FieldType[Mapping[A]] =
         new TestField[Mapping[A]]() {
-          override var value: Mapping[A] = op.getOrElse(empty)
+          override var value: Mapping[A] = op
         }
     }
 

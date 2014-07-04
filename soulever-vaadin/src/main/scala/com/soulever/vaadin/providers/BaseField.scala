@@ -1,6 +1,7 @@
 package com.soulever.vaadin.providers
 
-import com.soulever.vaadin.{GeneratedField, FieldDescriptor, TypeFieldProvider}
+import com.soulever.vaadin.types.{TypeFieldProvider, GeneratedField}
+import com.soulever.vaadin.FieldDescriptor
 import com.soulever.makro.MFieldDescriptor
 import com.vaadin.ui._
 import com.vaadin.data.Validator
@@ -33,12 +34,12 @@ trait BaseField[A] extends CustomField[A] with InlineValidationProvider {
 }
 
 class IntFieldProvider extends TypeFieldProvider[Int, FieldDescriptor] {
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Int], baseField: GeneratedField[_,_]): AbstractField[Int] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Int, baseField: GeneratedField[_,_]): AbstractField[Int] =
     new BaseField[Int] {
       def getType: Class[_ <: Int] = classOf[Int]
 
       val innerField = new TextField()
-      op.map(_.toString).foreach(innerField.setValue)
+      innerField.setValue(op.toString)
       innerField.addValidator(new Validator {
         def validate(value: scala.Any) = if(Try(value.toString.toInt).isFailure) throw new InvalidValueException(inlineValidations.head._1)
       })
@@ -57,12 +58,12 @@ class IntFieldProvider extends TypeFieldProvider[Int, FieldDescriptor] {
 class LongFieldProvider extends TypeFieldProvider[Long, FieldDescriptor] {
 
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Long], baseField: GeneratedField[_,_]): AbstractField[Long] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Long, baseField: GeneratedField[_,_]): AbstractField[Long] =
     new BaseField[Long] {
       def getType: Class[_ <: Long] = classOf[Long]
 
       val innerField = new TextField()
-      op.map(_.toString).foreach(innerField.setValue)
+      innerField.setValue(op.toString)
       innerField.addValidator(new Validator(){
         def validate(value: scala.Any) = if(Try(value.toString.toLong).isFailure) throw new InvalidValueException(inlineValidations.head._1)
       })
@@ -80,12 +81,12 @@ class LongFieldProvider extends TypeFieldProvider[Long, FieldDescriptor] {
 
 class FloatFieldProvider extends TypeFieldProvider[Float, FieldDescriptor] {
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Float], baseField: GeneratedField[_,_]): AbstractField[Float] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Float, baseField: GeneratedField[_,_]): AbstractField[Float] =
     new BaseField[Float] {
       def getType: Class[_ <: Float] = classOf[Float]
 
       val innerField = new TextField()
-      op.map(_.toString).foreach(innerField.setValue)
+      innerField.setValue(op.toString)
       innerField.addValidator(new Validator {
         def validate(value: scala.Any) = if(Try(value.toString.toFloat).isFailure) throw new InvalidValueException(inlineValidations.head._1)
       })
@@ -104,12 +105,12 @@ class FloatFieldProvider extends TypeFieldProvider[Float, FieldDescriptor] {
 class DoubleFieldProvider extends TypeFieldProvider[Double, FieldDescriptor] {
 
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Double], baseField: GeneratedField[_,_]): AbstractField[Double] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Double, baseField: GeneratedField[_,_]): AbstractField[Double] =
     new BaseField[Double] {
       def getType: Class[_ <: Double] = classOf[Double]
 
       val innerField = new TextField()
-      op.map(_.toString).foreach(innerField.setValue)
+      innerField.setValue(op.toString)
       innerField.addValidator(new Validator {
         def validate(value: scala.Any) = if(Try(value.toString.toDouble).isFailure) throw new InvalidValueException(inlineValidations.head._1)
       })
@@ -127,7 +128,7 @@ class DoubleFieldProvider extends TypeFieldProvider[Double, FieldDescriptor] {
 
 class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Boolean], baseField: GeneratedField[_,_]): AbstractField[Boolean] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Boolean, baseField: GeneratedField[_,_]): AbstractField[Boolean] =
     new CustomField[Boolean] with InlineKeyProvider {
       def getType: Class[_ <: Boolean] = classOf[Boolean]
       val i18nKey = baseField.i18nKey
@@ -139,7 +140,7 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
       button.addClickListener(new ClickListener {
         def buttonClick(event: ClickEvent) = setNewValue(!selected)
       })
-      op.foreach(setNewValue)
+      setNewValue(op)
       override def setValue(newFieldValue: Boolean) = setNewValue(newFieldValue)
 
       def setNewValue(newFieldValue: Boolean) {
@@ -167,12 +168,12 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
 
 class ByteFieldProvider extends TypeFieldProvider[Byte, FieldDescriptor]{
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Byte], baseField: GeneratedField[_,_]): AbstractField[Byte] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Byte, baseField: GeneratedField[_,_]): AbstractField[Byte] =
     new BaseField[Byte] {
       def getType: Class[_ <: Byte] = classOf[Byte]
 
       val innerField = new TextField()
-      op.map(b => (b & 0xFF).toString).foreach(innerField.setValue)
+      innerField.setValue((op & 0xFF).toString)
       innerField.addValidator(new Validator {
         def validate(value: scala.Any) =
           if(Try(value.toString.toByte).isFailure) throw new InvalidValueException(inlineValidations.head._1)
@@ -190,11 +191,11 @@ class ByteFieldProvider extends TypeFieldProvider[Byte, FieldDescriptor]{
 
 class PasswordFieldProvider extends TypeFieldProvider[Password, FieldDescriptor]{
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Password], baseField: GeneratedField[_,_]): AbstractField[Password] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Password, baseField: GeneratedField[_,_]): AbstractField[Password] =
     new BaseField[Password] {
 
       val innerField = new PasswordField()
-      op.foreach(s => innerField.setValue(s))
+      innerField.setValue(op)
 
       def getType: Class[_ <: Password] = classOf[Password]
 
@@ -210,12 +211,12 @@ class PasswordFieldProvider extends TypeFieldProvider[Password, FieldDescriptor]
 
 class LongTextFieldProvider extends TypeFieldProvider[LongText, FieldDescriptor]{
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[LongText], baseField: GeneratedField[_,_]): AbstractField[LongText] =
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: LongText, baseField: GeneratedField[_,_]): AbstractField[LongText] =
     new BaseField[LongText] {
       def getType: Class[_ <: LongText] = classOf[LongText]
 
       val inf = new TextArea()
-      op.foreach(a => inf.setValue(a))
+      inf.setValue(op)
       def innerField: AbstractField[_] = inf
 
       override def getValue: LongText = inf.getValue
@@ -232,9 +233,9 @@ class LongTextFieldProvider extends TypeFieldProvider[LongText, FieldDescriptor]
 
 class DateFieldProvider extends TypeFieldProvider[Date, FieldDescriptor]{
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Option[Date], baseField: GeneratedField[_,_]): AbstractField[Date] = {
+  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Date, baseField: GeneratedField[_,_]): AbstractField[Date] = {
     val dateField = new DateField()
-    op.foreach(dateField.setValue)
+    dateField.setValue(op)
     dateField
   }
 

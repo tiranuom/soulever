@@ -1,6 +1,7 @@
 package com.soulever.lift.test.snippet
 
 import com.soulever.lift.{FormUtil, FieldDescriptorImplicits, FieldDescriptor}
+import com.soulever.makro.providers.{TypeEmptyProvider, KindEmptyProvider}
 import com.soulever.makro.types.{Password, Mapping}
 import com.soulever.makro._
 import net.liftweb.util._
@@ -48,12 +49,25 @@ class HelloWorld {
 
   val testCaseClass = TestCaseClass(stringField = "name")
 
+  val i = Some(2)
+
+  implicit val stringTypeEmptyProvider = new TypeEmptyProvider[String] {
+    override def empty: String = ""
+  }
+
+  println(implicitly[KindEmptyProvider[List]].empty[Int])
+  println(implicitly[KindEmptyProvider[Set]].empty[Int])
+  println(implicitly[KindEmptyProvider[Option]].empty[Int])
+  println(implicitly[TypeEmptyProvider[String]].empty)
+  println(implicitly[TypeEmptyProvider[Bool.Bool]].empty)
   def howdy = {
     "#time *" #> date.map(_.toString) &
-      "#form" #> FormUtil.form(testCaseClass, { (t: TestCaseClass) =>
-        println(t)
-        Right(t)
-      })
+      "#form" #> <span></span>
+//        FormUtil.field(i, "test", this)
+//        FormUtil.form(testCaseClass, { (t: TestCaseClass) =>
+//        println(t)
+//        Right(t)
+//      })
   }
 
 }

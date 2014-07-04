@@ -18,13 +18,13 @@ import scala.xml.NodeSeq
  */
 class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvider[Mapping[A], FieldDescriptor] {
   override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
-                                               (op: Option[Mapping[A]], baseField: GeneratedField[_, _]): InnerField[Mapping[A]] = {
+                                               (op: Mapping[A], baseField: GeneratedField[_, _]): InnerField[Mapping[A]] = {
 
     new InnerField[Mapping[A]] {
 
       val uniqueId = LiftRules.funcNameGenerator()
 
-      var value = op.getOrElse(empty)
+      var value = op
 
       val options: List[SelectableOption[A]] = mapping.map { case (id, a) => SelectableOption(a, id, "id" -> s"$uniqueId-$id")}
 

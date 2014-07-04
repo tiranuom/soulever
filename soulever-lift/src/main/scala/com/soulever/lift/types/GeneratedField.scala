@@ -14,7 +14,7 @@ import scala.xml.NodeSeq
  */
 class GeneratedField[A :Manifest, Obj](init: A,
                                        caption: String,
-                                       innerFieldGenerator: (Option[A], GeneratedField[A, Obj]) => InnerField[A],
+                                       innerFieldGenerator: (A, GeneratedField[A, Obj]) => InnerField[A],
                                        validators: List[(A) => Either[String, A]],
                                        secondaryValidators: List[(A, Obj) => Either[String, A]],
                                        css: String,
@@ -42,7 +42,7 @@ class GeneratedField[A :Manifest, Obj](init: A,
 
   val i18nKey = caption
 
-  val innerField = innerFieldGenerator(Option(init), this)
+  val innerField = innerFieldGenerator(init, this)
 
   def validate = validators.foldLeft(innerField.validate)(_.right.flatMap(_))
 

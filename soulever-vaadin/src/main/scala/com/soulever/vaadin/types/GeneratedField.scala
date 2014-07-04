@@ -1,20 +1,21 @@
-package com.soulever.vaadin
+package com.soulever.vaadin.types
 
-import com.vaadin.ui._
-import scala.util.control.Exception._
-import com.vaadin.data.Validator.InvalidValueException
 import com.soulever.makro.BaseField
+import com.vaadin.data.Validator.InvalidValueException
+import com.vaadin.ui._
+
+import scala.util.control.Exception._
 
 class GeneratedField[A : Manifest, Obj](init:A,
                                         caption:String,
-                                        innerFieldGenerator:(Option[A], GeneratedField[A, Obj]) => AbstractField[A],
+                                        innerFieldGenerator:(A, GeneratedField[A, Obj]) => AbstractField[A],
                                         validators:List[A => Either[String, A]] = List.empty,
                                         secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
                                         css:String = "",
                                         i18n:String => String = identity) extends CustomField[A] with BaseField[A, Obj] {
   def getType: Class[_ <: A] = implicitly[Manifest[A]].runtimeClass.asInstanceOf[Class[A]]
 
-  val innerField = innerFieldGenerator(Some(init), this)
+  val innerField = innerFieldGenerator(init, this)
   val i18nKey = caption
   setCaption(i18n(caption.trim))
 

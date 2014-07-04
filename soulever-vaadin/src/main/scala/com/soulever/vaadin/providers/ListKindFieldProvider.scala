@@ -1,17 +1,18 @@
 package com.soulever.vaadin.providers
 
-import com.soulever.vaadin.{FieldDescriptor, GeneratedField, KindFieldProvider}
+import com.soulever.vaadin.FieldDescriptor
 import com.soulever.makro.MFieldDescriptor
+import com.soulever.vaadin.types.KindFieldProvider
 import com.vaadin.ui._
 
 class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
 
-  override def field[B, FD <: MFieldDescriptor[_]](innerField: (Option[B], FieldDescriptor#BaseFieldType[_, _]) => AbstractField[B], empty: B, fieldDescriptor: FD)
-                                                  (op: Option[List[B]], baseField: FieldDescriptor#BaseFieldType[_, _]): AbstractField[List[B]] =
+  override def field[B, FD <: MFieldDescriptor[_]](innerField: (B, FieldDescriptor#BaseFieldType[_, _]) => AbstractField[B], empty: B, fieldDescriptor: FD)
+                                                  (op: List[B], baseField: FieldDescriptor#BaseFieldType[_, _]): AbstractField[List[B]] =
     new CustomField[List[B]] with InlineValidationProvider with InlineKeyProvider {
       def getType: Class[_ <: List[B]] = classOf[List[B]]
 
-      def createFieldRow(o:Option[B]) = {
+      def createFieldRow(o:B) = {
         val layout = new HorizontalLayout()
         val removeButton: Button = new Button("-", new Button.ClickListener {
           def buttonClick(event: Button.ClickEvent) {
@@ -29,14 +30,14 @@ class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
 
       val addButton:Button = new Button("+", new Button.ClickListener {
         def buttonClick(event: Button.ClickEvent) {
-          fieldsList = fieldsList ::: List(createFieldRow(Option(empty)))
+          fieldsList = fieldsList ::: List(createFieldRow(empty))
           vLayout.removeAllComponents()
           vLayout.addComponents(fieldsList.map(_._1) ::: List(addButton) : _*)
         }
       })
 
-      var fieldsList:List[(HorizontalLayout, AbstractField[B])] = op.getOrElse(List.empty).
-        map(b => createFieldRow(Option(b)))
+      var fieldsList:List[(HorizontalLayout, AbstractField[B])] = op.
+        map(createFieldRow)
 
       vLayout.addComponents(fieldsList.map(_._1) ::: List(addButton) : _*)
 
@@ -49,17 +50,17 @@ class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
       override def getValue: List[B] = fieldsList.map(_._2.getValue)
 
       override def setValue(newFieldValue: List[B]) = {
-        fieldsList = op.getOrElse(List.empty).map(b => createFieldRow(Option(b)))
+        fieldsList = op.map(createFieldRow)
         vLayout.removeAllComponents()
         vLayout.addComponents(fieldsList.map(_._1) ::: List(addButton) : _*)
       }
 
-      override def inlineValidations: List[(String,String)] = innerField(None, baseField) match {
+      override def inlineValidations: List[(String,String)] = innerField(empty, baseField) match {
         case value: com.soulever.vaadin.providers.InlineValidationProvider => value.inlineValidations
         case _ => List.empty
       }
 
-      override def inlineKeys: List[(String,String)] = innerField(None, baseField) match {
+      override def inlineKeys: List[(String,String)] = innerField(empty, baseField) match {
         case value: com.soulever.vaadin.providers.InlineKeyProvider => value.inlineKeys
         case _ => List.empty
       }

@@ -19,7 +19,7 @@ import scala.xml.{NodeSeq, Elem}
  * @Date 6/30/14.
  */
 class BasicTypedField[A, FD <: MFieldDescriptor[_]](baseField: GeneratedField[_, _],
-                                                    op:Option[A],
+                                                    op:A,
                                                     empty:A,
                                                     encode:A => String,
                                                     decode:String => A,
@@ -27,7 +27,7 @@ class BasicTypedField[A, FD <: MFieldDescriptor[_]](baseField: GeneratedField[_,
                                                     tpe:Option[String] = None) extends InnerField[A] {
   val uniqueId: String = LiftRules.funcNameGenerator()
 
-  var curValue = op.getOrElse(empty).toString
+  var curValue = op.toString
 
   protected val field:Elem = SHtml.ajaxText(curValue, { s =>
     curValue = s
@@ -52,7 +52,7 @@ class BasicTypedField[A, FD <: MFieldDescriptor[_]](baseField: GeneratedField[_,
 class StringFieldProvider extends TypeFieldProvider[String, FieldDescriptor] {
 
   override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
-                                               (op: Option[String], baseField:GeneratedField[_, _]): InnerField[String] =
+                                               (op: String, baseField:GeneratedField[_, _]): InnerField[String] =
     new BasicTypedField[String, FD](baseField, op, empty, identity, identity)
 
   override def empty: String = ""
@@ -61,7 +61,7 @@ class StringFieldProvider extends TypeFieldProvider[String, FieldDescriptor] {
 class IntFieldProvider extends TypeFieldProvider[Int, FieldDescriptor] {
 
   override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
-                                               (op: Option[Int], baseField: GeneratedField[_, _]): InnerField[Int] =
+                                               (op: Int, baseField: GeneratedField[_, _]): InnerField[Int] =
     new BasicTypedField[Int, FD](baseField, op, empty, _.toString, _.toInt, "integer")
 
   override def empty: Int = 0
@@ -70,7 +70,7 @@ class IntFieldProvider extends TypeFieldProvider[Int, FieldDescriptor] {
 class LongFieldProvider extends TypeFieldProvider[Long, FieldDescriptor] {
 
   override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
-                                               (op: Option[Long], baseField: GeneratedField[_, _]): InnerField[Long] =
+                                               (op: Long, baseField: GeneratedField[_, _]): InnerField[Long] =
     new BasicTypedField[Long, FD](baseField, op, empty, _.toString, _.toLong, "long")
 
   override def empty: Long = 0
@@ -79,7 +79,7 @@ class LongFieldProvider extends TypeFieldProvider[Long, FieldDescriptor] {
 class FloatFieldProvider extends TypeFieldProvider[Float, FieldDescriptor] {
 
   override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
-                                               (op: Option[Float], baseField: GeneratedField[_, _]): InnerField[Float] =
+                                               (op: Float, baseField: GeneratedField[_, _]): InnerField[Float] =
     new BasicTypedField[Float, FD](baseField, op, empty, _.toString, _.toFloat, "float")
 
   override def empty: Float = 0
@@ -88,7 +88,7 @@ class FloatFieldProvider extends TypeFieldProvider[Float, FieldDescriptor] {
 class DoubleFieldProvider extends TypeFieldProvider[Double, FieldDescriptor] {
 
   override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
-                                               (op: Option[Double], baseField: GeneratedField[_, _]): InnerField[Double] =
+                                               (op: Double, baseField: GeneratedField[_, _]): InnerField[Double] =
     new BasicTypedField[Double, FD](baseField, op, empty, _.toString, _.toDouble, "double")
 
   override def empty: Double = 0
@@ -97,7 +97,7 @@ class DoubleFieldProvider extends TypeFieldProvider[Double, FieldDescriptor] {
 class ByteFieldProvider extends TypeFieldProvider[Byte, FieldDescriptor] {
 
   override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
-                                               (op: Option[Byte], baseField: GeneratedField[_, _]): InnerField[Byte] =
+                                               (op: Byte, baseField: GeneratedField[_, _]): InnerField[Byte] =
     new BasicTypedField[Byte, FD](baseField, op, empty, a => (a & 0xFF).toString, _.toByte, "byte")
 
   override def empty: Byte = 0
@@ -105,11 +105,11 @@ class ByteFieldProvider extends TypeFieldProvider[Byte, FieldDescriptor] {
 
 class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
   override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
-                                               (op: Option[Boolean], baseField: GeneratedField[_, _]): InnerField[Boolean] =
+                                               (op: Boolean, baseField: GeneratedField[_, _]): InnerField[Boolean] =
     new InnerField[Boolean] {
       import helpers.JsCmdHelpers._
 
-      var state = op.getOrElse(empty)
+      var state = op
 
       val uniqueId = LiftRules.funcNameGenerator()
 
@@ -147,7 +147,7 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
 class PasswordFieldProvider extends TypeFieldProvider[Password, FieldDescriptor] {
 
   override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
-                                               (op: Option[Password], baseField: GeneratedField[_, _]): InnerField[Password] =
+                                               (op: Password, baseField: GeneratedField[_, _]): InnerField[Password] =
     new BasicTypedField[Password, FD](baseField, op, empty, _.get, Password, tpe = Some("password"))
 
   override def empty: Password = ""
@@ -156,7 +156,7 @@ class PasswordFieldProvider extends TypeFieldProvider[Password, FieldDescriptor]
 class DateFieldProvider extends TypeFieldProvider[Date, FieldDescriptor] {
 
   override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
-                                               (op: Option[Date], baseField: GeneratedField[_, _]): InnerField[Date] = {
+                                               (op: Date, baseField: GeneratedField[_, _]): InnerField[Date] = {
 
     val format = new SimpleDateFormat("dd/MM/yyyy")
 
@@ -168,7 +168,7 @@ class DateFieldProvider extends TypeFieldProvider[Date, FieldDescriptor] {
 
 class LongTextFieldProvider extends TypeFieldProvider[LongText, FieldDescriptor] {
   override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
-                                               (op: Option[LongText], baseField: FieldDescriptor#BaseFieldType[_, _]): InnerField[LongText] =
+                                               (op: LongText, baseField: FieldDescriptor#BaseFieldType[_, _]): InnerField[LongText] =
     new BasicTypedField[LongText, FD](baseField, op, empty, _.value, LongText) {
       override protected val field: Elem = SHtml.ajaxTextarea(curValue, { s =>
         curValue = s

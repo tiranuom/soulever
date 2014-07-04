@@ -14,11 +14,11 @@ import scala.xml.NodeSeq
  * @Date 7/1/14.
  */
 class OptionKindFieldProvider extends KindFieldProvider[Option, FieldDescriptor] {
-  override def field[B, FD <: MFieldDescriptor[_]](innerField: (Option[B], GeneratedField[_, _]) => InnerField[B], innerEmpty: B, fieldDescriptor: FD)
-                                                  (op: Option[Option[B]], baseField: GeneratedField[_, _]): InnerField[Option[B]] =
+  override def field[B, FD <: MFieldDescriptor[_]](innerField: (B, GeneratedField[_, _]) => InnerField[B], innerEmpty: B, fieldDescriptor: FD)
+                                                  (op: Option[B], baseField: GeneratedField[_, _]): InnerField[Option[B]] =
     new InnerField[Option[B]] {
 
-      var value = op.getOrElse(empty).isDefined
+      var value = op.isDefined
       var uniqueId = LiftRules.funcNameGenerator()
 
       def changeEnableState(b:Boolean) = {
@@ -26,7 +26,7 @@ class OptionKindFieldProvider extends KindFieldProvider[Option, FieldDescriptor]
         Run(s"""jQuery("input", "#${uniqueId + "-controlled"}").attr("disabled", ${if(value) """ null """ else """ "disabled" """})""")
       }
 
-      val iField = innerField(op.getOrElse(empty), baseField)
+      val iField = innerField(op.getOrElse(innerEmpty), baseField)
       val checkbox = SHtml.ajaxCheckbox(true, changeEnableState _ , "id" -> uniqueId)
 
       override def getValue: Option[B] = if (value) Option(iField.getValue) else None

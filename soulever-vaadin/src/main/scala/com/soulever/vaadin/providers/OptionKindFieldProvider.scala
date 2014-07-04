@@ -1,20 +1,21 @@
 package com.soulever.vaadin.providers
 
-import com.soulever.vaadin.{FieldDescriptor, KindFieldProvider}
+import com.soulever.vaadin.FieldDescriptor
 import com.soulever.makro.MFieldDescriptor
+import com.soulever.vaadin.types.KindFieldProvider
 import com.vaadin.ui.{HorizontalLayout, Component, CheckBox, AbstractField}
 import com.vaadin.data.Property.{ValueChangeEvent, ValueChangeListener}
 import com.vaadin.data.Property
 
 class OptionKindFieldProvider extends KindFieldProvider[Option, FieldDescriptor] {
 
-  override def field[B, FD <: MFieldDescriptor[_]](inf: (Option[B], FieldDescriptor#BaseFieldType[_,_]) => AbstractField[B], empty:B, fieldDescriptor: FD)
-                                                  (op: Option[Option[B]], baseField: FieldDescriptor#BaseFieldType[_, _]): AbstractField[Option[B]] =
+  override def field[B, FD <: MFieldDescriptor[_]](inf: (B, FieldDescriptor#BaseFieldType[_,_]) => AbstractField[B], empty:B, fieldDescriptor: FD)
+                                                  (op: Option[B], baseField: FieldDescriptor#BaseFieldType[_, _]): AbstractField[Option[B]] =
     new BaseField[Option[B]] with InlineKeyProvider with InlineValidationProvider {
       def getType: Class[_ <: Option[B]] = classOf[Option[B]]
 
       val checkboxField = {
-        val checkBox = new CheckBox("", op.flatMap(identity).isDefined)
+        val checkBox = new CheckBox("", op.isDefined)
         checkBox.addValueChangeListener(new ValueChangeListener {
           def valueChange(event: ValueChangeEvent) = {
             innerField.setEnabled(event.getProperty.asInstanceOf[Property[Boolean]].getValue)
@@ -23,8 +24,8 @@ class OptionKindFieldProvider extends KindFieldProvider[Option, FieldDescriptor]
         checkBox
       }
 
-      val innerField: AbstractField[B] = inf(Option(op.flatten.getOrElse(empty)), baseField)
-      innerField.setEnabled(op.flatMap(identity).isDefined)
+      val innerField: AbstractField[B] = inf(op.getOrElse(empty), baseField)
+      innerField.setEnabled(op.isDefined)
 
       override def initContent(): Component =
         new HorizontalLayout(checkboxField, innerField)

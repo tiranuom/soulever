@@ -99,7 +99,7 @@ class MacrosImpl(val c:Context) {
       m.i18nKeyCollector.print
       form
     """
-    println(comp)
+//    println(showCode(comp))
     comp
   }
 
@@ -117,7 +117,7 @@ class MacrosImpl(val c:Context) {
        $fieldName
        }
       """
-    println(tree)
+//    println(tree)
     tree
   }
 
@@ -166,13 +166,13 @@ class MacrosImpl(val c:Context) {
           case Nil if s <:< weakTypeOf[Enumeration#Value] =>
             q"enumFieldProvider[$pre](${pre.termSymbol})" :: collector
           case Nil =>
-            q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldType, $fieldDescriptorType]]" :: collector
+            q"implicitly[com.soulever.makro.providers.TypeFieldProvider[$s, $fieldType, $fieldDescriptorType]]" :: collector
           case x :: Nil if s.typeConstructor =:= c.weakTypeOf[com.soulever.makro.types.Mapping[Any]].typeConstructor =>
             if (mapping.isEmpty) c.error(valueTree.pos, "Cannot find mapping for the given type")
             q"mappingFieldProvider[$x]($mapping.getOrElse(List.empty))" :: collector
           case x :: Nil =>
-            expandParameters(x, q"implicitly[com.soulever.makro.KindFieldProvider[${s.finalResultType.typeConstructor}, $fieldType, $fieldDescriptorType]]" :: collector)
-          case _ => q"implicitly[com.soulever.makro.TypeFieldProvider[$s, $fieldType, $fieldDescriptorType]]" :: collector
+            expandParameters(x, q"implicitly[com.soulever.makro.providers.KindFieldProvider[${s.finalResultType.typeConstructor}, $fieldType, $fieldDescriptorType]]" :: collector)
+          case _ => q"implicitly[com.soulever.makro.providers.TypeFieldProvider[$s, $fieldType, $fieldDescriptorType]]" :: collector
         }
       }
 

@@ -16,11 +16,11 @@ import scala.xml.NodeSeq
 class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvider[A#Value, FieldDescriptor] {
 
   override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
-                                               (op: Option[A#Value], baseField: GeneratedField[_, _]): InnerField[A#Value] =
+                                               (op: A#Value, baseField: GeneratedField[_, _]): InnerField[A#Value] =
     new InnerField[A#Value] {
 
       private val field: InnerField[Mapping[A#Value]] = new MappingFieldProvider(enum.values.toList.map(e => e.toString -> e.asInstanceOf[A#Value])).
-        field(fieldDescriptor)(op.map(Mapping), baseField)
+        field(fieldDescriptor)(Mapping(op), baseField)
 
       override def getValue: A#Value = field.getValue
 
