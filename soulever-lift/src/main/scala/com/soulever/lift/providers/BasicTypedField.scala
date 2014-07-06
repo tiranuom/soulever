@@ -113,9 +113,9 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
 
       val uniqueId = LiftRules.funcNameGenerator()
 
-      private val offLable: String = fieldDescriptor.i18n(baseField.i18nKey + "{off}")
+      private val offLable: String = fieldDescriptor.i18n(baseField.i18nKey + "{off}", Some("Off"))
 
-      private val onLable: String = fieldDescriptor.i18n(baseField.i18nKey + "{on}")
+      private val onLable: String = fieldDescriptor.i18n(baseField.i18nKey + "{on}", Some("On"))
 
       override def innerI18nKeys: List[(String, String)] = List("on" -> "On", "off" -> "Off")
 

@@ -63,12 +63,10 @@ class HelloWorld {
 //  println(implicitly[TypeEmptyProvider[Bool.Bool]].empty)
   def howdy = {
     "#time *" #> date.map(_.toString) &
-      "#form" #> <span></span>
-//        FormUtil.field(i, "test", this)
-//        FormUtil.form(testCaseClass, { (t: TestCaseClass) =>
-//        println(t)
-//        Right(t)
-//      })
+      "#form" #> FormUtil.form(testCaseClass, { (t: TestCaseClass) =>
+        println(t)
+        Right(t)
+      })
   }
 
 }
@@ -76,7 +74,7 @@ class HelloWorld {
 case class TestCaseClass(@field @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2Field, "not-equal") enumerationField:Bool.Bool = Bool.TRUE,
                          @field enumeration2Field:Bool.Bool = Bool.TRUE,
                          @field @mapping[Imp, V](_.intMapping) mappedIntField:Mapping[V] = V(1),
-                         @field @nonEmpty stringField:String,
+                         @field @nonEmpty[String] stringField:String,
                          @field @min(0) @max(60) intField:Int = 0,
                          @field @min(0) @max(60) newIntField:Int = 0,
                          @field booleanField:Boolean = false,

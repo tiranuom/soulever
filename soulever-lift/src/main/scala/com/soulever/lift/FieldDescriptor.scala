@@ -56,7 +56,7 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor]{
 
   override def enumFieldProvider[A <: Enumeration](enum: A): TypeFieldProvider[A#Value, FieldDescriptor] = new EnumerationFieldProvider(enum)
 
-  override val i18nKeyCollector: I18nKeyCollector = new I18nKeyCollector(Props.get("i18n.print.path"))
+  override val i18nKeyCollector: I18nKeyCollector = new I18nKeyCollector(Props.get("i18n.print.path").map( new File(".").getAbsolutePath + _))
 }
 
 trait FieldDescriptorImplicits {

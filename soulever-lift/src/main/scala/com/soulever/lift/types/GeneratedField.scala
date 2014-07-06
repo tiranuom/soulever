@@ -68,7 +68,9 @@ class GeneratedField[A :Manifest, Obj](init: A,
 
   override def innerValidations: List[(String, String)] = innerField.innerValidations
 
-  def elem:NodeSeq = <tr><td>{fieldDescriptor.i18n(caption)}</td><td>{innerField.elem}</td><td><span id={errorFieldId} class="soulever-field-error"></span></td></tr>
+  def elem:NodeSeq = <tr>
+    <td>{fieldDescriptor.i18n(caption)}</td>
+    <td>{fieldDescriptor.i18n(caption + ".prefix", Some(""))}<span style="margin-right:10px"></span>{innerField.elem}<span style="margin-right:10px"></span>{fieldDescriptor.i18n(caption + ".postfix", Some(""))}</td><td><span id={errorFieldId} class="soulever-field-error"></span></td></tr>
 
   override def setValueWithJsCmd(value: A): JsCmd = innerField.setValueWithJsCmd(value)
 }
