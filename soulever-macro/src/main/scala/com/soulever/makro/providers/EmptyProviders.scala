@@ -68,7 +68,6 @@ object KindEmptyProvider {
   def materializeKindEmptyProvider_impl[A:c.WeakTypeTag](c:Context) = {
     import c.universe._
     val tag: WeakTypeTag[A] = implicitly[WeakTypeTag[A]]
-    println(tag.tpe)
     val tree: Tree = q"""
        new KindEmptyProvider[${tag.tpe}]{
          def empty[B] = ${tag.tpe.finalResultType.typeSymbol.companion}.empty[B]

@@ -1,6 +1,7 @@
 package com.soulever.vaadin.types
 
 import com.soulever.makro.BaseField
+import com.soulever.vaadin.FieldDescriptor
 import com.vaadin.data.Validator.InvalidValueException
 import com.vaadin.ui._
 
@@ -12,8 +13,10 @@ class GeneratedField[A : Manifest, Obj](init:A,
                                         validators:List[A => Either[String, A]] = List.empty,
                                         secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
                                         css:String = "",
-                                        i18n:String => String = identity) extends CustomField[A] with BaseField[A, Obj] {
+                                        fieldDescriptor:FieldDescriptor) extends CustomField[A] with BaseField[A, Obj] {
   def getType: Class[_ <: A] = implicitly[Manifest[A]].runtimeClass.asInstanceOf[Class[A]]
+
+  def i18n(key:String, defaultValue:Option[String] = None) = fieldDescriptor.i18n(key, defaultValue)
 
   val i18nKey = caption
   val innerField = innerFieldGenerator(init, this)
@@ -34,9 +37,9 @@ class GeneratedField[A : Manifest, Obj](init:A,
 
   def initContent(): Component ={
     val layout: HorizontalLayout = new HorizontalLayout(
-      Option(i18n(caption.trim + ".prefix")).filterNot(_ == caption.trim + ".prefix").map(wrapLabel("v-field-prefix")).toList :::
+      Option(i18n(caption.trim + ".prefix", Some(""))).map(wrapLabel("v-field-prefix")).toList :::
         List(innerField) :::
-        Option(i18n(caption.trim + ".postfix")).filterNot(_ == caption.trim + ".postfix").map(wrapLabel("v-field-postfix")).toList :::
+        Option(i18n(caption.trim + ".postfix", Some(""))).map(wrapLabel("v-field-postfix")).toList :::
         List(errorLabel): _*)
     layout.setStyleName(css)
     layout

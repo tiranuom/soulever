@@ -1,5 +1,6 @@
 package com.soulever.lift.types
 
+import com.soulever.lift.FieldDescriptor
 import com.soulever.makro.BaseField
 import net.liftweb.http.LiftRules
 import net.liftweb.http.js.JsCmd
@@ -18,7 +19,7 @@ class GeneratedField[A :Manifest, Obj](init: A,
                                        validators: List[(A) => Either[String, A]],
                                        secondaryValidators: List[(A, Obj) => Either[String, A]],
                                        css: String,
-                                       i18n:String => String) extends BaseField[A, Obj] with InnerField[A]{
+                                       fieldDescriptor:FieldDescriptor) extends BaseField[A, Obj] with InnerField[A]{
   private val fieldId: String = LiftRules.funcNameGenerator()
 
   private val errorFieldId = fieldId + "-ERROR"
@@ -67,7 +68,7 @@ class GeneratedField[A :Manifest, Obj](init: A,
 
   override def innerValidations: List[(String, String)] = innerField.innerValidations
 
-  def elem:NodeSeq = <tr><td>{i18n(caption)}</td><td>{innerField.elem}</td><td><span id={errorFieldId} class="soulever-field-error"></span></td></tr>
+  def elem:NodeSeq = <tr><td>{fieldDescriptor.i18n(caption)}</td><td>{innerField.elem}</td><td><span id={errorFieldId} class="soulever-field-error"></span></td></tr>
 
   override def setValueWithJsCmd(value: A): JsCmd = innerField.setValueWithJsCmd(value)
 }

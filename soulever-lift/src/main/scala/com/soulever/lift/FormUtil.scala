@@ -1,6 +1,6 @@
 package com.soulever.lift
 
-import com.soulever.makro.{FieldValidation2, FieldValidation, Macros}
+import com.soulever.makro.Macros
 import language.experimental.macros
 import scala.reflect.runtime.{universe => ru}
 import ru._

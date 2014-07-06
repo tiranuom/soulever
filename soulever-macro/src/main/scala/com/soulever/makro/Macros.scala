@@ -2,14 +2,42 @@ package com.soulever.makro
 
 import java.io.PrintWriter
 
+import com.soulever.makro.annotations._
+
 import language.experimental.macros
+import scala.annotation.tailrec
 import scala.io.Source
 import scala.reflect.macros.blackbox.Context
 
 object Macros {
-  def form[ClassType <: Product, FD <: MFieldDescriptor[_]](caseClass:ClassType, action:ClassType => Either[Exception, ClassType])
-                                                                (implicit moduleDesc:FD):FD#LayoutType= macro MacrosImpl.form_impl[ClassType, FD]
+  /**
+   * Generates a code for creting a UI form, for given case class,
+   *  - fields in case class are transformed to ui fields.
+   *  - two buttons for submit and reset are created.
+   *
+   * @param caseClass
+   * @param action
+   * @param moduleDesc
+   * @tparam ClassType
+   * @tparam FD
+   * @return
+   */
+  def form[ClassType, FD <: MFieldDescriptor[_]](caseClass:ClassType, action:ClassType => Either[Exception, ClassType])
+                                                (implicit moduleDesc:FD):FD#LayoutType= macro MacrosImpl.form_impl[ClassType, FD]
 
+  /**
+   * Generates a code for creating a UI field for given value
+   *   - the value should be defined as a field and annotations should be given.
+   *
+   * @param value
+   * @param i18nKey
+   * @param ths
+   * @param moduleDesc
+   * @tparam FieldType
+   * @tparam FD
+   * @tparam ClassType
+   * @return
+   */
   def field[FieldType, FD <: MFieldDescriptor[_], ClassType](value:FieldType,
                                                              i18nKey:String,
                                                              ths:ClassType)
@@ -18,15 +46,17 @@ object Macros {
 
 class MacrosImpl(val c:Context) {
 
-
-
   import c.universe._
   def form_impl[ClassType:c.WeakTypeTag, FD:c.WeakTypeTag](caseClass:c.Expr[ClassType],
-                                                               action:c.Expr[ClassType => Either[Exception, ClassType]])
-                                                              (moduleDesc:c.Expr[FD]) = {
+                                                           action:c.Expr[ClassType => Either[Exception, ClassType]])
+                                                          (moduleDesc:c.Expr[FD]) = {
 
     val classExpr = caseClass
-    
+
+    if(Option(classExpr.tree.tpe.typeSymbol).filter(_.isClass).filter(_.asClass.isCaseClass).isEmpty){
+      c.abort(c.enclosingPosition, "Only case classes are supported.")
+    }
+
     val classWTT = implicitly[WeakTypeTag[ClassType]]
 
     val fieldsList = classWTT.tpe.typeSymbol.companion.typeSignature.members.
@@ -99,6 +129,7 @@ class MacrosImpl(val c:Context) {
     val m = $moduleDesc
       import m._
       import com.soulever.makro._
+      m.i18nKeyCollector.addBlock($i18nPrefix)
       ..${fieldsCode.flatten}
       val fields = $fieldNamesList
       ..$buttonCodes
@@ -119,17 +150,23 @@ class MacrosImpl(val c:Context) {
                                                                        ths:c.Expr[ClassType])
                                                                       (moduleDesc:c.Expr[FD]) = {
 
-    val (code, fieldName, _) = generateFieldBlock[FD, ClassType](value.tree, value.tree.symbol, q""" "" """, i18nKey.tree, ths)
+    @tailrec
+    def findClass(s:Symbol):Symbol = {
+      if (s.isClass || s.isModule || s.isModuleClass || s.isPackage || s.isPackageClass) s
+      else findClass(s.owner)
+    }
+    val className: String = findClass(c.internal.enclosingOwner).name.toString.dotNotation
 
-    val tree: Tree = q"""{
+    val (code, fieldName, _) = generateFieldBlock[FD, ClassType](value.tree, value.tree.symbol, q"$className", i18nKey.tree, ths)
+
+    q"""{
         val m = $moduleDesc
         import m._
+        m.i18nKeyCollector.addBlock($className)
        ..$code
        $fieldName
        }
       """
-//    println(tree)
-    tree
   }
 
   def generateFieldBlock[FD:c.WeakTypeTag, ClassType: c.WeakTypeTag](valueTree: Tree,
@@ -145,13 +182,13 @@ class MacrosImpl(val c:Context) {
     val fieldName = TermName(c.freshName() + "Field")
 
     val css = Option(fieldSymbol).flatMap(_.annotations.collectFirst {
-      case s if s.tree.tpe.typeConstructor =:= c.weakTypeOf[com.soulever.makro.css] => s.tree.children.tail.head
+      case s if s.tree.tpe.typeConstructor =:= c.weakTypeOf[css] => s.tree.children.tail.head
     })
 
     val (innerField, emptyValue) = {
 
       val mapping = Option(fieldSymbol).flatMap(_.annotations.collectFirst {
-        case s if s.tree.tpe.typeConstructor =:= weakTypeOf[com.soulever.makro.mapping[Any, Any]].typeConstructor =>
+        case s if s.tree.tpe.typeConstructor =:= weakTypeOf[mapping[Any, Any]].typeConstructor =>
           q"${s.tree.children.tail.head}(m)"
       })
 
@@ -172,14 +209,13 @@ class MacrosImpl(val c:Context) {
             pre -> args
           case _ => c.abort(c.enclosingPosition, "Cannot decode the position")
         }
-
         args match {
           case Nil if s <:< weakTypeOf[Enumeration#Value] =>
             q"enumFieldProvider[$pre](${pre.termSymbol})" :: collector
           case Nil =>
             q"implicitly[com.soulever.makro.providers.TypeFieldProvider[$s, $fieldType, $fieldDescriptorType]]" :: collector
           case x :: Nil if s.typeConstructor =:= c.weakTypeOf[com.soulever.makro.types.Mapping[Any]].typeConstructor =>
-            if (mapping.isEmpty) c.error(valueTree.pos, "Cannot find mapping for the given type")
+            if (mapping.isEmpty) c.error(fieldSymbol.pos, "Cannot find mapping for the given type")
             q"mappingFieldProvider[$x]($mapping.getOrElse(List.empty))" :: collector
           case x :: Nil =>
             expandParameters(x, q"implicitly[com.soulever.makro.providers.KindFieldProvider[${s.finalResultType.typeConstructor}, $fieldType, $fieldDescriptorType]]" :: collector)
@@ -212,7 +248,7 @@ class MacrosImpl(val c:Context) {
       q"""
       val $fieldName = {
         m.i18nKeyCollector.insert($compoundI18nKey, $i18nKey.naturalNotation)
-        ($validations ::: $classDependentValidations).foreach((v:com.soulever.makro.ValidationMessageProvider) => m.i18nKeyCollector.insert($compoundI18nKey + "[" + v.message + "]", v.defaultErrorMessage))
+        ($validations ::: $classDependentValidations).foreach((v:com.soulever.makro.annotations.ValidationMessageProvider) => m.i18nKeyCollector.insert($compoundI18nKey + "[" + v.message + "]", v.defaultErrorMessage))
         val field = m.field[$valueType, ${ths.actualType}]($valueTree, ($compoundI18nKey).trim, $innerField, $validatorFunctions, $classDependentValidatorFunctions, $css.getOrElse(""))
         field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.foreach{ case (key, defaultValue) => m.i18nKeyCollector.insert($compoundI18nKey + "[" + key + "]", defaultValue)}
         field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerI18nKeys.foreach{ case (key, defaultValue) => m.i18nKeyCollector.insert($compoundI18nKey + "{" + key + "}", defaultValue)}

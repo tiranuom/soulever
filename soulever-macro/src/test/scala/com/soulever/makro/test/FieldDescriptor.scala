@@ -1,5 +1,6 @@
 package com.soulever.makro.test
 
+import com.soulever.makro.i18n.I18nKeyCollector
 import com.soulever.makro.{BaseField, MFieldDescriptor}
 import com.soulever.makro.types.Mapping
 import com.soulever.makro
@@ -10,7 +11,8 @@ class FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
 
       override def empty: A#Value = enum.values.head
 
-      override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: A#Value): FieldType[A#Value] =
+      override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
+                                                   (op: A#Value, baseField: BaseFieldType[_, _]): TestField[A#Value] =
         new TestField[A#Value] {
           override var value: A#Value = op
         }
@@ -20,23 +22,34 @@ class FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
     new TypeFieldProvider[Mapping[A]] {
       override def empty: Mapping[A] = mapping.head._2
 
-      override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Mapping[A]): FieldType[Mapping[A]] =
+      override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
+                                                   (op: Mapping[A], baseField: BaseFieldType[_, _]): TestField[Mapping[A]] =
         new TestField[Mapping[A]]() {
           override var value: Mapping[A] = op
         }
     }
 
-  override def form(fields: List[FieldType[_]], buttons: List[ButtonType]): TestForm = TestForm()
 
-  override def button(label: String, clickAction: () => Unit): ButtonType = TestButton()
 
-  override def field[A: Manifest, Obj](init: A,
-                                       caption: String,
-                                       innerField: (Option[A]) => FieldType[A],
-                                       validators: List[(A) => Either[String, A]],
-                                       secondaryValidators: List[(A, Obj) => Either[String, A]],
-                                       css: String): BaseFieldType[A, Obj] =
-    TestBaseField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, innerValidations)
+//  override def form(fields: List[FieldType[_]], buttons: List[ButtonType]): TestForm = TestForm()
+
+//  override def button(label: String, clickAction: () => Unit): ButtonType = TestButton()
+
+//  override def field[A: Manifest, Obj](init: A,
+//                                       caption: String,
+//                                       innerField: (Option[A]) => FieldType[A],
+//                                       validators: List[(A) => Either[String, A]],
+//                                       secondaryValidators: List[(A, Obj) => Either[String, A]],
+//                                       css: String): BaseFieldType[A, Obj] =
+//    TestBaseField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, innerValidations)
+
+  override def field[A: Manifest, Obj](init: A, caption: String, innerField: (A, BaseFieldType[A, Obj]) => FieldType[A], validators: List[(A) => Either[String, A]], secondaryValidators: List[(A, Obj) => Either[String, A]], css: String): BaseFieldType[A, Obj] = ???
+
+  override def button(label: String, clickAction: () => Unit, fieldsList: List[BaseFieldType[_, _]]): ButtonType = ???
+
+  override def form(fields: List[BaseFieldType[_, _]], buttons: List[ButtonType]): LayoutType = ???
+
+  override val i18nKeyCollector: I18nKeyCollector = null
 
   def innerValidations:List[(String, String)] = List.empty
 
@@ -46,9 +59,9 @@ class FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
   override type LayoutType = TestForm
 }
 
-trait TypeFieldProvider[A] extends makro.TypeFieldProvider[A, TestField, FieldDescriptor]
+trait TypeFieldProvider[A] extends makro.providers.TypeFieldProvider[A, TestField, FieldDescriptor]
 
-trait KindFieldProvider[A[_]] extends makro.KindFieldProvider[A, TestField, FieldDescriptor]
+trait KindFieldProvider[A[_]] extends makro.providers.KindFieldProvider[A, TestField, FieldDescriptor]
 
 trait FieldDescriptorImplicits {
 

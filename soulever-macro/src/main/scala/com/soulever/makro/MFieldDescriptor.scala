@@ -1,5 +1,6 @@
 package com.soulever.makro
 
+import com.soulever.makro.i18n.I18nKeyCollector
 import com.soulever.makro.providers.TypeFieldProvider
 import com.soulever.makro.types.Mapping
 
@@ -18,7 +19,7 @@ trait MFieldDescriptor[SelfType <: MFieldDescriptor[SelfType]] {
 
   def button(label:String, clickAction:() => Unit, fieldsList:List[SelfType#BaseFieldType[_, _]]):SelfType#ButtonType
 
-  def i18n(msg:String):String = i18nKeyCollector.i18n(msg)
+  def i18n(msg:String, defaultValue:Option[String] = None):String = i18nKeyCollector.i18n(msg, defaultValue)
 
   def form(fields:List[SelfType#BaseFieldType[_, _]], buttons:List[SelfType#ButtonType]):LayoutType
 

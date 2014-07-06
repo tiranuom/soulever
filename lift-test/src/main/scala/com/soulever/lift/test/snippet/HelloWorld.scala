@@ -1,6 +1,7 @@
 package com.soulever.lift.test.snippet
 
 import com.soulever.lift.{FormUtil, FieldDescriptorImplicits, FieldDescriptor}
+import com.soulever.makro.annotations._
 import com.soulever.makro.providers.{TypeEmptyProvider, KindEmptyProvider}
 import com.soulever.makro.types.{Password, Mapping}
 import com.soulever.makro._

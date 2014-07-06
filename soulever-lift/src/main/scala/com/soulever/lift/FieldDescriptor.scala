@@ -4,7 +4,8 @@ import java.io.File
 
 import com.soulever.lift.providers.{EnumerationFieldProvider, MappingFieldProvider}
 import com.soulever.lift.types.{GeneratedField, InnerField, TypeFieldProvider}
-import com.soulever.makro.{I18nKeyCollector, MFieldDescriptor}
+import com.soulever.makro.MFieldDescriptor
+import com.soulever.makro.i18n.I18nKeyCollector
 import com.soulever.makro.types.Mapping
 import net.liftweb.http.SHtml
 import net.liftweb.http.js.JsCmd
@@ -33,7 +34,7 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor]{
                                        validators: List[(A) => Either[String, A]],
                                        secondaryValidators: List[(A, Obj) => Either[String, A]],
                                        css: String): BaseFieldType[A, Obj] =
-    new GeneratedField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, i18n)
+    new GeneratedField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, this)
 
   override def button(label: String, clickAction: () => Unit, fieldsList:List[GeneratedField[_, _]] = List.empty): ButtonType =
     SHtml.ajaxButton(i18n(label), () => {

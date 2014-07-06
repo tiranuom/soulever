@@ -1,6 +1,6 @@
 package com.soulever.vaadin
 
-import com.soulever.makro.{FieldValidation2, FieldValidation, Macros}
+import com.soulever.makro.Macros
 import com.vaadin.ui.FormLayout
 import language.experimental.macros
 import scala.reflect.runtime.{universe => ru}
@@ -8,7 +8,7 @@ import ru._
 import scala.reflect.macros.Context
 
 object FormUtil {
-  def form[A <: Product, FD <: FieldDescriptor](init:A, action:A => Either[Exception, A])
+  def form[A, FD <: FieldDescriptor](init:A, action:A => Either[Exception, A])
                                                (implicit modleDesc:FD):FormLayout = macro form_macro[A, FD]
 
   def field[FieldType, FD <: FieldDescriptor, ClassType](init:FieldType,

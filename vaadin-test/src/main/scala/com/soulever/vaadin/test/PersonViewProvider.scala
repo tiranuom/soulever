@@ -1,5 +1,6 @@
 package com.soulever.vaadin.test
 
+import com.soulever.makro.annotations._
 import com.soulever.makro.types.{Mapping, Password}
 import com.soulever.vaadin.{FieldDescriptorImplicits, FormUtil}
 import com.vaadin.navigator.{View, ViewProvider}
@@ -42,12 +43,12 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
 case class TestCaseClass(@field @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2Field, "not-equal") enumerationField:Bool.Bool = Bool.TRUE,
                          @field enumeration2Field:Bool.Bool = Bool.TRUE,
                          @field @mapping[Imp, V](_.intMapping) mappedIntField:Mapping[V] = V(1),
-                         @field @nonEmpty stringField:String,
+                         @field @nonEmpty[String] stringField:String,
                          @field @min(0) @max(60) intField:Int = 0,
                          @field @min(0) @max(60) newIntField:Int = 0,
                          @field booleanField:Boolean = false,
                          @field passwordField:Password = "",
-                         @field @mapping[Imp, V](_.intMapping) listField:List[Option[Mapping[V]]] = List(None),
+                         @field @mapping[Imp, V](_.intMapping) @nonEmpty[List[Option[Mapping[V]]]] listField:List[Option[Mapping[V]]] = List(None),
                          @field @custom[Option[Int]](TestCaseClass.customValidation, "all.positive") optionField:Option[Int] = None)
 
 object TestCaseClass {
