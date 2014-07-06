@@ -132,8 +132,8 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
     new CustomField[Boolean] with InlineKeyProvider {
       def getType: Class[_ <: Boolean] = classOf[Boolean]
       val i18nKey = baseField.i18nKey
-      private val offLable: String = fieldDescriptor.i18n(i18nKey + "{off}")
-      private val onLable: String = fieldDescriptor.i18n(i18nKey + "{on}")
+      private def offLable: String = fieldDescriptor.i18n(i18nKey + "{off}")
+      private def onLable: String = fieldDescriptor.i18n(i18nKey + "{on}")
       var selected = false
       val button: Button = new Button(offLable)
       button.setStyleName("boolean-field-off")

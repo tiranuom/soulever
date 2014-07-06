@@ -45,7 +45,8 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
 }
 
 object Props {
-  val props = ConfigFactory.load(getClass.getClassLoader, "/soulever.properties")
+
+  val props = ConfigFactory.load(getClass.getClassLoader, "soulever.properties")
 
   def printableFile = Try(props.getString("i18n.print.path")).toOption.filter(_ =>isPrintable)
 

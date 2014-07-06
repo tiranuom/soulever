@@ -62,7 +62,7 @@ object SouleverBuild extends Build {
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
       libraryDependencies ++= Seq(typesafeConfig)
     )
-  )
+  ) dependsOn souleverMetamacro
 
   lazy val souleverVaadin:Project = Project(
     "soulever-vaadin",

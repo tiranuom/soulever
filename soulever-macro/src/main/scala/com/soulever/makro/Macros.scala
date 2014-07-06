@@ -1,6 +1,9 @@
 package com.soulever.makro
 
+import java.io.PrintWriter
+
 import language.experimental.macros
+import scala.io.Source
 import scala.reflect.macros.blackbox.Context
 
 object Macros {
@@ -14,6 +17,9 @@ object Macros {
 }
 
 class MacrosImpl(val c:Context) {
+
+
+
   import c.universe._
   def form_impl[ClassType:c.WeakTypeTag, FD:c.WeakTypeTag](caseClass:c.Expr[ClassType],
                                                                action:c.Expr[ClassType => Either[Exception, ClassType]])
@@ -36,8 +42,8 @@ class MacrosImpl(val c:Context) {
         val (code, fieldName, emptyValue) = generateFieldBlock[FD, ClassType](
           q"$classExpr.${field.name.toTermName}",
           field,
-          i18nPrefix,
-          q"${i18nPrefix + "." + field.name.toString.trim.dotNotation}",
+          q"$i18nPrefix",
+          q"${field.name.toString.trim.dotNotation}",
           classExpr)
 
         (code, q"$fieldName", field -> q"$fieldName.getValue", (field, fieldName, emptyValue))
@@ -52,7 +58,7 @@ class MacrosImpl(val c:Context) {
 
         buttonName -> q"""
           val $buttonName = {
-            m.i18nKeyCollector.insert($i18nPrefix)($i18nKey)
+            m.i18nKeyCollector.insert($i18nKey, "Submit")
             button($i18nKey, {() =>
               Option((fields.asInstanceOf[List[com.soulever.makro.BaseField[_, $classWTT]]] foldLeft true){ case (b, f) => f.isValid && b }).
               filter(identity).
@@ -77,7 +83,7 @@ class MacrosImpl(val c:Context) {
 
         buttonName -> q"""
           val $buttonName = {
-            m.i18nKeyCollector.insert($i18nPrefix)($i18nKey)
+            m.i18nKeyCollector.insert($i18nKey, "Reset")
             button($i18nKey,{() =>
               val empty = new $classWTT(..$emptyValueExpressionsList)
               ..$settersList
@@ -92,6 +98,7 @@ class MacrosImpl(val c:Context) {
     val comp = q"""
     val m = $moduleDesc
       import m._
+      import com.soulever.makro._
       ..${fieldsCode.flatten}
       val fields = $fieldNamesList
       ..$buttonCodes
@@ -99,6 +106,10 @@ class MacrosImpl(val c:Context) {
       m.i18nKeyCollector.print
       form
     """
+
+    val writer: PrintWriter = new PrintWriter("/tmp/generated.scala")
+    writer.write(showCode(comp))
+    writer.close()
 //    println(showCode(comp))
     comp
   }
@@ -108,7 +119,7 @@ class MacrosImpl(val c:Context) {
                                                                        ths:c.Expr[ClassType])
                                                                       (moduleDesc:c.Expr[FD]) = {
 
-    val (code, fieldName, _) = generateFieldBlock[FD, ClassType](value.tree, value.tree.symbol, "", i18nKey.tree, ths)
+    val (code, fieldName, _) = generateFieldBlock[FD, ClassType](value.tree, value.tree.symbol, q""" "" """, i18nKey.tree, ths)
 
     val tree: Tree = q"""{
         val m = $moduleDesc
@@ -123,7 +134,7 @@ class MacrosImpl(val c:Context) {
 
   def generateFieldBlock[FD:c.WeakTypeTag, ClassType: c.WeakTypeTag](valueTree: Tree,
                                                                      fieldSymbol: Symbol,
-                                                                     i18nPrefix: String,
+                                                                     i18nPrefix: Tree,
                                                                      i18nKey: Tree,
                                                                      ths:c.Expr[ClassType]) = {
 
@@ -183,26 +194,28 @@ class MacrosImpl(val c:Context) {
       }
     }
 
-    val (validationMessages, validators) = {
+    val (validations, validatorFunctions) = {
       val provided = Option(fieldSymbol).toList.flatMap(_.annotations.filter(_.tree.tpe <:< weakTypeOf[FieldValidation.AnnotationType]))
       provided.foreach(FieldValidation.validate[ClassType](c)(fieldSymbol))
-      provided.map(FieldValidation.generateCodeBlock[ClassType](c)(fieldSymbol, q"$i18nKey"))
+      provided.map(FieldValidation.generateCodeBlock[ClassType](c)(fieldSymbol, q""" $i18nPrefix + "." + $i18nKey """))
     }.unzip(identity)
 
-    val (classDependentValidationMessages, classDependentValidators) = {
+    val (classDependentValidations, classDependentValidatorFunctions) = {
       val provided = Option(fieldSymbol).toList.flatMap(_.annotations.filter(_.tree.tpe <:< weakTypeOf[FieldValidation2.AnnotationType]))
       provided.foreach(FieldValidation2.validate[ClassType](c)(fieldSymbol))
-      provided.map(FieldValidation2.generateCodeBlock[ClassType](c)(fieldSymbol, q"$i18nKey"))
+      provided.map(FieldValidation2.generateCodeBlock[ClassType](c)(fieldSymbol, q""" $i18nPrefix + "." + $i18nKey """))
     }.unzip(identity)
+
+    val compoundI18nKey = q""" $i18nPrefix + "." + $i18nKey """
 
     (List(
       q"""
       val $fieldName = {
-        m.i18nKeyCollector.insert($i18nPrefix)($i18nKey)
-        ($validationMessages ::: $classDependentValidationMessages).foreach(m.i18nKeyCollector.insert($i18nPrefix))
-        val field = m.field[$valueType, ${ths.actualType}]($valueTree, $i18nKey.trim, $innerField, $validators, $classDependentValidators, $css.getOrElse(""))
-        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.map(s => $i18nKey + "[" + s._1 + "]").foreach(m.i18nKeyCollector.insert($i18nPrefix))
-        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerI18nKeys.map(s => $i18nKey + "{" + s._1 + "}").foreach(m.i18nKeyCollector.insert($i18nPrefix))
+        m.i18nKeyCollector.insert($compoundI18nKey, $i18nKey.naturalNotation)
+        ($validations ::: $classDependentValidations).foreach((v:com.soulever.makro.ValidationMessageProvider) => m.i18nKeyCollector.insert($compoundI18nKey + "[" + v.message + "]", v.defaultErrorMessage))
+        val field = m.field[$valueType, ${ths.actualType}]($valueTree, ($compoundI18nKey).trim, $innerField, $validatorFunctions, $classDependentValidatorFunctions, $css.getOrElse(""))
+        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerValidations.foreach{ case (key, defaultValue) => m.i18nKeyCollector.insert($compoundI18nKey + "[" + key + "]", defaultValue)}
+        field.asInstanceOf[com.soulever.makro.BaseField[_,_]].innerI18nKeys.foreach{ case (key, defaultValue) => m.i18nKeyCollector.insert($compoundI18nKey + "{" + key + "}", defaultValue)}
         field
       }
       """), fieldName, emptyValue)

@@ -1,5 +1,7 @@
 package com.soulever.makro
 
+import com.soulever.metamacro.Meta
+
 import scala.annotation.StaticAnnotation
 import scala.reflect.macros.blackbox.Context
 
@@ -11,10 +13,13 @@ trait FieldBlockProvider {
   def generateCodeBlock[A:c.WeakTypeTag](c:Context)(field:c.universe.Symbol, i18nKey:c.universe.Tree)(v:c.universe.Annotation):(c.universe.Tree, c.universe.Tree)
 }
 
-trait FieldValidation[A] extends StaticAnnotation {
-  def validate(a:A):Boolean
+trait ValidationMessageProvider {
   def message:String
   def defaultErrorMessage:String
+}
+
+trait FieldValidation[A] extends StaticAnnotation with ValidationMessageProvider {
+  def validate(a:A):Boolean
 }
 
 object FieldValidation extends FieldBlockProvider {
@@ -34,19 +39,24 @@ object FieldValidation extends FieldBlockProvider {
               | """.stripMargin)
   }
 
-  def generateCodeBlock[A:c.WeakTypeTag](c:Context)(field:c.universe.Symbol, i18nKey:c.universe.Tree)(v:c.universe.Annotation) = {
+  def generateCodeBlock[A:c.WeakTypeTag](c:Context)(field:c.universe.Symbol, i18nKey:c.universe.Tree)(a:c.universe.Annotation) = {
     import c.universe._
-    val tr = if (v.tree.children.tail.length == 2) {
-      q""" $i18nKey + "[" + ${v.tree.children.tail.last} + "]" """
+    val tr = if (a.tree.children.tail.length == 2) {
+      q""" $i18nKey + "[" + ${a.tree.children.tail.last} + "]" """
     } else {
       q"""
-            $i18nKey + "[" + ${v.tree.tpe.typeSymbol.companion}(..${v.tree.children.tail}).message + "]"
+            $i18nKey + "[" + ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail}).message + "]"
             """
     }
-    ( tr,
+    val f = a.tree.children.tail match {
+      case p1::p2::Nil => q"${a.tree.tpe.typeSymbol.companion}(null, $p2)"
+      case p::Nil => q"${a.tree.tpe.typeSymbol.companion}($p)"
+      case l => q"${a.tree.tpe.typeSymbol.companion}(..$l)"
+    }//foreach(a => println(a + ":" + a.tpe.typeSymbol.name))
+    ( f,
       q"""
           { (x:${field.typeSignature}) =>
-            val validator = ${v.tree.tpe.typeSymbol.companion}(..${v.tree.children.tail})
+            val validator = ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})
             Option(x).filter(validator.validate).toRight($i18nKey + s"[$${validator.message}]")
           }""")
   }
@@ -84,20 +94,14 @@ case class nonEmpty() extends FieldValidation[String]{
   override def defaultErrorMessage: String = "should not be empty"
 }
 
-case class custom[A](value:A => Boolean, msg:String) extends FieldValidation[A]{
+case class custom[A](value:A => Boolean, message:String) extends FieldValidation[A]{
   def validate(a: A): Boolean = value(a)
-
-  def message = msg
 
   override def defaultErrorMessage: String = s"should not be []"
 }
 
-trait FieldValidation2[A, Obj] {
+trait FieldValidation2[A, Obj] extends StaticAnnotation with ValidationMessageProvider{
   def validate(a:A, obj:Obj):Boolean
-
-  def message: String
-
-  def defaultErrorMessage:String
 }
 
 object FieldValidation2 extends FieldBlockProvider {
@@ -113,7 +117,8 @@ object FieldValidation2 extends FieldBlockProvider {
             $i18nKey + "[" + ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail}).message + "]"
             """
     }
-    (tr,
+
+    (q"${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})",
       q"""
         { (x:${field.typeSignature}, obj:${initWtt.tpe.finalResultType}) =>
           val validator = ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})

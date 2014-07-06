@@ -55,11 +55,11 @@ class HelloWorld {
     override def empty: String = ""
   }
 
-  println(implicitly[KindEmptyProvider[List]].empty[Int])
-  println(implicitly[KindEmptyProvider[Set]].empty[Int])
-  println(implicitly[KindEmptyProvider[Option]].empty[Int])
-  println(implicitly[TypeEmptyProvider[String]].empty)
-  println(implicitly[TypeEmptyProvider[Bool.Bool]].empty)
+//  println(implicitly[KindEmptyProvider[List]].empty[Int])
+//  println(implicitly[KindEmptyProvider[Set]].empty[Int])
+//  println(implicitly[KindEmptyProvider[Option]].empty[Int])
+//  println(implicitly[TypeEmptyProvider[String]].empty)
+//  println(implicitly[TypeEmptyProvider[Bool.Bool]].empty)
   def howdy = {
     "#time *" #> date.map(_.toString) &
       "#form" #> <span></span>

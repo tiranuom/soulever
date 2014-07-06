@@ -15,8 +15,8 @@ class GeneratedField[A : Manifest, Obj](init:A,
                                         i18n:String => String = identity) extends CustomField[A] with BaseField[A, Obj] {
   def getType: Class[_ <: A] = implicitly[Manifest[A]].runtimeClass.asInstanceOf[Class[A]]
 
-  val innerField = innerFieldGenerator(init, this)
   val i18nKey = caption
+  val innerField = innerFieldGenerator(init, this)
   setCaption(i18n(caption.trim))
 
   private def wrapLabel(style:String)(msg:String) = {

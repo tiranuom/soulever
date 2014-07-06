@@ -17,5 +17,7 @@ package object makro {
       replaceAll("(?<=[A-Z])(?=[A-Z][a-z])|(?<=[^A-Z])(?=[A-Z])|(?<=[A-Za-z])(?=[^A-Za-z])", ".").
       toLowerCase.
       trim
+
+    def naturalNotation = s.split("\\.").map(_.capitalize).mkString(" ").replaceAll("[\\[\\]\\{\\}]", "")
   }
 }

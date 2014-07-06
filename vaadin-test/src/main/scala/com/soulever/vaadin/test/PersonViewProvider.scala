@@ -48,7 +48,11 @@ case class TestCaseClass(@field @css("enum") @fieldDependent[Bool.Bool, TestCase
                          @field booleanField:Boolean = false,
                          @field passwordField:Password = "",
                          @field @mapping[Imp, V](_.intMapping) listField:List[Option[Mapping[V]]] = List(None),
-                         @field @custom[Option[Int]]({(_:Option[Int]).map(_ > 0).getOrElse(true)}, "all.positive") optionField:Option[Int] = None)
+                         @field @custom[Option[Int]](TestCaseClass.customValidation, "all.positive") optionField:Option[Int] = None)
+
+object TestCaseClass {
+  def customValidation(o:Option[Int]) = o.map(_ > 0).getOrElse(true)
+}
 
 case class V(i:Int)
 
