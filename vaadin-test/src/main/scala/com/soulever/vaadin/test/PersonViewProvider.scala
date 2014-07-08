@@ -44,6 +44,7 @@ case class TestCaseClass(@field @css("enum") @fieldDependent[Bool.Bool, TestCase
                          @field enumeration2Field:Bool.Bool = Bool.TRUE,
                          @field @mapping[Imp, V](_.intMapping) mappedIntField:Mapping[V] = V(1),
                          @field @nonEmpty[String] stringField:String,
+                         @field @nonEmpty[String] newStringField:String = "",
                          @field @min(0) @max(60) intField:Int = 0,
                          @field @min(0) @max(60) newIntField:Int = 0,
                          @field booleanField:Boolean = false,

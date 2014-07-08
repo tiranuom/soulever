@@ -38,7 +38,12 @@ object FieldValidation extends FieldBlockProvider {
       case p::Nil => q"${a.tree.tpe.typeSymbol.companion}[..${a.tree.tpe.typeArgs}]($p)"
       case l => q"${a.tree.tpe.typeSymbol.companion}[..${a.tree.tpe.typeArgs}](..$l)"
     }//foreach(a => println(a + ":" + a.tpe.typeSymbol.name))
-    ( f,
+    (
+      q"""{
+          val validation = $f
+          validation.message -> validation.defaultErrorMessage
+         }
+       """,
       q"""
           { (x:${field.typeSignature}) =>
             val validator = ${a.tree.tpe.typeSymbol.companion}[..${a.tree.tpe.typeArgs}](..${a.tree.children.tail})

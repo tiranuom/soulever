@@ -18,15 +18,12 @@ object FieldValidation2 extends FieldBlockProvider {
   override def generateCodeBlock[A:c.WeakTypeTag](c: Context)(field: c.universe.Symbol, i18nKey: c.universe.Tree)(a: c.universe.Annotation): (c.universe.Tree, c.universe.Tree) = {
     import c.universe._
     val initWtt = implicitly[WeakTypeTag[A]]
-    val tr = if (a.tree.children.tail.length == 2) {
-      q""" $i18nKey + "[" + ${a.tree.children.tail.last} + "]" """
-    } else {
-      q"""
-            $i18nKey + "[" + ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail}).message + "]"
-            """
-    }
 
-    (q"${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})",
+    (q""" {
+         val validation = ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})
+         validation.message -> validation.defaultErrorMessage
+       }"""
+      ,
       q"""
         { (x:${field.typeSignature}, obj:${initWtt.tpe.finalResultType}) =>
           val validator = ${a.tree.tpe.typeSymbol.companion}(..${a.tree.children.tail})
