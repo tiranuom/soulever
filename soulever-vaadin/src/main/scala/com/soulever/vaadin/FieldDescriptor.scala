@@ -1,26 +1,27 @@
 package com.soulever.vaadin
 
-import com.soulever.makro.i18n.I18nKeyCollector
-import com.soulever.vaadin.types.{TypeFieldProvider, GeneratedField}
-import com.typesafe.config.ConfigFactory
-import com.vaadin.ui._
-import com.vaadin.ui.Button.{ClickEvent, ClickListener}
 import com.soulever.makro.MFieldDescriptor
-import com.soulever.vaadin.providers._
-import com.soulever.makro
+import com.soulever.makro.i18n.I18nKeyCollector
 import com.soulever.makro.types.Mapping
+import com.soulever.vaadin.providers._
+import com.soulever.vaadin.types.{GeneratedField, TypeFieldProvider}
+import com.typesafe.config.ConfigFactory
+import com.vaadin.ui.Button.{ClickEvent, ClickListener}
+import com.vaadin.ui._
 
 import scala.util.Try
 
 trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
 
-  type LayoutType = FormLayout
+  override type LayoutType = FormLayout
 
-  type ButtonType = Button
+  override type ButtonType = Button
 
-  type FieldType[A] = AbstractField[A]
+  override type FieldType[A] = AbstractField[A]
 
-  type BaseFieldType[A, Obj] = GeneratedField[A, Obj]
+  override type BaseFieldType[A, Obj] = GeneratedField[A, Obj]
+
+  override type RequestType = Unit
 
   def field[A: Manifest, Obj](init: A,
                               caption: String,

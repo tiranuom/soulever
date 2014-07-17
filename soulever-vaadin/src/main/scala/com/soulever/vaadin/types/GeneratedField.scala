@@ -52,7 +52,7 @@ class GeneratedField[A : Manifest, Obj](init:A,
     }.left.map(_.getMessage).
       right.flatMap {
       _ =>
-        val right: Either[String, A] = Right[String, A](getValue)
+        val right: Either[String, A] = Right[String, A](value)
         (validators foldLeft right) {
           case (e, v) => e.right.flatMap(v)
         }
@@ -64,14 +64,14 @@ class GeneratedField[A : Manifest, Obj](init:A,
     }
   }
 
-  override def isValid: Boolean = {
+  override def valid_? : Boolean = {
     errorLabel.setVisible(false)
     val result: Either[String, A] = catching(classOf[InvalidValueException]).either {
       innerField.validate()
     }.left.map(t => s"$caption[${t.getMessage}]").
       right.flatMap {
       _ =>
-        val right: Either[String, A] = Right[String, A](getValue)
+        val right: Either[String, A] = Right[String, A](value)
         (validators foldLeft right) {
           case (e, v) => e.right.flatMap(v)
         }
@@ -84,8 +84,8 @@ class GeneratedField[A : Manifest, Obj](init:A,
     result.isRight
   }
 
-  override def isValid(obj: Obj): Boolean = {
-    val right: Either[String, A] = Right[String, A](getValue)
+  override def valid_?(obj: Obj): Boolean = {
+    val right: Either[String, A] = Right[String, A](value)
     val result = (secondaryValidators foldLeft right) {
       case (e, f) =>
         e.right.flatMap(a => f(a, obj))
@@ -102,7 +102,7 @@ class GeneratedField[A : Manifest, Obj](init:A,
 
   override def setEnabled(enabled: Boolean) = innerField.setEnabled(enabled)
 
-  override def getValue: A = innerField.getValue
+  override def value: A = innerField.getValue
 
   override def innerValidations: scala.List[(String, String)] = {
     innerField match {
@@ -111,7 +111,7 @@ class GeneratedField[A : Manifest, Obj](init:A,
     }
   }
 
-  override def setValue(newFieldValue: A) = innerField.setValue(newFieldValue)
+  override def value_=(newFieldValue: A) = innerField.setValue(newFieldValue)
 
   override def isEnabled: Boolean = innerField.isEnabled
 

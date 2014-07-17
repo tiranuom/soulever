@@ -41,7 +41,7 @@ class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
 
     var fieldsList = op.map(createField)
 
-    override def getValue: List[B] = fieldsList.map{ case (_, field, _) => field.getValue }
+    override def value: List[B] = fieldsList.map{ case (_, field, _) => field.value }
 
     override def setValueWithJsCmd(value: List[B]): JsCmd = {
       fieldsList = value.map(createField)

@@ -47,10 +47,10 @@ class GeneratedField[A :Manifest, Obj](init: A,
 
   def validate = validators.foldLeft(innerField.validate)(_.right.flatMap(_))
 
-  override def isValid: Boolean = validate.isRight
+  override def valid_? : Boolean = validate.isRight
 
-  override def isValid(obj: Obj): Boolean = {
-    val result: Either[String, A] = secondaryValidators.foldLeft(Right(getValue):Either[String, A]){
+  override def valid_?(obj: Obj): Boolean = {
+    val result: Either[String, A] = secondaryValidators.foldLeft(Right(value):Either[String, A]){
       case (v, f) => v.right.flatMap(a => f(a, obj))
     }
     result.left.foreach(updateError)
@@ -58,11 +58,11 @@ class GeneratedField[A :Manifest, Obj](init: A,
     result.isRight
   }
 
-  override def setValue(value: A): Unit = {
+  override def value_=(value: A): Unit = {
     toBeEvaluated = setValueWithJsCmd(value) & Replace(errorFieldId, <span id={errorFieldId}></span>)
   }
 
-  override def getValue: A = innerField.getValue
+  override def value: A = innerField.value
 
   override def innerI18nKeys: List[(String, String)] = innerField.innerI18nKeys
 
@@ -81,7 +81,7 @@ trait InnerField[A] {
 
   def innerValidations: List[(String, String)] = List.empty
 
-  def getValue: A
+  def value: A
 
   def setValueWithJsCmd(value: A): JsCmd
 

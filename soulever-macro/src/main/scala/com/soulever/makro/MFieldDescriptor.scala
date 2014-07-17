@@ -9,6 +9,7 @@ trait MFieldDescriptor[SelfType <: MFieldDescriptor[SelfType]] {
   type FieldType[_]
   type ButtonType
   type BaseFieldType[A, Obj] <: BaseField[A, Obj]
+  type RequestType
 
   def field[A : Manifest, Obj](init:A,
                                caption:String,
@@ -32,13 +33,13 @@ trait MFieldDescriptor[SelfType <: MFieldDescriptor[SelfType]] {
 
 trait BaseField[A, Obj] {
 
-  def isValid:Boolean
+  def valid_? :Boolean
 
-  def isValid(obj:Obj):Boolean
+  def valid_?(obj:Obj):Boolean
 
-  def setValue(value:A)
+  def value_=(value:A)
 
-  def getValue:A
+  def value:A
 
   def innerValidations:List[(String, String)]
 

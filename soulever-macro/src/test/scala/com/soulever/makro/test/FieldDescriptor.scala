@@ -89,16 +89,16 @@ case class TestBaseField[A, Obj](init: A,
 
   val inf = innerField(Option(init))
 
-  override def getValue: A = inf.getValue
+  override def value: A = inf.getValue
 
-  override def isValid(obj: Obj): Boolean = {
-    val right: Either[String, (A, Obj)] = Right[String, (A, Obj)](getValue -> obj)
+  override def valid_?(obj: Obj): Boolean = {
+    val right: Either[String, (A, Obj)] = Right[String, (A, Obj)](value -> obj)
     (secondaryValidators foldLeft right) {
       case (e, f) => e.right.flatMap(f.tupled).right.map(_ -> obj)
     }.isRight
   }
 
-  override def isValid: Boolean =
+  override def valid_?: Boolean =
     inf.
       validate.
       right.flatMap {
@@ -111,7 +111,7 @@ case class TestBaseField[A, Obj](init: A,
 
   override def innerI18nKeys: List[(String, String)] = ???
 
-  override def setValue(value: A): Unit = ???
+  override def value_=(value: A): Unit = ???
 }
 
 case class TestButton()

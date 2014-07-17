@@ -22,7 +22,7 @@ class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvid
       private val field: InnerField[Mapping[A#Value]] = new MappingFieldProvider(enum.values.toList.map(e => e.toString -> e.asInstanceOf[A#Value])).
         field(fieldDescriptor)(Mapping(op), baseField)
 
-      override def getValue: A#Value = field.getValue
+      override def value: A#Value = field.value
 
       override def elem: NodeSeq = field.elem
 

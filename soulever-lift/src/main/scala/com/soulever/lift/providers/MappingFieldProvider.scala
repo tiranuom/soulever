@@ -24,23 +24,23 @@ class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvid
 
       val uniqueId = LiftRules.funcNameGenerator()
 
-      var value = op
+      var tempValue = op
 
       val options: List[SelectableOption[A]] = mapping.map { case (id, a) => SelectableOption(a, id, "id" -> s"$uniqueId-$id")}
 
       val field = {
-        SHtml.ajaxSelectObj[A](options, Full(value.get), { (a: A) =>
-          value = a
+        SHtml.ajaxSelectObj[A](options, Full(tempValue.get), { (a: A) =>
+          tempValue = a
           JsCmd.unitToJsCmd();
         }, "id" -> uniqueId)
       }
 
-      override def getValue: Mapping[A] = value
+      override def value: Mapping[A] = tempValue
 
       override def setValueWithJsCmd(v: Mapping[A]): JsCmd = {
         mapping.find(_._2 == v.get).map{ v =>
           println(v)
-          value = v._2
+          tempValue = v._2
           println(options.collect{ case a if a.label == v._1 => a.attrs.toList})
 
           Run(
@@ -52,7 +52,7 @@ class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvid
 
       override def elem: NodeSeq = field
 
-      override def validate: Either[String, Mapping[A]] = Right(value)
+      override def validate: Either[String, Mapping[A]] = Right(tempValue)
     }
   }
 

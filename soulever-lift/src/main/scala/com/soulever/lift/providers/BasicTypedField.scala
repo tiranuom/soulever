@@ -35,7 +35,7 @@ class BasicTypedField[A, FD <: MFieldDescriptor[_]](baseField: GeneratedField[_,
     baseField.toJsCmd(res)
   }, List("id" -> uniqueId) ++ tpe.map("type" -> _).toList:_*)
 
-  def getValue: A = Try(decode(curValue)).getOrElse(empty)
+  def value: A = Try(decode(curValue)).getOrElse(empty)
 
   override def setValueWithJsCmd(value: A): JsCmd = {
     curValue = value.toString
@@ -129,7 +129,7 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
         updateState
       }, "id" -> uniqueId, "class" -> (if(state) "boolean-field-on" else "boolean-field-off"))
 
-      override def getValue: Boolean = state
+      override def value: Boolean = state
 
       override def setValueWithJsCmd(value: Boolean): JsCmd = {
         state = value

@@ -7,7 +7,7 @@ import com.soulever.lift.types.{GeneratedField, InnerField, TypeFieldProvider}
 import com.soulever.makro.MFieldDescriptor
 import com.soulever.makro.i18n.I18nKeyCollector
 import com.soulever.makro.types.Mapping
-import net.liftweb.http.SHtml
+import net.liftweb.http.{S, SHtml}
 import net.liftweb.http.js.JsCmd
 import net.liftweb.util.Props
 
@@ -27,6 +27,8 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor]{
   override type FieldType[A] = InnerField[A]
 
   override type BaseFieldType[A, Obj] = GeneratedField[A, Obj]
+
+  override type RequestType = S.type
 
   override def field[A: Manifest, Obj](init: A,
                                        caption: String,

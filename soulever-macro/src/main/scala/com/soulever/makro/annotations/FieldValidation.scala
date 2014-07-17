@@ -10,8 +10,12 @@ import scala.language.experimental.macros
  * @Date 7/6/14.
  */
 
-trait FieldValidation[A] extends StaticAnnotation with ValidationMessageProvider {
+trait FieldValidation[A] extends StaticAnnotation with ValidationMessageProvider with (A =/> String) {
   def validate(a:A):Boolean
+
+  override def isDefinedAt(x: A): Boolean = !validate(x)
+
+  override def apply(v1: A): String = defaultErrorMessage
 }
 
 object FieldValidation extends FieldBlockProvider {
