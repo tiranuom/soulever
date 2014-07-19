@@ -3,7 +3,7 @@ package com.soulever.lift.providers
 import com.soulever.lift.FieldDescriptor
 import com.soulever.lift.types.{GeneratedField, InnerField, TypeFieldProvider}
 import com.soulever.makro.MFieldDescriptor
-import com.soulever.makro.types.Mapping
+import com.soulever.makro.Soulever._
 import net.liftweb.common.{Full, Box}
 import net.liftweb.http.{LiftRules, SHtml}
 import net.liftweb.http.SHtml.SelectableOption

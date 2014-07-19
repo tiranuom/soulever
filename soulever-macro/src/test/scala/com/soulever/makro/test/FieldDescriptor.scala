@@ -47,7 +47,7 @@ class FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
 
   override def button(label: String, clickAction: () => Unit, fieldsList: List[BaseFieldType[_, _]]): ButtonType = ???
 
-  override def form(fields: List[BaseFieldType[_, _]], buttons: List[ButtonType]): LayoutType = ???
+  override def formElement(fields: List[BaseFieldType[_, _]], buttons: List[ButtonType]): LayoutType = ???
 
   override val i18nKeyCollector: I18nKeyCollector = null
 

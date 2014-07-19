@@ -1,6 +1,10 @@
-package com.soulever.makro
+package com.soulever.makro.types
 
-package object types {
+/**
+ * Created by tiran on 7/17/14.
+ */
+trait ImplicitTypes {
+
   implicit class Password(val get:String) {
     override def toString: String = "******"
   }

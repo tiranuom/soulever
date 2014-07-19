@@ -19,6 +19,9 @@ trait FieldValidation[A] extends StaticAnnotation with ValidationMessageProvider
 }
 
 object FieldValidation extends FieldBlockProvider {
+
+  def f(a:Int) = (min(0) orElse max(60) lift)(a).toLeft(a)
+
   type AnnotationType = FieldValidation[_]
 
   def validate[A:c.WeakTypeTag](c:Context)(field:c.universe.Symbol)(v:c.universe.Annotation) {

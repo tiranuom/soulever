@@ -2,7 +2,7 @@ package com.soulever.makro
 
 import com.soulever.makro.i18n.I18nKeyCollector
 import com.soulever.makro.providers.TypeFieldProvider
-import com.soulever.makro.types.Mapping
+import Soulever._
 
 trait MFieldDescriptor[SelfType <: MFieldDescriptor[SelfType]] {
   type LayoutType
@@ -18,11 +18,11 @@ trait MFieldDescriptor[SelfType <: MFieldDescriptor[SelfType]] {
                                secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
                                css:String = ""):SelfType#BaseFieldType[A, Obj]
 
-  def button(label:String, clickAction:() => Unit, fieldsList:List[SelfType#BaseFieldType[_, _]]):SelfType#ButtonType
+  def button(label:String, clickAction:() => Any, fieldsList:List[SelfType#BaseFieldType[_, _]]):SelfType#ButtonType
 
   def i18n(msg:String, defaultValue:Option[String] = None):String = i18nKeyCollector.i18n(msg, defaultValue)
 
-  def form(fields:List[SelfType#BaseFieldType[_, _]], buttons:List[SelfType#ButtonType]):LayoutType
+  def formElement(fields:List[SelfType#BaseFieldType[_, _]], buttons:List[SelfType#ButtonType]):SelfType#LayoutType
 
   def mappingFieldProvider[A](mapping:List[(String, A)]):TypeFieldProvider[Mapping[A], SelfType#FieldType, SelfType]
 

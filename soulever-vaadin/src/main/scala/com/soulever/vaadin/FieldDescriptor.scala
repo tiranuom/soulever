@@ -2,7 +2,7 @@ package com.soulever.vaadin
 
 import com.soulever.makro.MFieldDescriptor
 import com.soulever.makro.i18n.I18nKeyCollector
-import com.soulever.makro.types.Mapping
+import com.soulever.makro.Soulever._
 import com.soulever.vaadin.providers._
 import com.soulever.vaadin.types.{GeneratedField, TypeFieldProvider}
 import com.typesafe.config.ConfigFactory
@@ -31,10 +31,10 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
                               css:String): FieldDescriptor#BaseFieldType[A, Obj] =
     new GeneratedField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, this)
 
-  override def form(fields: List[GeneratedField[_, _]], buttons: List[Button]): FormLayout =
+  override def formElement(fields: List[GeneratedField[_, _]], buttons: List[Button]): FormLayout =
     new FormLayout(fields ::: List(new HorizontalLayout(buttons: _*)): _*)
 
-  override def button(label:String, clickAction: () => Unit, fieldsList:List[GeneratedField[_, _]] = List.empty): Button =
+  override def button(label:String, clickAction: () => Any, fieldsList:List[GeneratedField[_, _]] = List.empty): Button =
     new Button(i18n(label), new ClickListener {
       def buttonClick(event: ClickEvent) = clickAction()
     })

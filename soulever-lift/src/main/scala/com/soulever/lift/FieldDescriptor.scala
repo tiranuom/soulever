@@ -6,7 +6,7 @@ import com.soulever.lift.providers.{EnumerationFieldProvider, MappingFieldProvid
 import com.soulever.lift.types.{GeneratedField, InnerField, TypeFieldProvider}
 import com.soulever.makro.MFieldDescriptor
 import com.soulever.makro.i18n.I18nKeyCollector
-import com.soulever.makro.types.Mapping
+import com.soulever.makro.Soulever._
 import net.liftweb.http.{S, SHtml}
 import net.liftweb.http.js.JsCmd
 import net.liftweb.util.Props
@@ -38,13 +38,13 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor]{
                                        css: String): BaseFieldType[A, Obj] =
     new GeneratedField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, this)
 
-  override def button(label: String, clickAction: () => Unit, fieldsList:List[GeneratedField[_, _]] = List.empty): ButtonType =
+  override def button(label: String, clickAction: () => Any, fieldsList:List[GeneratedField[_, _]] = List.empty): ButtonType =
     SHtml.ajaxButton(i18n(label), () => {
       clickAction()
       fieldsList.map(_.collectUpdate).foldRight(JsCmd.unitToJsCmd())(_ & _)
     })
 
-  override def form(fields: List[GeneratedField[_, _]], buttons: List[ButtonType]): Elem =
+  override def formElement(fields: List[GeneratedField[_, _]], buttons: List[ButtonType]): Elem =
     <span>
       <table>
         <tbody>

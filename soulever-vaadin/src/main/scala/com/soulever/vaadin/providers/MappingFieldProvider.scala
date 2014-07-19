@@ -2,9 +2,9 @@ package com.soulever.vaadin.providers
 
 import com.soulever.vaadin.types.{TypeFieldProvider, GeneratedField}
 import com.soulever.vaadin.FieldDescriptor
-import com.soulever.makro.MFieldDescriptor
+import com.soulever.makro.{Soulever, MFieldDescriptor}
 import com.vaadin.ui._
-import com.soulever.makro.types.Mapping
+import Soulever._
 
 class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvider[Mapping[A], FieldDescriptor]{
 

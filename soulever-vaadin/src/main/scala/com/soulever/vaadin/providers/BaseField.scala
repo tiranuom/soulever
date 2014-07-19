@@ -8,8 +8,10 @@ import com.vaadin.data.Validator
 import scala.util.Try
 import com.vaadin.data.Validator.InvalidValueException
 import com.vaadin.ui.Button.{ClickEvent, ClickListener}
-import com.soulever.makro.types.{LongText, Password}
+import com.soulever.makro.Soulever._
 import java.util.Date
+
+import scala.util.control.NoStackTrace
 
 trait InlineValidationProvider {
 
@@ -41,7 +43,7 @@ class IntFieldProvider extends TypeFieldProvider[Int, FieldDescriptor] {
       val innerField = new TextField()
       innerField.setValue(op.toString)
       innerField.addValidator(new Validator {
-        def validate(value: scala.Any) = if(Try(value.toString.toInt).isFailure) throw new InvalidValueException(inlineValidations.head._1)
+        def validate(value: scala.Any) = if(Try(value.toString.toInt).isFailure) throw new InvalidValueException(inlineValidations.head._1) with NoStackTrace
       })
 
       override def setValue(newFieldValue: Int) = innerField.setValue(newFieldValue.toString)
@@ -65,7 +67,7 @@ class LongFieldProvider extends TypeFieldProvider[Long, FieldDescriptor] {
       val innerField = new TextField()
       innerField.setValue(op.toString)
       innerField.addValidator(new Validator(){
-        def validate(value: scala.Any) = if(Try(value.toString.toLong).isFailure) throw new InvalidValueException(inlineValidations.head._1)
+        def validate(value: scala.Any) = if(Try(value.toString.toLong).isFailure) throw new InvalidValueException(inlineValidations.head._1) with NoStackTrace
       })
 
       override def setValue(newFieldValue: Long) = innerField.setValue(newFieldValue.toString)
@@ -88,7 +90,7 @@ class FloatFieldProvider extends TypeFieldProvider[Float, FieldDescriptor] {
       val innerField = new TextField()
       innerField.setValue(op.toString)
       innerField.addValidator(new Validator {
-        def validate(value: scala.Any) = if(Try(value.toString.toFloat).isFailure) throw new InvalidValueException(inlineValidations.head._1)
+        def validate(value: scala.Any) = if(Try(value.toString.toFloat).isFailure) throw new InvalidValueException(inlineValidations.head._1) with NoStackTrace
       })
 
       override def getValue: Float = innerField.getValue.toFloat
@@ -112,7 +114,7 @@ class DoubleFieldProvider extends TypeFieldProvider[Double, FieldDescriptor] {
       val innerField = new TextField()
       innerField.setValue(op.toString)
       innerField.addValidator(new Validator {
-        def validate(value: scala.Any) = if(Try(value.toString.toDouble).isFailure) throw new InvalidValueException(inlineValidations.head._1)
+        def validate(value: scala.Any) = if(Try(value.toString.toDouble).isFailure) throw new InvalidValueException(inlineValidations.head._1) with NoStackTrace
       })
 
       override def getValue: Double = innerField.getValue.toDouble
@@ -176,7 +178,7 @@ class ByteFieldProvider extends TypeFieldProvider[Byte, FieldDescriptor]{
       innerField.setValue((op & 0xFF).toString)
       innerField.addValidator(new Validator {
         def validate(value: scala.Any) =
-          if(Try(value.toString.toByte).isFailure) throw new InvalidValueException(inlineValidations.head._1)
+          if(Try(value.toString.toByte).isFailure) throw new InvalidValueException(inlineValidations.head._1) with NoStackTrace
       })
 
       override def setValue(newFieldValue: Byte) = innerField.setValue((newFieldValue & 0xFF).toString)

@@ -1,13 +1,13 @@
 package com.soulever.vaadin.test
 
 import com.soulever.makro.annotations._
-import com.soulever.makro.types.{Mapping, Password}
-import com.soulever.vaadin.{FieldDescriptorImplicits, FormUtil}
+import com.soulever.makro.Soulever._
+import com.soulever.vaadin.Forms._
+import com.soulever.vaadin.{FieldDescriptorImplicits}
 import com.vaadin.navigator.{View, ViewProvider}
 import com.vaadin.ui._
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent
-import com.soulever.makro._
-import com.soulever._
+
 import scala.util.Try
 
 class PersonViewProvider(ui:UI) extends ViewProvider{
@@ -26,16 +26,14 @@ class PersonViewProvider(ui:UI) extends ViewProvider{
       def enter(event: ViewChangeEvent) = {}
     }
 
-    import types._
-
     @min(0)
     val i:Int = 3
 
-    val intField = FormUtil.field(i, "test.key", this)
+    val intField = field(i, "test.key", this)
 
     val person: TestCaseClass = new TestCaseClass(stringField = "name")
 
-    layout.addComponent(new HorizontalLayout(FormUtil.form(person, printPerson), intField, imp.button("Submit", () => println(Try(intField.validate())))))
+    layout.addComponent(new HorizontalLayout(form(person, submit(printPerson), reset), intField, imp.button("Submit", () => println(Try(intField.validate())))))
     layout
   }
 }
@@ -68,4 +66,4 @@ trait ServiceRegistry {
   lazy val intMapping:List[(String, V)] = (1 to 9).toList.map(i => "value" + i.toString -> V(i))
 }
 
-class Imp extends FieldDescriptorImplicits with vaadin.FieldDescriptor with ServiceRegistry
+class Imp extends FieldDescriptorImplicits with com.soulever.vaadin.FieldDescriptor with ServiceRegistry

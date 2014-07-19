@@ -6,7 +6,7 @@ import java.util.Date
 import com.soulever.lift.{FieldDescriptor, helpers}
 import com.soulever.lift.types.{TypeFieldProvider, InnerField, GeneratedField}
 import com.soulever.makro.{BaseField, MFieldDescriptor}
-import com.soulever.makro.types.{LongText, Password}
+import com.soulever.makro.Soulever._
 import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds.{SetHtml, SetValById, SetElemById}
 import net.liftweb.http.{SHtml, LiftRules}

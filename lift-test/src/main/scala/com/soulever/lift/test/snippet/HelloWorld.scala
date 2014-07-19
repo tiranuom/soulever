@@ -3,10 +3,11 @@ package com.soulever.lift.test.snippet
 import java.util.Date
 
 import com.soulever.lift.test.lib._
-import com.soulever.lift.{FieldDescriptor, FieldDescriptorImplicits, FormUtil}
+import com.soulever.lift.{FieldDescriptor, FieldDescriptorImplicits}
+import com.soulever.makro.Soulever._
+import com.soulever.lift.Forms._
 import com.soulever.makro.annotations._
 import com.soulever.makro.providers.TypeEmptyProvider
-import com.soulever.makro.types.{Mapping, Password}
 import net.liftweb.common._
 import net.liftweb.util.Helpers._
 
@@ -31,11 +32,17 @@ class HelloWorld {
 
   def howdy = {
     "#time *" #> date.map(_.toString) &
-      "#form" #> FormUtil.form(testCaseClass, { (t: TestCaseClass) =>
+      "#form" #> form(testCaseClass, submit[TestCaseClass, Unit](println), reset[TestCaseClass])
+
+  }
+
+  /*
+  * FormUtil.form(testCaseClass, { (t: TestCaseClass) =>
         println(t)
         Right(t)
-      })
-  }
+      })*/
+
+  val F = form_*(testCaseClass, submit[TestCaseClass, Unit](println), reset[TestCaseClass])
 
 }
 

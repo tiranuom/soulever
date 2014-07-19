@@ -3,8 +3,7 @@ package com.soulever.lift.providers
 import com.soulever.lift.FieldDescriptor
 import com.soulever.lift.types.{GeneratedField, InnerField, TypeFieldProvider}
 import com.soulever.makro.MFieldDescriptor
-import com.soulever.makro.types.Mapping
-import net.liftweb.http.js.JE.Value
+import com.soulever.makro.Soulever._
 import net.liftweb.http.js.JsCmd
 
 import scala.xml.NodeSeq
