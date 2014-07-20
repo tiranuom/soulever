@@ -36,7 +36,7 @@ class HelloWorld {
 case class TestCaseClass(@css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2Field, "not-equal") enumerationField:Bool.Bool = Bool.TRUE,
                          enumeration2Field:Bool.Bool = Bool.TRUE,
                          @mapping[Imp, V](_.intMapping) mappedIntField:Mapping[V] = V(1),
-                         @nonEmpty[String] stringField:String,
+                         @hidden @nonEmpty[String] stringField:String,
                          @min(0) @max(60) intField:Int = 0,
                          @min(0) @max(60) newIntField:Int = 0,
                          booleanField:Boolean = false,

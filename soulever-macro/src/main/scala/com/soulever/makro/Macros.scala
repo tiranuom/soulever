@@ -94,8 +94,8 @@ class MacrosImpl(val c:blackbox.Context) {
       //TODO After introducing empty providers, handle hidden fields without default values
 
       val noDefaultParamList = for {
-        (field, _, emptyValue) <- emptyValuesList if !field.asTerm.isParamWithDefault
-      } yield q"${field.name.toTermName} = $emptyValue"
+        field <- classParamsList if !field.asTerm.isParamWithDefault
+      } yield q"${field.name.toTermName} = ${emptyBlock(field, field.typeSignature)}.empty"
 
       val settersList = for {
         (field, fieldName, _) <- emptyValuesList
