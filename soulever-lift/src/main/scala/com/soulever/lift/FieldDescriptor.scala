@@ -5,13 +5,12 @@ import java.io.File
 import com.soulever.lift.providers.{EnumerationFieldProvider, MappingFieldProvider}
 import com.soulever.lift.types.{GeneratedField, InnerField, TypeFieldProvider}
 import com.soulever.makro.AbstractFieldDescriptor
-import com.soulever.makro.i18n.I18nKeyCollector
 import com.soulever.makro.Soulever._
-import net.liftweb.http.{S, SHtml}
+import com.soulever.makro.i18n.I18nKeyCollector
 import net.liftweb.http.js.JsCmd
+import net.liftweb.http.{S, SHtml}
 import net.liftweb.util.Props
 
-import scala.io.Source
 import scala.xml.{Elem, NodeSeq}
 
 /**
@@ -61,7 +60,7 @@ trait FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor]{
   override val i18nKeyCollector: I18nKeyCollector = new I18nKeyCollector(Props.get("i18n.print.path").map( new File(".").getAbsolutePath + _))
 }
 
-trait FieldDescriptorImplicits {
+trait FieldDescriptorImplicits extends com.soulever.makro.providers.FieldDescriptorImplicits{
   import com.soulever.lift.providers._
 
   implicit val stringFieldProvider = new StringFieldProvider

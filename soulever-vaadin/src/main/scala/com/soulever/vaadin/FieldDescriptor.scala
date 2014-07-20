@@ -55,7 +55,7 @@ object Props {
   def isPrintable = Try(props.getBoolean("i18n.print.on")).getOrElse(false)
 }
 
-trait FieldDescriptorImplicits {
+trait FieldDescriptorImplicits extends com.soulever.makro.providers.FieldDescriptorImplicits {
 
   implicit val stringFieldProvider = new TypeFieldProvider[String, FieldDescriptor] {
     override def empty: String = ""

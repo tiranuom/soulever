@@ -26,10 +26,6 @@ class HelloWorld {
 
   val i = Some(2)
 
-  implicit val stringTypeEmptyProvider = new TypeEmptyProvider[String] {
-    override def empty: String = ""
-  }
-
   def howdy = {
     "#time *" #> date.map(_.toString) &
       "#form" #> form(testCaseClass, submit[TestCaseClass, Unit](println), reset[TestCaseClass])

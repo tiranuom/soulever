@@ -191,7 +191,7 @@ class MacrosImpl(val c:blackbox.Context) {
         selfType.asSeenFrom(tpe, mdfClass)
       }
 
-      def expandParameters(s: Type = valueType, collector: List[Tree] = List.empty): List[Tree] = {
+      def expandParameters(s: Type = valueType, collector: List[(Tree, Tree)] = List.empty): List[(Tree, Tree)] = {
         val (pre, args) = s match {
           case NullaryMethodType(TypeRef(a:Type, _, b)) => a -> b
           case NullaryMethodType(a:Type) => a -> List.empty
@@ -201,25 +201,30 @@ class MacrosImpl(val c:blackbox.Context) {
 
         args match {
           case Nil if s <:< weakTypeOf[Enumeration#Value] =>
-            q"enumFieldProvider[$pre](${pre.termSymbol})" :: collector
+            (q"enumFieldProvider[$pre](${pre.termSymbol})", q"implicitly[providers.TypeEmptyProvider[$pre]]") :: collector
           case Nil =>
-            q"implicitly[providers.TypeFieldProvider[$s, $fieldType, $fieldDescriptorType]]" :: collector
+            (q"implicitly[providers.TypeFieldProvider[$s, $fieldType, $fieldDescriptorType]]", q"implicitly[providers.TypeEmptyProvider[$s]]") ::
+              collector
           case x :: Nil if s.typeConstructor =:= c.weakTypeOf[Mapping[Any]].typeConstructor =>
             if (mapping.isEmpty) c.error(fieldSymbol.pos, "Cannot find mapping for the given type")
-            q"mappingFieldProvider[$x]($mapping.getOrElse(List.empty))" :: collector
+            (q"mappingFieldProvider[$x]($mapping.getOrElse(List.empty))", q"mappingEmptyProvider($mapping.getOrElse(List.empty))") ::
+              collector
           case x :: Nil =>
             val providerTypes =
-              q"implicitly[providers.KindFieldProvider[${s.finalResultType.typeConstructor}, $fieldType, $fieldDescriptorType]]" ::
+              (q"implicitly[providers.KindFieldProvider[${s.finalResultType.typeConstructor}, $fieldType, $fieldDescriptorType]]",
+                q"implicitly[providers.KindEmptyProvider[${s.finalResultType.typeConstructor}]]") ::
                 collector
             expandParameters(x, providerTypes)
-          case _ => q"implicitly[providers.TypeFieldProvider[$s, $fieldType, $fieldDescriptorType]]" :: collector
+          case _ =>
+            (q"implicitly[providers.TypeFieldProvider[$s, $fieldType, $fieldDescriptorType]]", q"implicitly[providers.TypeEmptyProvider[$pre]]") ::
+            collector
         }
       }
 
       val fieldProviders = expandParameters()
-      (fieldProviders.tail foldLeft (q"${fieldProviders.head}.field(m)", q"${fieldProviders.head}.empty")){
+      (fieldProviders.tail foldLeft (q"${fieldProviders.head._1}.field(m)", q"${fieldProviders.head._2}.empty")){
         case ((underlyingFieldProvider, underlyingEmpty), thisFieldProvider) =>
-          (q"$thisFieldProvider.field($underlyingFieldProvider, $underlyingEmpty, m)", q"$thisFieldProvider.empty")
+          (q"${thisFieldProvider._1}.field($underlyingFieldProvider, $underlyingEmpty, m)", q"${thisFieldProvider._2}.empty")
       }
     }
 
