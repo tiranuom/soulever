@@ -65,6 +65,4 @@ class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
         case _ => List.empty
       }
     }
-
-  override def empty[B]: List[B] = List.empty
 }

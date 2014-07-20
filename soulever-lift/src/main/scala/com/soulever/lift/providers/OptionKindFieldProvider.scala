@@ -48,8 +48,6 @@ class OptionKindFieldProvider extends KindFieldProvider[Option, FieldDescriptor]
 
       override def innerValidations: List[(String, String)] = iField.innerValidations
 
-      override def validate: Either[String, Option[B]] = if (tempValue) iField.validate.right.map(Option.apply) else Right(empty)
+      override def validate: Either[String, Option[B]] = if (tempValue) iField.validate.right.map(Option.apply) else Right(None)
     }
-
-  override def empty[B]: Option[B] = None
 }

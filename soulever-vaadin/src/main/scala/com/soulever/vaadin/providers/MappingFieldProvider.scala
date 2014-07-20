@@ -8,8 +8,6 @@ import Soulever._
 
 class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvider[Mapping[A], FieldDescriptor]{
 
-  override def empty: Mapping[A] = new Mapping[A](mapping.head._2) //Might produce an exception
-
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: Mapping[A], baseField: GeneratedField[_,_]): AbstractField[Mapping[A]] =
     new CustomField[Mapping[A]] {
       def getType: Class[_ <: Mapping[A]] = classOf[Mapping[A]]

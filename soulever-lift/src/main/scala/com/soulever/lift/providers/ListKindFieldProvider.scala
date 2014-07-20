@@ -55,6 +55,4 @@ class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
 
     override def elem: NodeSeq = <div><ul id={listId}>{fieldsList.map(_._3)}</ul><div>{addButton}</div></div>
   }
-
-  override def empty[B]: List[B] = List.empty
 }

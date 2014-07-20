@@ -52,7 +52,4 @@ class OptionKindFieldProvider extends KindFieldProvider[Option, FieldDescriptor]
         case _ => List.empty
       }
     }
-
-
-  override def empty[B]: Option[B] = None
 }

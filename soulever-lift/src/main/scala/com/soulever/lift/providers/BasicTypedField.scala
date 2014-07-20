@@ -20,7 +20,6 @@ import scala.xml.{NodeSeq, Elem}
  */
 class BasicTypedField[A, FD <: AbstractFieldDescriptor[_]](baseField: GeneratedField[_, _],
                                                     op:A,
-                                                    empty:A,
                                                     encode:A => String,
                                                     decode:String => A,
                                                     errorMsg:String = "",
@@ -35,7 +34,7 @@ class BasicTypedField[A, FD <: AbstractFieldDescriptor[_]](baseField: GeneratedF
     baseField.toJsCmd(res)
   }, List("id" -> uniqueId) ++ tpe.map("type" -> _).toList:_*)
 
-  def value: A = Try(decode(curValue)).getOrElse(empty)
+  def value: A = Try(decode(curValue)).getOrElse(op)
 
   override def setValueWithJsCmd(value: A): JsCmd = {
     curValue = value.toString
@@ -53,54 +52,42 @@ class StringFieldProvider extends TypeFieldProvider[String, FieldDescriptor] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: String, baseField:GeneratedField[_, _]): InnerField[String] =
-    new BasicTypedField[String, FD](baseField, op, empty, identity, identity)
-
-  override def empty: String = ""
+    new BasicTypedField[String, FD](baseField, op, identity, identity)
 }
 
 class IntFieldProvider extends TypeFieldProvider[Int, FieldDescriptor] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Int, baseField: GeneratedField[_, _]): InnerField[Int] =
-    new BasicTypedField[Int, FD](baseField, op, empty, _.toString, _.toInt, "integer")
-
-  override def empty: Int = 0
+    new BasicTypedField[Int, FD](baseField, op, _.toString, _.toInt, "integer")
 }
 
 class LongFieldProvider extends TypeFieldProvider[Long, FieldDescriptor] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Long, baseField: GeneratedField[_, _]): InnerField[Long] =
-    new BasicTypedField[Long, FD](baseField, op, empty, _.toString, _.toLong, "long")
-
-  override def empty: Long = 0
+    new BasicTypedField[Long, FD](baseField, op, _.toString, _.toLong, "long")
 }
 
 class FloatFieldProvider extends TypeFieldProvider[Float, FieldDescriptor] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Float, baseField: GeneratedField[_, _]): InnerField[Float] =
-    new BasicTypedField[Float, FD](baseField, op, empty, _.toString, _.toFloat, "float")
-
-  override def empty: Float = 0
+    new BasicTypedField[Float, FD](baseField, op, _.toString, _.toFloat, "float")
 }
 
 class DoubleFieldProvider extends TypeFieldProvider[Double, FieldDescriptor] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Double, baseField: GeneratedField[_, _]): InnerField[Double] =
-    new BasicTypedField[Double, FD](baseField, op, empty, _.toString, _.toDouble, "double")
-
-  override def empty: Double = 0
+    new BasicTypedField[Double, FD](baseField, op, _.toString, _.toDouble, "double")
 }
 
 class ByteFieldProvider extends TypeFieldProvider[Byte, FieldDescriptor] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Byte, baseField: GeneratedField[_, _]): InnerField[Byte] =
-    new BasicTypedField[Byte, FD](baseField, op, empty, a => (a & 0xFF).toString, _.toByte, "byte")
-
-  override def empty: Byte = 0
+    new BasicTypedField[Byte, FD](baseField, op, a => (a & 0xFF).toString, _.toByte, "byte")
 }
 
 class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
@@ -140,17 +127,13 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
 
       override def validate: Either[String, Boolean] = Right(true)
     }
-
-  override def empty: Boolean = true
 }
 
 class PasswordFieldProvider extends TypeFieldProvider[Password, FieldDescriptor] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Password, baseField: GeneratedField[_, _]): InnerField[Password] =
-    new BasicTypedField[Password, FD](baseField, op, empty, _.get, Password, tpe = Some("password"))
-
-  override def empty: Password = ""
+    new BasicTypedField[Password, FD](baseField, op, _.get, Password, tpe = Some("password"))
 }
 
 class DateFieldProvider extends TypeFieldProvider[Date, FieldDescriptor] {
@@ -160,21 +143,17 @@ class DateFieldProvider extends TypeFieldProvider[Date, FieldDescriptor] {
 
     val format = new SimpleDateFormat("dd/MM/yyyy")
 
-    new BasicTypedField[Date, FD](baseField, op, empty, format.format, format.parse, "date", Some("date"))
+    new BasicTypedField[Date, FD](baseField, op, format.format, format.parse, "date", Some("date"))
   }
-
-  override def empty: Date = new Date()
 }
 
 class LongTextFieldProvider extends TypeFieldProvider[LongText, FieldDescriptor] {
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: LongText, baseField: FieldDescriptor#BaseFieldType[_, _]): InnerField[LongText] =
-    new BasicTypedField[LongText, FD](baseField, op, empty, _.value, LongText) {
+    new BasicTypedField[LongText, FD](baseField, op, _.value, LongText) {
       override protected val field: Elem = SHtml.ajaxTextarea(curValue, { s =>
         curValue = s
         baseField.toJsCmd(baseField.validate)
       }, "id" -> uniqueId)
     }
-
-  override def empty: LongText = ""
 }

@@ -29,6 +29,4 @@ class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvid
 
       override def setValueWithJsCmd(value: A#Value): JsCmd = field.setValueWithJsCmd(value)
     }
-
-  override def empty: A#Value = enum.values.head
 }

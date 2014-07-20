@@ -55,6 +55,4 @@ class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvid
       override def validate: Either[String, Mapping[A]] = Right(tempValue)
     }
   }
-
-  override def empty: Mapping[A] = new Mapping[A](mapping.head._2)
 }

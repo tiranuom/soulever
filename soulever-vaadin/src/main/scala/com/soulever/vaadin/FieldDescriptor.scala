@@ -58,8 +58,6 @@ object Props {
 trait FieldDescriptorImplicits extends com.soulever.makro.providers.FieldDescriptorImplicits {
 
   implicit val stringFieldProvider = new TypeFieldProvider[String, FieldDescriptor] {
-    override def empty: String = ""
-
     override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: String, baseField: GeneratedField[_, _]): AbstractField[String] = {
       val field: TextField = new TextField()
       field.setValue(op)

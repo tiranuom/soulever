@@ -52,9 +52,6 @@ class IntFieldProvider extends TypeFieldProvider[Int, FieldDescriptor] {
 
       override def inlineValidations: List[(String,String)] = List("integer" -> "should be an integer")
     }
-
-
-  override def empty: Int = 0
 }
 
 class LongFieldProvider extends TypeFieldProvider[Long, FieldDescriptor] {
@@ -76,9 +73,6 @@ class LongFieldProvider extends TypeFieldProvider[Long, FieldDescriptor] {
 
       override def inlineValidations: List[(String,String)] = List("long" -> "should be a long")
     }
-
-
-  override def empty: Long = 0
 }
 
 class FloatFieldProvider extends TypeFieldProvider[Float, FieldDescriptor] {
@@ -99,9 +93,6 @@ class FloatFieldProvider extends TypeFieldProvider[Float, FieldDescriptor] {
 
       override def inlineValidations: List[(String,String)] = List("float" -> "should be a float value")
     }
-
-
-  override def empty: Float = 0
 }
 
 class DoubleFieldProvider extends TypeFieldProvider[Double, FieldDescriptor] {
@@ -123,9 +114,6 @@ class DoubleFieldProvider extends TypeFieldProvider[Double, FieldDescriptor] {
 
       override def inlineValidations: List[(String,String)] = List("double" -> "should be a double value")
     }
-
-
-  override def empty: Double = 0
 }
 
 class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
@@ -163,9 +151,6 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
 
       override def inlineKeys: List[(String,String)] = List("on" -> "On", "off" -> "Off")
     }
-
-
-  override def empty: Boolean = false
 }
 
 class ByteFieldProvider extends TypeFieldProvider[Byte, FieldDescriptor]{
@@ -187,8 +172,6 @@ class ByteFieldProvider extends TypeFieldProvider[Byte, FieldDescriptor]{
 
       override def inlineValidations: List[(String,String)] = List("byte" -> "should be a byte value")
     }
-
-  override def empty: Byte = 0
 }
 
 class PasswordFieldProvider extends TypeFieldProvider[Password, FieldDescriptor]{
@@ -207,8 +190,6 @@ class PasswordFieldProvider extends TypeFieldProvider[Password, FieldDescriptor]
 
       override def inlineValidations: List[(String, String)] = List.empty
     }
-
-  override def empty: Password = new Password("")
 }
 
 class LongTextFieldProvider extends TypeFieldProvider[LongText, FieldDescriptor]{
@@ -229,8 +210,6 @@ class LongTextFieldProvider extends TypeFieldProvider[LongText, FieldDescriptor]
 
       override def inlineValidations: List[(String, String)] = List.empty
     }
-
-  override def empty: LongText = new LongText("")
 }
 
 class DateFieldProvider extends TypeFieldProvider[Date, FieldDescriptor]{
@@ -240,6 +219,4 @@ class DateFieldProvider extends TypeFieldProvider[Date, FieldDescriptor]{
     dateField.setValue(op)
     dateField
   }
-
-  override def empty: Date = new Date()
 }

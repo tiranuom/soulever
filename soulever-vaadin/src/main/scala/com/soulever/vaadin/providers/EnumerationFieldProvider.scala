@@ -24,7 +24,4 @@ class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvid
 
       override def focus() = innerField.focus()
     }
-
-
-  override def empty: A#Value = enum.values.head
 }
