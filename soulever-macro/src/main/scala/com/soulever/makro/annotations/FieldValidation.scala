@@ -15,12 +15,10 @@ trait FieldValidation[A] extends StaticAnnotation with ValidationMessageProvider
 
   override def isDefinedAt(x: A): Boolean = !validate(x)
 
-  override def apply(v1: A): String = defaultErrorMessage
+  override def apply(v1: A): String = message
 }
 
 object FieldValidation extends FieldBlockProvider {
-
-  def f(a:Int) = (min(0) orElse max(60) lift)(a).toLeft(a)
 
   type AnnotationType = FieldValidation[_]
 

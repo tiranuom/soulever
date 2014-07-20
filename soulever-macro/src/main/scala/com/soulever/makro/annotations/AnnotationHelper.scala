@@ -5,7 +5,7 @@ package com.soulever.makro.annotations
  */
 trait AnnotationHelper {
   val css             = com.soulever.makro.annotations.css
-  val field           = com.soulever.makro.annotations.field
+  val field           = com.soulever.makro.annotations.hidden
   val mapping         = com.soulever.makro.annotations.mapping
   val custom          = com.soulever.makro.annotations.custom
   val max             = com.soulever.makro.annotations.max

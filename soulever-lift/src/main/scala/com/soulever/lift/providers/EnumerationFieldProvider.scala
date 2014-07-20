@@ -2,7 +2,7 @@ package com.soulever.lift.providers
 
 import com.soulever.lift.FieldDescriptor
 import com.soulever.lift.types.{GeneratedField, InnerField, TypeFieldProvider}
-import com.soulever.makro.MFieldDescriptor
+import com.soulever.makro.AbstractFieldDescriptor
 import com.soulever.makro.Soulever._
 import net.liftweb.http.js.JsCmd
 
@@ -14,7 +14,7 @@ import scala.xml.NodeSeq
  */
 class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvider[A#Value, FieldDescriptor] {
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
+  override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: A#Value, baseField: GeneratedField[_, _]): InnerField[A#Value] =
     new InnerField[A#Value] {
 

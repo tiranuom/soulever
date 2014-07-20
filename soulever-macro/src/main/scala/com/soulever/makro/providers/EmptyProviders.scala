@@ -8,6 +8,10 @@ package com.soulever.makro.providers
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
+trait TypeEmptyProvider[A] {
+  def empty:A
+}
+
 object TypeEmptyProvider {
   implicit def materializeNumTypeEmptyProvider[A <% Long]:TypeEmptyProvider[A] = macro materializeNumTypeEmptyProvider_impl[A]
 
@@ -19,7 +23,6 @@ object TypeEmptyProvider {
          def empty = 0
        }
        """
-    //    println(tree)
     tree
   }
 
@@ -33,8 +36,6 @@ object TypeEmptyProvider {
          def empty = ${tag.tpe.typeSymbol.name.toTermName}.values.toList.head
        }
        """
-
-    println(tree)
     tree
   }
 
@@ -48,15 +49,10 @@ object TypeEmptyProvider {
          def empty = ${tag.tpe.finalResultType.typeSymbol.companion}.empty
        }
        """
-
-    //    println(tree)
     tree
   }
 }
 
-trait TypeEmptyProvider[A] {
-  def empty:A
-}
 
 trait KindEmptyProvider[A[_]] {
   def empty[B]:A[B]
@@ -73,7 +69,6 @@ object KindEmptyProvider {
          def empty[B] = ${tag.tpe.finalResultType.typeSymbol.companion}.empty[B]
        }
        """
-    //    println(tree)
     tree
   }
 }

@@ -2,7 +2,7 @@ package com.soulever.vaadin.providers
 
 import com.soulever.vaadin.types.{TypeFieldProvider, GeneratedField}
 import com.soulever.vaadin.FieldDescriptor
-import com.soulever.makro.{Soulever, MFieldDescriptor}
+import com.soulever.makro.{Soulever, AbstractFieldDescriptor}
 import com.vaadin.ui._
 import Soulever._
 
@@ -10,7 +10,7 @@ class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvid
 
   override def empty: Mapping[A] = new Mapping[A](mapping.head._2) //Might produce an exception
 
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: Mapping[A], baseField: GeneratedField[_,_]): AbstractField[Mapping[A]] =
+  override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: Mapping[A], baseField: GeneratedField[_,_]): AbstractField[Mapping[A]] =
     new CustomField[Mapping[A]] {
       def getType: Class[_ <: Mapping[A]] = classOf[Mapping[A]]
 

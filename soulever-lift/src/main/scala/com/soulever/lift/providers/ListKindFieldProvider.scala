@@ -2,7 +2,7 @@ package com.soulever.lift.providers
 
 import com.soulever.lift.FieldDescriptor
 import com.soulever.lift.types.{GeneratedField, InnerField, KindFieldProvider}
-import com.soulever.makro.MFieldDescriptor
+import com.soulever.makro.AbstractFieldDescriptor
 import net.liftweb.http.js.{JsCmd, JsExp}
 import net.liftweb.http.js.jquery.JqJsCmds.{JqSetHtml, AppendHtml}
 import net.liftweb.http.{LiftRules, SHtml}
@@ -15,7 +15,7 @@ import scala.xml.{Elem, NodeSeq}
  * @Date 7/1/14.
  */
 class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
-  override def field[B, FD <: MFieldDescriptor[_]](innerField: (B, GeneratedField[_, _]) => InnerField[B],
+  override def field[B, FD <: AbstractFieldDescriptor[_]](innerField: (B, GeneratedField[_, _]) => InnerField[B],
                                                    innerEmpty: B,
                                                    fieldDescriptor: FD)
                                                   (op: List[B],

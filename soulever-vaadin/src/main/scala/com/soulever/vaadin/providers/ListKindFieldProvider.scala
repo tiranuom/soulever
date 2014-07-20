@@ -1,13 +1,13 @@
 package com.soulever.vaadin.providers
 
 import com.soulever.vaadin.FieldDescriptor
-import com.soulever.makro.MFieldDescriptor
+import com.soulever.makro.AbstractFieldDescriptor
 import com.soulever.vaadin.types.KindFieldProvider
 import com.vaadin.ui._
 
 class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
 
-  override def field[B, FD <: MFieldDescriptor[_]](innerField: (B, FieldDescriptor#BaseFieldType[_, _]) => AbstractField[B], empty: B, fieldDescriptor: FD)
+  override def field[B, FD <: AbstractFieldDescriptor[_]](innerField: (B, FieldDescriptor#BaseFieldType[_, _]) => AbstractField[B], empty: B, fieldDescriptor: FD)
                                                   (op: List[B], baseField: FieldDescriptor#BaseFieldType[_, _]): AbstractField[List[B]] =
     new CustomField[List[B]] with InlineValidationProvider with InlineKeyProvider {
       def getType: Class[_ <: List[B]] = classOf[List[B]]

@@ -2,7 +2,7 @@ package com.soulever.lift.providers
 
 import com.soulever.lift.FieldDescriptor
 import com.soulever.lift.types.{GeneratedField, InnerField, TypeFieldProvider}
-import com.soulever.makro.MFieldDescriptor
+import com.soulever.makro.AbstractFieldDescriptor
 import com.soulever.makro.Soulever._
 import net.liftweb.common.{Full, Box}
 import net.liftweb.http.{LiftRules, SHtml}
@@ -17,7 +17,7 @@ import scala.xml.NodeSeq
  * @Date 6/30/14.
  */
 class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvider[Mapping[A], FieldDescriptor] {
-  override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)
+  override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Mapping[A], baseField: GeneratedField[_, _]): InnerField[Mapping[A]] = {
 
     new InnerField[Mapping[A]] {

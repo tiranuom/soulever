@@ -22,8 +22,8 @@ object Macros {
    * @tparam FD
    * @return
    */
-  def form[ClassType, FD <: MFieldDescriptor[_]](instance:ClassType, buttons:List[ButtonBlock[ClassType]])
-                                                 (implicit moduleDesc:FD):FD#LayoutType= macro MacrosImpl.form_impl[ClassType, FD]
+  def form[ClassType, FD <: AbstractFieldDescriptor[_]](instance:ClassType, buttons:List[ButtonBlock[ClassType]])
+                                                       (implicit moduleDesc:FD):FD#LayoutType= macro MacrosImpl.form_impl[ClassType, FD]
 
   /**
    * Generates a code for creating a UI field for given value type
@@ -37,10 +37,10 @@ object Macros {
    * @tparam ClassType
    * @return
    */
-  def field[FieldType, FD <: MFieldDescriptor[_], ClassType](value:FieldType,
-                                                             i18nKey:String,
-                                                             ths:ClassType)
-                                                            (implicit moduleDesc:FD):FD#BaseFieldType[FieldType, ClassType] = macro MacrosImpl.field_impl[FieldType, FD, ClassType]
+  def field[FieldType, FD <: AbstractFieldDescriptor[_], ClassType](value:FieldType,
+                                                                    i18nKey:String,
+                                                                    ths:ClassType)
+                                                                   (implicit moduleDesc:FD):FD#BaseFieldType[FieldType, ClassType] = macro MacrosImpl.field_impl[FieldType, FD, ClassType]
 
 
 }
@@ -49,8 +49,8 @@ class MacrosImpl(val c:blackbox.Context) {
   import c.universe._
 
   def form_impl[ClassType:c.WeakTypeTag, FD:c.WeakTypeTag](instance:c.Expr[ClassType],
-                                                            buttons:c.Expr[List[ButtonBlock[ClassType]]])
-                                                           (moduleDesc:c.Expr[FD]) = {
+                                                           buttons:c.Expr[List[ButtonBlock[ClassType]]])
+                                                          (moduleDesc:c.Expr[FD]) = {
 
     if(Option(instance.tree.tpe.typeSymbol).filter(_.isClass).filter(_.asClass.isCaseClass).isEmpty){
       c.abort(c.enclosingPosition, "Only case classes are supported.")
@@ -68,7 +68,7 @@ class MacrosImpl(val c:blackbox.Context) {
       flatMap(_.asMethod.paramLists.flatten)
 
     val fieldDataList = for {
-      field <- classParamsList if field.annotations.map(_.tree.tpe).contains(weakTypeOf[field])
+      field <- classParamsList if !field.annotations.map(_.tree.tpe).contains(weakTypeOf[hidden])
     } yield generateFieldBlock[FD, ClassType](
         valueTree   = q"$classExpr.${field.name.toTermName}",
         fieldSymbol = field,
@@ -86,10 +86,12 @@ class MacrosImpl(val c:blackbox.Context) {
     val buttonCode = {
       val fieldDescriptorType = {
         val tpe = c.weakTypeOf[FD]
-        val mdfClass = typeOf[MFieldDescriptor[_]].typeSymbol.asClass
+        val mdfClass = typeOf[AbstractFieldDescriptor[_]].typeSymbol.asClass
         val selfType = mdfClass.typeParams.head.asType.toType
         selfType.asSeenFrom(tpe, mdfClass)
       }
+
+      //TODO After introducing empty providers, handle hidden fields without default values
 
       val noDefaultParamList = for {
         (field, _, emptyValue) <- emptyValuesList if !field.asTerm.isParamWithDefault
@@ -124,7 +126,7 @@ class MacrosImpl(val c:blackbox.Context) {
       m.i18nKeyCollector.addBlock($classI18nKey)
       ..$fieldCodeBlocks
       val fields = $fieldNamesList
-      val formOb = m.formElement(fields, $buttonCode)
+      val formOb = m.formComponent(fields, $buttonCode)
       m.i18nKeyCollector.print
       formOb
     """
@@ -184,7 +186,7 @@ class MacrosImpl(val c:blackbox.Context) {
 
       val fieldDescriptorType = {
         val tpe = c.weakTypeOf[FD]
-        val mdfClass = typeOf[MFieldDescriptor[_]].typeSymbol.asClass
+        val mdfClass = typeOf[AbstractFieldDescriptor[_]].typeSymbol.asClass
         val selfType = mdfClass.typeParams.head.asType.toType
         selfType.asSeenFrom(tpe, mdfClass)
       }
@@ -245,7 +247,7 @@ class MacrosImpl(val c:blackbox.Context) {
         import com.soulever.makro._
         m.i18nKeyCollector.insert($compoundI18nKey, $fieldI18nKey.naturalNotation)
 
-        val field = m.field[$valueType, ${ths.actualType}](
+        val field = m.fieldComponent[$valueType, ${ths.actualType}](
           init                = $valueTree,
           caption             = ($compoundI18nKey).trim,
           innerField          = $innerField,

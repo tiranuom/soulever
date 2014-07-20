@@ -1,7 +1,7 @@
 package com.soulever.vaadin.providers
 
 import com.soulever.vaadin.FieldDescriptor
-import com.soulever.makro.MFieldDescriptor
+import com.soulever.makro.AbstractFieldDescriptor
 import com.soulever.vaadin.types.KindFieldProvider
 import com.vaadin.ui.{HorizontalLayout, Component, CheckBox, AbstractField}
 import com.vaadin.data.Property.{ValueChangeEvent, ValueChangeListener}
@@ -9,7 +9,7 @@ import com.vaadin.data.Property
 
 class OptionKindFieldProvider extends KindFieldProvider[Option, FieldDescriptor] {
 
-  override def field[B, FD <: MFieldDescriptor[_]](inf: (B, FieldDescriptor#BaseFieldType[_,_]) => AbstractField[B], empty:B, fieldDescriptor: FD)
+  override def field[B, FD <: AbstractFieldDescriptor[_]](inf: (B, FieldDescriptor#BaseFieldType[_,_]) => AbstractField[B], empty:B, fieldDescriptor: FD)
                                                   (op: Option[B], baseField: FieldDescriptor#BaseFieldType[_, _]): AbstractField[Option[B]] =
     new BaseField[Option[B]] with InlineKeyProvider with InlineValidationProvider {
       def getType: Class[_ <: Option[B]] = classOf[Option[B]]

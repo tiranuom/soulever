@@ -2,7 +2,7 @@ package com.soulever.lift.providers
 
 import com.soulever.lift.FieldDescriptor
 import com.soulever.lift.types.{GeneratedField, InnerField, KindFieldProvider}
-import com.soulever.makro.MFieldDescriptor
+import com.soulever.makro.AbstractFieldDescriptor
 import net.liftweb.http.js.JsCmd
 import net.liftweb.http.{LiftRules, SHtml}
 import net.liftweb.http.js.JsCmds.{Run, SetValById}
@@ -14,7 +14,7 @@ import scala.xml.NodeSeq
  * @Date 7/1/14.
  */
 class OptionKindFieldProvider extends KindFieldProvider[Option, FieldDescriptor] {
-  override def field[B, FD <: MFieldDescriptor[_]](innerField: (B, GeneratedField[_, _]) => InnerField[B], innerEmpty: B, fieldDescriptor: FD)
+  override def field[B, FD <: AbstractFieldDescriptor[_]](innerField: (B, GeneratedField[_, _]) => InnerField[B], innerEmpty: B, fieldDescriptor: FD)
                                                   (op: Option[B], baseField: GeneratedField[_, _]): InnerField[Option[B]] =
     new InnerField[Option[B]] {
 

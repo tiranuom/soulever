@@ -37,7 +37,7 @@ class FormBlockMacros(val c:blackbox.Context) {
 }
 
 sealed trait ButtonBlock[A] {
-  def button[FD1 <: MFieldDescriptor[FD1], FD <: MFieldDescriptor[FD1]](label:String,
+  def button[FD1 <: AbstractFieldDescriptor[FD1], FD <: AbstractFieldDescriptor[FD1]](label:String,
                                                                         fieldsList:List[FD1#BaseFieldType[_, A]],
                                                                         createInstance:List[FD1#BaseFieldType[_, A]] => A,
                                                                         setEmpties: () => Unit)
@@ -47,7 +47,7 @@ sealed trait ButtonBlock[A] {
 
 case class SubmitButton[A, B](f:A => B) extends ButtonBlock[A] {
 
-  override def button[FD1 <: MFieldDescriptor[FD1], FD <: MFieldDescriptor[FD1]](label: String,
+  override def button[FD1 <: AbstractFieldDescriptor[FD1], FD <: AbstractFieldDescriptor[FD1]](label: String,
                                                                                  fieldsList: List[FD1#BaseFieldType[_, A]],
                                                                                  createInstance: (List[FD1#BaseFieldType[_, A]]) => A,
                                                                                  setEmpties: () => Unit)
@@ -65,7 +65,7 @@ case class SubmitButton[A, B](f:A => B) extends ButtonBlock[A] {
 }
 
 case class ResetButton[A]() extends ButtonBlock[A] {
-  override def button[FD1 <: MFieldDescriptor[FD1], FD <: MFieldDescriptor[FD1]](label: String,
+  override def button[FD1 <: AbstractFieldDescriptor[FD1], FD <: AbstractFieldDescriptor[FD1]](label: String,
                                                                                  fieldsList: List[FD1#BaseFieldType[_, A]],
                                                                                  createInstance: (List[FD1#BaseFieldType[_, A]]) => A,
                                                                                  setEmpties: () => Unit)
@@ -77,7 +77,7 @@ case class ResetButton[A]() extends ButtonBlock[A] {
 
 case class ExternalActionButton[A, B](f: () => B) extends ButtonBlock[A] {
 
-  override def button[FD1 <: MFieldDescriptor[FD1], FD <: MFieldDescriptor[FD1]](label: String,
+  override def button[FD1 <: AbstractFieldDescriptor[FD1], FD <: AbstractFieldDescriptor[FD1]](label: String,
                                                                                  fieldsList: List[FD1#BaseFieldType[_, A]],
                                                                                  createInstance: (List[FD1#BaseFieldType[_, A]]) => A,
                                                                                  setEmpties: () => Unit)

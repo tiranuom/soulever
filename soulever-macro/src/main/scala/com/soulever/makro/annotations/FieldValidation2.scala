@@ -8,8 +8,12 @@ import scala.reflect.macros.blackbox.Context
  * @Auther tiran 
  * @Date 7/6/14.
  */
-trait FieldValidation2[A, Obj] extends StaticAnnotation with ValidationMessageProvider{
+trait FieldValidation2[A, Obj] extends StaticAnnotation with ValidationMessageProvider with ((A, Obj) =/> String){
   def validate(a:A, obj:Obj):Boolean
+
+  override def isDefinedAt(x: (A, Obj)): Boolean = validate(x._1, x._2)
+
+  override def apply(v1: (A, Obj)): String = message
 }
 
 object FieldValidation2 extends FieldBlockProvider {

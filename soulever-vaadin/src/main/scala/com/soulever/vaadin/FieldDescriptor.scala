@@ -1,6 +1,6 @@
 package com.soulever.vaadin
 
-import com.soulever.makro.MFieldDescriptor
+import com.soulever.makro.AbstractFieldDescriptor
 import com.soulever.makro.i18n.I18nKeyCollector
 import com.soulever.makro.Soulever._
 import com.soulever.vaadin.providers._
@@ -11,7 +11,7 @@ import com.vaadin.ui._
 
 import scala.util.Try
 
-trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
+trait FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor] {
 
   override type LayoutType = FormLayout
 
@@ -23,7 +23,7 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
 
   override type RequestType = Unit
 
-  def field[A: Manifest, Obj](init: A,
+  def fieldComponent[A: Manifest, Obj](init: A,
                               caption: String,
                               innerField: (A, GeneratedField[A, Obj]) => AbstractField[A],
                               validators: List[(A) => Either[String, A]],
@@ -31,7 +31,7 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor] {
                               css:String): FieldDescriptor#BaseFieldType[A, Obj] =
     new GeneratedField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, this)
 
-  override def formElement(fields: List[GeneratedField[_, _]], buttons: List[Button]): FormLayout =
+  override def formComponent(fields: List[GeneratedField[_, _]], buttons: List[Button]): FormLayout =
     new FormLayout(fields ::: List(new HorizontalLayout(buttons: _*)): _*)
 
   override def button(label:String, clickAction: () => Any, fieldsList:List[GeneratedField[_, _]] = List.empty): Button =
@@ -60,7 +60,7 @@ trait FieldDescriptorImplicits {
   implicit val stringFieldProvider = new TypeFieldProvider[String, FieldDescriptor] {
     override def empty: String = ""
 
-    override def field[FD <: MFieldDescriptor[_]](fieldDescriptor: FD)(op: String, baseField: GeneratedField[_, _]): AbstractField[String] = {
+    override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: String, baseField: GeneratedField[_, _]): AbstractField[String] = {
       val field: TextField = new TextField()
       field.setValue(op)
       field

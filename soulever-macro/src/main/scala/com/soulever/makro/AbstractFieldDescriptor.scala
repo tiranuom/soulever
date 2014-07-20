@@ -4,29 +4,30 @@ import com.soulever.makro.i18n.I18nKeyCollector
 import com.soulever.makro.providers.TypeFieldProvider
 import Soulever._
 
-trait MFieldDescriptor[SelfType <: MFieldDescriptor[SelfType]] {
+trait AbstractFieldDescriptor[FieldDescriptor <: AbstractFieldDescriptor[FieldDescriptor]] {
   type LayoutType
   type FieldType[_]
   type ButtonType
   type BaseFieldType[A, Obj] <: BaseField[A, Obj]
   type RequestType
 
-  def field[A : Manifest, Obj](init:A,
+  def fieldComponent[A : Manifest, Obj](init:A,
                                caption:String,
-                               innerField:(A, SelfType#BaseFieldType[A, Obj]) => SelfType#FieldType[A],
+                               innerField:(A, FieldDescriptor#BaseFieldType[A, Obj]) => FieldDescriptor#FieldType[A],
                                validators:List[A => Either[String, A]] = List.empty,
                                secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
-                               css:String = ""):SelfType#BaseFieldType[A, Obj]
+                               css:String = ""):FieldDescriptor#BaseFieldType[A, Obj]
 
-  def button(label:String, clickAction:() => Any, fieldsList:List[SelfType#BaseFieldType[_, _]]):SelfType#ButtonType
+  def button(label:String, action:() => Any, fields:List[FieldDescriptor#BaseFieldType[_, _]]):FieldDescriptor#ButtonType
 
   def i18n(msg:String, defaultValue:Option[String] = None):String = i18nKeyCollector.i18n(msg, defaultValue)
 
-  def formElement(fields:List[SelfType#BaseFieldType[_, _]], buttons:List[SelfType#ButtonType]):SelfType#LayoutType
+  def formComponent(fields:List[FieldDescriptor#BaseFieldType[_, _]],
+                    buttons:List[FieldDescriptor#ButtonType]):FieldDescriptor#LayoutType
 
-  def mappingFieldProvider[A](mapping:List[(String, A)]):TypeFieldProvider[Mapping[A], SelfType#FieldType, SelfType]
+  def mappingFieldProvider[A](mapping:List[(String, A)]):TypeFieldProvider[Mapping[A], FieldDescriptor#FieldType, FieldDescriptor]
 
-  def enumFieldProvider[A <: Enumeration](enum:A):TypeFieldProvider[A#Value, SelfType#FieldType, SelfType]
+  def enumFieldProvider[A <: Enumeration](enum:A):TypeFieldProvider[A#Value, FieldDescriptor#FieldType, FieldDescriptor]
 
   val i18nKeyCollector:I18nKeyCollector
 }

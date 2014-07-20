@@ -4,7 +4,7 @@ import java.io.File
 
 import com.soulever.lift.providers.{EnumerationFieldProvider, MappingFieldProvider}
 import com.soulever.lift.types.{GeneratedField, InnerField, TypeFieldProvider}
-import com.soulever.makro.MFieldDescriptor
+import com.soulever.makro.AbstractFieldDescriptor
 import com.soulever.makro.i18n.I18nKeyCollector
 import com.soulever.makro.Soulever._
 import net.liftweb.http.{S, SHtml}
@@ -18,7 +18,7 @@ import scala.xml.{Elem, NodeSeq}
  * @Auther tiran 
  * @Date 6/28/14.
  */
-trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor]{
+trait FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor]{
 
   override type LayoutType = Elem
 
@@ -30,7 +30,7 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor]{
 
   override type RequestType = S.type
 
-  override def field[A: Manifest, Obj](init: A,
+  override def fieldComponent[A: Manifest, Obj](init: A,
                                        caption: String,
                                        innerField: (A, BaseFieldType[A, Obj]) => FieldType[A],
                                        validators: List[(A) => Either[String, A]],
@@ -44,7 +44,7 @@ trait FieldDescriptor extends MFieldDescriptor[FieldDescriptor]{
       fieldsList.map(_.collectUpdate).foldRight(JsCmd.unitToJsCmd())(_ & _)
     })
 
-  override def formElement(fields: List[GeneratedField[_, _]], buttons: List[ButtonType]): Elem =
+  override def formComponent(fields: List[GeneratedField[_, _]], buttons: List[ButtonType]): Elem =
     <span>
       <table>
         <tbody>
