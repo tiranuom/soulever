@@ -6,7 +6,7 @@ import scala.reflect.macros.blackbox.Context
 /**
  * Created by tiran on 7/20/14.
  */
-trait FieldDescriptorImplicits {
+trait FieldDescriptorImplicits extends LowPriorityFieldDescriptorImplicits{
   type TypeEmptyProvider[A] = com.soulever.makro.providers.TypeEmptyProvider[A]
   type KindEmptyProvider[A[_]] = com.soulever.makro.providers.KindEmptyProvider[A]
 
@@ -16,9 +16,6 @@ trait FieldDescriptorImplicits {
   implicit def materializeEnumTypeEmptyProvider[A <: Enumeration]:TypeEmptyProvider[A#Value] =
     macro EmptyProviderMacros.materializeEnumTypeEmptyProvider_impl[A]
 
-  implicit def materializeEmptyMethodTypeEmptyProvider[A]:TypeEmptyProvider[A] =
-    macro EmptyProviderMacros.materializeEmptyMethodTypeEmptyProvider_impl[A]
-
   implicit def materializeKindEmptyProvider[A[_]]: KindEmptyProvider[A] =
     macro EmptyProviderMacros.materializeKindEmptyProvider_impl[A[_]]
 
@@ -26,6 +23,11 @@ trait FieldDescriptorImplicits {
     override def empty: String = ""
   }
 
+}
+
+trait LowPriorityFieldDescriptorImplicits {
+  implicit def materializeEmptyMethodTypeEmptyProvider[A]:TypeEmptyProvider[A] =
+    macro EmptyProviderMacros.materializeEmptyMethodTypeEmptyProvider_impl[A]
 }
 
 class EmptyProviderMacros(val c:Context) {
