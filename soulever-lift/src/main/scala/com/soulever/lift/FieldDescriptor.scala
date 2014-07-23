@@ -19,6 +19,8 @@ import scala.xml.{Elem, NodeSeq}
  */
 trait FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor]{
 
+  override type FD = com.soulever.lift.FieldDescriptor
+
   override type LayoutType = Elem
 
   override type ButtonType = NodeSeq

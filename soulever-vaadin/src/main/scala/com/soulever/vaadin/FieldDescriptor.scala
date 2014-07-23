@@ -13,6 +13,8 @@ import scala.util.Try
 
 trait FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor] {
 
+  override type FD = com.soulever.vaadin.FieldDescriptor
+
   override type LayoutType = FormLayout
 
   override type ButtonType = Button

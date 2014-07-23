@@ -1,10 +1,11 @@
 package com.soulever.makro
 
 import com.soulever.makro.i18n.I18nKeyCollector
-import com.soulever.makro.providers.{TypeEmptyProvider, TypeFieldProvider}
+import com.soulever.makro.providers.{EmptyProvider, TypeFieldProvider}
 import Soulever._
 
 trait AbstractFieldDescriptor[FieldDescriptor <: AbstractFieldDescriptor[FieldDescriptor]] {
+  type FD <: AbstractFieldDescriptor[FD]
   type LayoutType
   type FieldType[_]
   type ButtonType
@@ -25,7 +26,7 @@ trait AbstractFieldDescriptor[FieldDescriptor <: AbstractFieldDescriptor[FieldDe
   def formComponent(fields:List[FieldDescriptor#BaseFieldType[_, _]],
                     buttons:List[FieldDescriptor#ButtonType]):FieldDescriptor#LayoutType
 
-  def mappingEmptyProvider[A](mapping:List[(String, A)]) = new TypeEmptyProvider[Mapping[A]] {
+  def mappingEmptyProvider[A](mapping:List[(String, A)]) = new EmptyProvider[Mapping[A]] {
     override def empty: Soulever.Mapping[A] = mapping.headOption.map(a => Mapping(a._2)).orNull
   }
 

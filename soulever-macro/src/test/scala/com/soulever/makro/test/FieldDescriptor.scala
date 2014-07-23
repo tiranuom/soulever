@@ -6,6 +6,9 @@ import com.soulever.makro.types.Mapping
 import com.soulever.makro
 
 class FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor] {
+
+  override type FD = com.soulever.makro.test.FieldDescriptor
+
   override def enumFieldProvider[A <: Enumeration](enum: A): TypeFieldProvider[A#Value] =
     new TypeFieldProvider[A#Value] {
 

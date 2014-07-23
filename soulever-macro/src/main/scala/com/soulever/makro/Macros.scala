@@ -294,13 +294,7 @@ class MacrosImpl(val c:blackbox.Context) {
         })
         if (mapping.isEmpty) c.error(fieldSymbol.pos, "Cannot find mapping for the given type")
         q"mappingEmptyProvider($mapping.getOrElse(List.empty))"
-      case Nil if valueType <:< weakTypeOf[Enumeration#Value] =>
-        q"implicitly[providers.TypeEmptyProvider[$valueType]]"
-      case Nil =>
-        q"implicitly[providers.TypeEmptyProvider[$valueType]]"
-      case x :: Nil =>
-        q"implicitly[providers.KindEmptyProvider[${valueType.finalResultType.typeConstructor}]]"
-      case _ => q"implicitly[providers.TypeEmptyProvider[$pre]]"
+      case _ => q"implicitly[providers.EmptyProvider[$valueType]]"
     }
   }
 

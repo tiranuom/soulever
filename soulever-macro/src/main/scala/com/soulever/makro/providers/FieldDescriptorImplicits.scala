@@ -7,66 +7,52 @@ import scala.reflect.macros.blackbox.Context
  * Created by tiran on 7/20/14.
  */
 trait FieldDescriptorImplicits extends LowPriorityFieldDescriptorImplicits{
-  type TypeEmptyProvider[A] = com.soulever.makro.providers.TypeEmptyProvider[A]
-  type KindEmptyProvider[A[_]] = com.soulever.makro.providers.KindEmptyProvider[A]
+  type EmptyProvider[A] = com.soulever.makro.providers.EmptyProvider[A]
 
-  implicit def materializeNumTypeEmptyProvider[A <% Long]:TypeEmptyProvider[A] =
-    macro EmptyProviderMacros.materializeNumTypeEmptyProvider_impl[A]
+  implicit def materializeNumTypeEmptyProvider[A <% Long]:EmptyProvider[A] =
+    macro EmptyProviderMacros.materializeNumEmptyProvider_impl[A]
 
-  implicit def materializeEnumTypeEmptyProvider[A <: Enumeration]:TypeEmptyProvider[A#Value] =
-    macro EmptyProviderMacros.materializeEnumTypeEmptyProvider_impl[A]
+  implicit def materializeEnumTypeEmptyProvider[A <: Enumeration]:EmptyProvider[A#Value] =
+    macro EmptyProviderMacros.materializeEnumEmptyProvider_impl[A]
 
-  implicit def materializeKindEmptyProvider[A[_]]: KindEmptyProvider[A] =
-    macro EmptyProviderMacros.materializeKindEmptyProvider_impl[A[_]]
-
-  implicit val stringEmptyProvider = new TypeEmptyProvider[String] {
+  implicit val stringEmptyProvider = new EmptyProvider[String] {
     override def empty: String = ""
   }
 
 }
 
 trait LowPriorityFieldDescriptorImplicits {
-  implicit def materializeEmptyMethodTypeEmptyProvider[A]:TypeEmptyProvider[A] =
-    macro EmptyProviderMacros.materializeEmptyMethodTypeEmptyProvider_impl[A]
+  implicit def materializeEmptyMethodTypeEmptyProvider[A]:EmptyProvider[A] =
+    macro EmptyProviderMacros.materializeEmptyMethodEmptyProvider_impl[A]
 }
 
 class EmptyProviderMacros(val c:Context) {
   import c.universe._
-  def materializeNumTypeEmptyProvider_impl[A:c.WeakTypeTag](evidence$1: c.Expr[A => Long]) = {
+  def materializeNumEmptyProvider_impl[A:c.WeakTypeTag](evidence$1: c.Expr[A => Long]) = {
     val tag: WeakTypeTag[A] = implicitly[WeakTypeTag[A]]
     val tree: Tree = q"""
-       new TypeEmptyProvider[${tag.tpe}]{
+       new EmptyProvider[${tag.tpe}]{
          def empty = 0
        }
        """
     tree
   }
 
-  def materializeEnumTypeEmptyProvider_impl[A: c.WeakTypeTag] = {
+  def materializeEnumEmptyProvider_impl[A: c.WeakTypeTag] = {
     val tag: WeakTypeTag[A] = implicitly[WeakTypeTag[A]]
     val tree: Tree = q"""
-       new TypeEmptyProvider[${tag}#Value]{
+       new EmptyProvider[${tag}#Value]{
          def empty = ${tag.tpe.typeSymbol.name.toTermName}.values.toList.head
        }
        """
     tree
   }
 
-  def materializeEmptyMethodTypeEmptyProvider_impl[A :c.WeakTypeTag] = {
+  def materializeEmptyMethodEmptyProvider_impl[A :c.WeakTypeTag] = {
     val tag: WeakTypeTag[A] = implicitly[WeakTypeTag[A]]
     val tree: Tree = q"""
-       new TypeEmptyProvider[${tag.tpe}]{
+       new EmptyProvider[${tag.tpe}]{
          def empty = ${tag.tpe.finalResultType.typeSymbol.companion}.empty
-       }
-       """
-    tree
-  }
-
-  def materializeKindEmptyProvider_impl[A:c.WeakTypeTag] = {
-    val tag: WeakTypeTag[A] = implicitly[WeakTypeTag[A]]
-    val tree: Tree = q"""
-       new KindEmptyProvider[${tag.tpe}]{
-         def empty[B] = ${tag.tpe.finalResultType.typeSymbol.companion}.empty[B]
        }
        """
     tree
