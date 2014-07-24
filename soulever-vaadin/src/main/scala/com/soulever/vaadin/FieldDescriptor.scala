@@ -41,9 +41,9 @@ trait FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor] {
       def buttonClick(event: ClickEvent) = clickAction()
     })
 
-  def mappingFieldProvider[A](mapping: List[(String, A)]): TypeFieldProvider[Mapping[A], FieldDescriptor] = new MappingFieldProvider[A](mapping)
+  def mappingFieldProvider[A](mapping: List[(String, A)]): TypeFieldProvider[Mapping[A]] = new MappingFieldProvider[A](mapping)
 
-  def enumFieldProvider[A <: Enumeration](enum: A): TypeFieldProvider[A#Value, FieldDescriptor] = new EnumerationFieldProvider[A](enum)
+  def enumFieldProvider[A <: Enumeration](enum: A): TypeFieldProvider[A#Value] = new EnumerationFieldProvider[A](enum)
 
   override val i18nKeyCollector: I18nKeyCollector = new I18nKeyCollector(Props.printableFile)
 }
@@ -59,7 +59,7 @@ object Props {
 
 trait FieldDescriptorImplicits extends com.soulever.makro.providers.FieldDescriptorImplicits {
 
-  implicit val stringFieldProvider = new TypeFieldProvider[String, FieldDescriptor] {
+  implicit val stringFieldProvider = new TypeFieldProvider[String] {
     override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: String, baseField: GeneratedField[_, _]): AbstractField[String] = {
       val field: TextField = new TextField()
       field.setValue(op)

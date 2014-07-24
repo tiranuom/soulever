@@ -5,7 +5,7 @@ import com.soulever.vaadin.FieldDescriptor
 import com.soulever.makro.AbstractFieldDescriptor
 import com.vaadin.ui.{ComboBox, Component, CustomField, AbstractField}
 
-class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvider[A#Value, FieldDescriptor]{
+class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvider[A#Value]{
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: A#Value, baseField: GeneratedField[_,_]): AbstractField[A#Value] =
     new CustomField[A#Value] {

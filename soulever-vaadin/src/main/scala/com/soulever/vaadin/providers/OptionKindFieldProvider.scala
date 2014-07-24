@@ -7,7 +7,7 @@ import com.vaadin.ui.{HorizontalLayout, Component, CheckBox, AbstractField}
 import com.vaadin.data.Property.{ValueChangeEvent, ValueChangeListener}
 import com.vaadin.data.Property
 
-class OptionKindFieldProvider extends KindFieldProvider[Option, FieldDescriptor] {
+class OptionKindFieldProvider extends KindFieldProvider[Option] {
 
   override def field[B, FD <: AbstractFieldDescriptor[_]](inf: (B, FieldDescriptor#BaseFieldType[_,_]) => AbstractField[B], empty:B, fieldDescriptor: FD)
                                                   (op: Option[B], baseField: FieldDescriptor#BaseFieldType[_, _]): AbstractField[Option[B]] =

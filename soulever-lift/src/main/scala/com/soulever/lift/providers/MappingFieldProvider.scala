@@ -16,7 +16,7 @@ import scala.xml.NodeSeq
  * @Auther tiran 
  * @Date 6/30/14.
  */
-class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvider[Mapping[A], FieldDescriptor] {
+class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvider[Mapping[A]] {
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Mapping[A], baseField: GeneratedField[_, _]): InnerField[Mapping[A]] = {
 

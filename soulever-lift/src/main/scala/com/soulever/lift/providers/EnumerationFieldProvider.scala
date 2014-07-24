@@ -12,7 +12,7 @@ import scala.xml.NodeSeq
  * @Auther tiran 
  * @Date 7/1/14.
  */
-class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvider[A#Value, FieldDescriptor] {
+class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvider[A#Value] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: A#Value, baseField: GeneratedField[_, _]): InnerField[A#Value] =

@@ -1,5 +1,6 @@
 package com.soulever.lift.types
 
+import com.soulever.lift.FieldDescriptor
 import com.soulever.makro
 import com.soulever.makro.AbstractFieldDescriptor
 
@@ -8,6 +9,6 @@ import com.soulever.makro.AbstractFieldDescriptor
  * @Date 6/28/14.
  */
 
-trait TypeFieldProvider[A, IFD <: AbstractFieldDescriptor[IFD]] extends makro.providers.TypeFieldProvider[A, InnerField, IFD]
+trait TypeFieldProvider[A] extends makro.providers.TypeFieldProvider[A, InnerField, FieldDescriptor]
 
-trait KindFieldProvider[A[_], IFD <: AbstractFieldDescriptor[IFD]] extends makro.providers.KindFieldProvider[A, InnerField, IFD]
+trait KindFieldProvider[A[_]] extends makro.providers.KindFieldProvider[A, InnerField, FieldDescriptor]

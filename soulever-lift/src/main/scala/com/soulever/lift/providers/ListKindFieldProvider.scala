@@ -14,7 +14,7 @@ import scala.xml.{Elem, NodeSeq}
  * @Auther tiran 
  * @Date 7/1/14.
  */
-class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
+class ListKindFieldProvider extends KindFieldProvider[List]{
   override def field[B, FD <: AbstractFieldDescriptor[_]](innerField: (B, GeneratedField[_, _]) => InnerField[B],
                                                    innerEmpty: B,
                                                    fieldDescriptor: FD)

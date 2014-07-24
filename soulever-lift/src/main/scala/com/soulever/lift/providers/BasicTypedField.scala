@@ -48,49 +48,49 @@ class BasicTypedField[A, FD <: AbstractFieldDescriptor[_]](baseField: GeneratedF
   def elem: NodeSeq = field
 }
 
-class StringFieldProvider extends TypeFieldProvider[String, FieldDescriptor] {
+class StringFieldProvider extends TypeFieldProvider[String] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: String, baseField:GeneratedField[_, _]): InnerField[String] =
     new BasicTypedField[String, FD](baseField, op, identity, identity)
 }
 
-class IntFieldProvider extends TypeFieldProvider[Int, FieldDescriptor] {
+class IntFieldProvider extends TypeFieldProvider[Int] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Int, baseField: GeneratedField[_, _]): InnerField[Int] =
     new BasicTypedField[Int, FD](baseField, op, _.toString, _.toInt, "integer")
 }
 
-class LongFieldProvider extends TypeFieldProvider[Long, FieldDescriptor] {
+class LongFieldProvider extends TypeFieldProvider[Long] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Long, baseField: GeneratedField[_, _]): InnerField[Long] =
     new BasicTypedField[Long, FD](baseField, op, _.toString, _.toLong, "long")
 }
 
-class FloatFieldProvider extends TypeFieldProvider[Float, FieldDescriptor] {
+class FloatFieldProvider extends TypeFieldProvider[Float] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Float, baseField: GeneratedField[_, _]): InnerField[Float] =
     new BasicTypedField[Float, FD](baseField, op, _.toString, _.toFloat, "float")
 }
 
-class DoubleFieldProvider extends TypeFieldProvider[Double, FieldDescriptor] {
+class DoubleFieldProvider extends TypeFieldProvider[Double] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Double, baseField: GeneratedField[_, _]): InnerField[Double] =
     new BasicTypedField[Double, FD](baseField, op, _.toString, _.toDouble, "double")
 }
 
-class ByteFieldProvider extends TypeFieldProvider[Byte, FieldDescriptor] {
+class ByteFieldProvider extends TypeFieldProvider[Byte] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Byte, baseField: GeneratedField[_, _]): InnerField[Byte] =
     new BasicTypedField[Byte, FD](baseField, op, a => (a & 0xFF).toString, _.toByte, "byte")
 }
 
-class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
+class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Boolean, baseField: GeneratedField[_, _]): InnerField[Boolean] =
     new InnerField[Boolean] {
@@ -129,14 +129,14 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean, FieldDescriptor] {
     }
 }
 
-class PasswordFieldProvider extends TypeFieldProvider[Password, FieldDescriptor] {
+class PasswordFieldProvider extends TypeFieldProvider[Password] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Password, baseField: GeneratedField[_, _]): InnerField[Password] =
     new BasicTypedField[Password, FD](baseField, op, _.get, Password, tpe = Some("password"))
 }
 
-class DateFieldProvider extends TypeFieldProvider[Date, FieldDescriptor] {
+class DateFieldProvider extends TypeFieldProvider[Date] {
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: Date, baseField: GeneratedField[_, _]): InnerField[Date] = {
@@ -147,7 +147,7 @@ class DateFieldProvider extends TypeFieldProvider[Date, FieldDescriptor] {
   }
 }
 
-class LongTextFieldProvider extends TypeFieldProvider[LongText, FieldDescriptor] {
+class LongTextFieldProvider extends TypeFieldProvider[LongText] {
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
                                                (op: LongText, baseField: FieldDescriptor#BaseFieldType[_, _]): InnerField[LongText] =
     new BasicTypedField[LongText, FD](baseField, op, _.value, LongText) {

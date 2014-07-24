@@ -13,7 +13,7 @@ import scala.xml.NodeSeq
  * @Auther tiran 
  * @Date 7/1/14.
  */
-class OptionKindFieldProvider extends KindFieldProvider[Option, FieldDescriptor] {
+class OptionKindFieldProvider extends KindFieldProvider[Option] {
   override def field[B, FD <: AbstractFieldDescriptor[_]](innerField: (B, GeneratedField[_, _]) => InnerField[B], innerEmpty: B, fieldDescriptor: FD)
                                                   (op: Option[B], baseField: GeneratedField[_, _]): InnerField[Option[B]] =
     new InnerField[Option[B]] {

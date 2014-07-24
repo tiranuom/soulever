@@ -55,9 +55,9 @@ trait FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor]{
       </table>
     </span>
 
-  override def mappingFieldProvider[A](mapping: List[(String, A)]): TypeFieldProvider[Mapping[A], FieldDescriptor] = new MappingFieldProvider(mapping)
+  override def mappingFieldProvider[A](mapping: List[(String, A)]): TypeFieldProvider[Mapping[A]] = new MappingFieldProvider(mapping)
 
-  override def enumFieldProvider[A <: Enumeration](enum: A): TypeFieldProvider[A#Value, FieldDescriptor] = new EnumerationFieldProvider(enum)
+  override def enumFieldProvider[A <: Enumeration](enum: A): TypeFieldProvider[A#Value] = new EnumerationFieldProvider(enum)
 
   override val i18nKeyCollector: I18nKeyCollector = new I18nKeyCollector(Props.get("i18n.print.path").map( new File(".").getAbsolutePath + _))
 }

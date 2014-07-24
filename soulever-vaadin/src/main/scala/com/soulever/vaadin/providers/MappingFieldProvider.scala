@@ -6,7 +6,7 @@ import com.soulever.makro.{Soulever, AbstractFieldDescriptor}
 import com.vaadin.ui._
 import Soulever._
 
-class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvider[Mapping[A], FieldDescriptor]{
+class MappingFieldProvider[A](mapping:List[(String, A)]) extends TypeFieldProvider[Mapping[A]]{
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: Mapping[A], baseField: GeneratedField[_,_]): AbstractField[Mapping[A]] =
     new CustomField[Mapping[A]] {

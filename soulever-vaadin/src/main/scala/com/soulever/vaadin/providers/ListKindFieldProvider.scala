@@ -5,7 +5,7 @@ import com.soulever.makro.AbstractFieldDescriptor
 import com.soulever.vaadin.types.KindFieldProvider
 import com.vaadin.ui._
 
-class ListKindFieldProvider extends KindFieldProvider[List, FieldDescriptor]{
+class ListKindFieldProvider extends KindFieldProvider[List]{
 
   override def field[B, FD <: AbstractFieldDescriptor[_]](innerField: (B, FieldDescriptor#BaseFieldType[_, _]) => AbstractField[B], empty: B, fieldDescriptor: FD)
                                                   (op: List[B], baseField: FieldDescriptor#BaseFieldType[_, _]): AbstractField[List[B]] =
