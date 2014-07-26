@@ -7,10 +7,8 @@ import com.soulever.makro
 
 class FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor] {
 
-  override type FD = com.soulever.makro.test.FieldDescriptor
-
-  override def enumFieldProvider[A <: Enumeration](enum: A): TypeFieldProvider[A#Value] =
-    new TypeFieldProvider[A#Value] {
+  override def enumFieldProvider[A <: Enumeration](enum: A): FieldProvider[A#Value] =
+    new FieldProvider[A#Value] {
 
       override def empty: A#Value = enum.values.head
 
@@ -21,8 +19,8 @@ class FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor] {
         }
     }
 
-  override def mappingFieldProvider[A](mapping: List[(String, A)]): TypeFieldProvider[Mapping[A]] =
-    new TypeFieldProvider[Mapping[A]] {
+  override def mappingFieldProvider[A](mapping: List[(String, A)]): FieldProvider[Mapping[A]] =
+    new FieldProvider[Mapping[A]] {
       override def empty: Mapping[A] = mapping.head._2
 
       override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)
@@ -31,20 +29,6 @@ class FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor] {
           override var value: Mapping[A] = op
         }
     }
-
-
-
-//  override def form(fields: List[FieldType[_]], buttons: List[ButtonType]): TestForm = TestForm()
-
-//  override def button(label: String, clickAction: () => Unit): ButtonType = TestButton()
-
-//  override def field[A: Manifest, Obj](init: A,
-//                                       caption: String,
-//                                       innerField: (Option[A]) => FieldType[A],
-//                                       validators: List[(A) => Either[String, A]],
-//                                       secondaryValidators: List[(A, Obj) => Either[String, A]],
-//                                       css: String): BaseFieldType[A, Obj] =
-//    TestBaseField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, innerValidations)
 
   override def fieldComponent[A: Manifest, Obj](init: A, caption: String, innerField: (A, BaseFieldType[A, Obj]) => FieldType[A], validators: List[(A) => Either[String, A]], secondaryValidators: List[(A, Obj) => Either[String, A]], css: String): BaseFieldType[A, Obj] = ???
 
@@ -62,9 +46,7 @@ class FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor] {
   override type LayoutType = TestForm
 }
 
-trait TypeFieldProvider[A] extends makro.providers.TypeFieldProvider[A, TestField, FieldDescriptor]
-
-trait KindFieldProvider[A[_]] extends makro.providers.KindFieldProvider[A, TestField, FieldDescriptor]
+trait FieldProvider[A] extends makro.providers.FieldProvider[A, FieldDescriptor]
 
 trait FieldDescriptorImplicits {
 

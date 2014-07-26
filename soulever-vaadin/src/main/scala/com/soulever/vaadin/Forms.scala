@@ -4,8 +4,6 @@ import com.soulever.makro.form.FormHelper
 import com.vaadin.ui.FormLayout
 
 import scala.language.experimental.macros
-import scala.reflect.macros.Context
-import scala.reflect.runtime.{universe => ru}
 
 object Forms extends FormHelper {
   def form[A, FD <: FieldDescriptor](instance:A, buttons: ButtonBlock[A]*)

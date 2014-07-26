@@ -4,7 +4,7 @@ import java.util.Date
 
 import com.soulever.lift.Forms._
 import com.soulever.lift.test.lib._
-import com.soulever.lift.{FieldDescriptor, FieldDescriptorImplicits}
+import com.soulever.lift.{Descriptor, FieldDescriptor, FieldDescriptorImplicits}
 import com.soulever.makro.Soulever._
 import com.soulever.makro.annotations._
 import net.liftweb.common._
@@ -33,16 +33,17 @@ class HelloWorld {
 
 }
 
-case class TestCaseClass(@css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2Field, "not-equal") enumerationField:Bool.Bool = Bool.TRUE,
-                         enumeration2Field:Bool.Bool = Bool.TRUE,
-                         @mapping[Imp, V](_.intMapping) mappedIntField:Mapping[V] = V(1),
-                         @hidden @nonEmpty[String] stringField:String,
-                         @min(0) @max(60) intField:Int = 0,
-                         @min(0) @max(60) newIntField:Int = 0,
-                         booleanField:Boolean = false,
-                         passwordField:Password = "",
+case class TestCaseClass(@hidden @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2Field, "not-equal") enumerationField:Bool.Bool = Bool.TRUE,
+                         @hidden enumeration2Field:Bool.Bool = Bool.TRUE,
+                         @mapping[Imp, V](_.intMapping) mappedIntField:Option[Mapping[V]] = Some(V(1)),
+                         @hidden @hidden @nonEmpty[String] stringField:String,
+                         @hidden @min(0) @max(60) intField:Int = 0,
+                         @hidden @min(0) @max(60) newIntField:Int = 0,
+                         @hidden booleanField:Boolean = false,
+                         @hidden passwordField:Password = "",
                          @mapping[Imp, V](_.intMapping) listField:List[Option[Mapping[V]]] = List(None),
-                         @custom[Option[Int]]({(_:Option[Int]).map(_ > 0).getOrElse(true)}, "all.positive") optionField:Option[Int] = None)
+                         @hidden listField2:List[Option[Bool.Bool]] = List(None),
+                         @hidden @custom[Option[Int]]({(_:Option[Int]).map(_ > 0).getOrElse(true)}, "all.positive") optionField:Option[Int] = None)
 
 case class V(i:Int)
 
@@ -56,4 +57,4 @@ trait ServiceRegistry {
   lazy val intMapping:List[(String, V)] = (1 to 9).toList.map(i => "value" + i.toString -> V(i))
 }
 
-class Imp extends FieldDescriptorImplicits with FieldDescriptor with ServiceRegistry
+class Imp extends Descriptor with ServiceRegistry

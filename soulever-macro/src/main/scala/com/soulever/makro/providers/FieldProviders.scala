@@ -10,14 +10,8 @@ import scala.annotation.implicitNotFound
  */
 
 @implicitNotFound("Cannot find TypeFieldProvider for ${A}")
-trait TypeFieldProvider[A, Field[_], IFD <: AbstractFieldDescriptor[IFD]] {
-  def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor:FD)
-                                      (op:A, baseField: IFD#BaseFieldType[_, _]): Field[A]
-}
-
-@implicitNotFound("Cannot find KindFieldProvider for ${A}")
-trait KindFieldProvider[A[_], Field[_], IFD <: AbstractFieldDescriptor[IFD]]{
-  def field[B, FD <: AbstractFieldDescriptor[_]](innerField:(B, IFD#BaseFieldType[_, _]) => Field[B], empty:B, fieldDescriptor:FD)
-  (op:A[B], baseField: IFD#BaseFieldType[_, _]): Field[A[B]]
+trait FieldProvider[A, IFD <: AbstractFieldDescriptor[IFD]] {
+  def field[FD <: IFD](fieldDescriptor:FD)
+                      (op:A, baseField: FD#BaseFieldType[_, _]): IFD#FieldType[A]
 }
 

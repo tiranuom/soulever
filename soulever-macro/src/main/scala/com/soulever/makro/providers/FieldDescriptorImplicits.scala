@@ -1,5 +1,7 @@
 package com.soulever.makro.providers
 
+import com.soulever.makro.AbstractFieldDescriptor
+
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 
@@ -7,7 +9,10 @@ import scala.reflect.macros.blackbox.Context
  * Created by tiran on 7/20/14.
  */
 trait FieldDescriptorImplicits extends LowPriorityFieldDescriptorImplicits{
+
   type EmptyProvider[A] = com.soulever.makro.providers.EmptyProvider[A]
+
+  type FieldDescriptor <: AbstractFieldDescriptor[FieldDescriptor]
 
   implicit def materializeNumTypeEmptyProvider[A <% Long]:EmptyProvider[A] =
     macro EmptyProviderMacros.materializeNumEmptyProvider_impl[A]
@@ -18,7 +23,6 @@ trait FieldDescriptorImplicits extends LowPriorityFieldDescriptorImplicits{
   implicit val stringEmptyProvider = new EmptyProvider[String] {
     override def empty: String = ""
   }
-
 }
 
 trait LowPriorityFieldDescriptorImplicits {
@@ -56,5 +60,18 @@ class EmptyProviderMacros(val c:Context) {
        }
        """
     tree
+  }
+}
+
+class FieldProviderMacros(val c:Context) {
+  import c.universe._
+
+  def enumFieldProviderMacro[A:c.WeakTypeTag] = {
+    val tpe = c.weakTypeOf[A]
+    val pre = tpe match {
+      case TypeRef(a, _, _) => a
+      case _ => c.abort(c.enclosingPosition, "Cannot decode the position")
+    }
+    q"m.enumFieldProvider(${pre.termSymbol})"
   }
 }

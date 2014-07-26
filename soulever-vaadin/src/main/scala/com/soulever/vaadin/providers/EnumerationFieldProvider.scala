@@ -1,11 +1,11 @@
 package com.soulever.vaadin.providers
 
-import com.soulever.vaadin.types.{TypeFieldProvider, GeneratedField}
+import com.soulever.vaadin.types.{FieldProvider, GeneratedField}
 import com.soulever.vaadin.FieldDescriptor
 import com.soulever.makro.AbstractFieldDescriptor
 import com.vaadin.ui.{ComboBox, Component, CustomField, AbstractField}
 
-class EnumerationFieldProvider[A <: Enumeration](enum:A) extends TypeFieldProvider[A#Value]{
+class EnumerationFieldProvider[A <: Enumeration](enum:A) extends FieldProvider[A#Value]{
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: A#Value, baseField: GeneratedField[_,_]): AbstractField[A#Value] =
     new CustomField[A#Value] {

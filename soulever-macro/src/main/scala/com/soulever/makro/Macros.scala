@@ -4,6 +4,7 @@ import java.io.PrintWriter
 
 import com.soulever.makro.annotations._
 import com.soulever.makro.form.ButtonBlock
+import com.soulever.makro.providers.FieldProvider
 
 import language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -107,7 +108,7 @@ class MacrosImpl(val c:blackbox.Context) {
             $buttons.zipWithIndex.map { case (btn:ButtonBlock[${classTag.typeSymbol.name}], index:Int) =>
               val empty = new $classTag(..$noDefaultParamList)
               m.i18nKeyCollector.insert($i18nKey + s".$$index", btn.defaultI18n)
-              btn.button[$fieldDescriptorType, ${c.weakTypeOf[FD]}](
+              btn.button[$fieldDescriptorType, ${c.weakTypeOf[FD]}](m)(
                 label = $i18nKey + s".$$index",
                 fieldsList = fields,
                 createInstance = _ => $classExpr.copy(..$getterExpressions),
@@ -120,7 +121,7 @@ class MacrosImpl(val c:blackbox.Context) {
     }
 
     val comp = q"""
-    val m = $moduleDesc
+    val m = new ${c.weakTypeTag[FD]} {}
       import m._
       import com.soulever.makro._
       m.i18nKeyCollector.addBlock($classI18nKey)
@@ -177,12 +178,27 @@ class MacrosImpl(val c:blackbox.Context) {
       case s if s.tree.tpe.typeConstructor =:= c.weakTypeOf[css] => s.tree.children.tail.head
     })
 
-    val (innerField, emptyValue) = {
+    val mapping = Option(fieldSymbol).flatMap(_.annotations.collectFirst {
+      case s if s.tree.tpe.typeConstructor =:= weakTypeOf[mapping[Any, Any]].typeConstructor =>
+        s.tpe.typeArgs(1) -> q"${s.tree.children.tail.head}"
+    })
 
-      val mapping = Option(fieldSymbol).flatMap(_.annotations.collectFirst {
-        case s if s.tree.tpe.typeConstructor =:= weakTypeOf[mapping[Any, Any]].typeConstructor =>
-          q"${s.tree.children.tail.head}(m)"
-      })
+    val mappingCode = {
+      val implicits = mapping.map { case (tpe, code) =>
+        q"""
+              implicit val ${newTermName(tpe.typeSymbol.name.toString + "FieldProvider")}:FieldProvider[Mapping[$tpe]] = m.mappingFieldProvider[$tpe]($code(m))
+              implicit val ${newTermName(tpe.typeSymbol.name.toString + "EmptyProvider")}:EmptyProvider[Mapping[$tpe]] = new EmptyProvider[Mapping[$tpe]] {
+                def empty = Mapping($code(m).head._2)
+              }
+           """
+      }.toList
+
+      q"""
+         ..$implicits
+       """
+    }
+
+    val (innerField, emptyValue) = {
 
       val fieldDescriptorType = {
         val tpe = c.weakTypeOf[FD]
@@ -200,23 +216,8 @@ class MacrosImpl(val c:blackbox.Context) {
         }
 
         args match {
-          case Nil if s <:< weakTypeOf[Enumeration#Value] =>
-            (q"enumFieldProvider[$pre](${pre.termSymbol})", emptyBlock(fieldSymbol, s)) :: collector
-          case Nil =>
-            (q"implicitly[providers.TypeFieldProvider[$s, $fieldType, $fieldDescriptorType]]", emptyBlock(fieldSymbol, s)) ::
-              collector
-          case x :: Nil if s.typeConstructor =:= c.weakTypeOf[Mapping[Any]].typeConstructor =>
-            if (mapping.isEmpty) c.error(fieldSymbol.pos, "Cannot find mapping for the given type")
-            (q"mappingFieldProvider[$x]($mapping.getOrElse(List.empty))", emptyBlock(fieldSymbol, s)) ::
-              collector
-          case x :: Nil =>
-            val providerTypes =
-              (q"implicitly[providers.KindFieldProvider[${s.finalResultType.typeConstructor}, $fieldType, $fieldDescriptorType]]",
-                emptyBlock(fieldSymbol, s)) ::
-                collector
-            expandParameters(x, providerTypes)
           case _ =>
-            (q"implicitly[providers.TypeFieldProvider[$s, $fieldType, $fieldDescriptorType]]", emptyBlock(fieldSymbol, s)) ::
+            (q"implicitly[providers.FieldProvider[$s, $fieldDescriptorType]]", emptyBlock(fieldSymbol, s)) ::
             collector
         }
       }
@@ -252,14 +253,16 @@ class MacrosImpl(val c:blackbox.Context) {
         import com.soulever.makro._
         m.i18nKeyCollector.insert($compoundI18nKey, $fieldI18nKey.naturalNotation)
 
-        val field = m.fieldComponent[$valueType, ${ths.actualType}](
+        val field = {
+        ..$mappingCode
+        fieldComponent[$valueType, ${ths.actualType}](
           init                = $valueTree,
           caption             = ($compoundI18nKey).trim,
           innerField          = $innerField,
           validators          = $validatorFunctions,
           secondaryValidators = $classDependentValidatorFunctions,
           css                 = $css.getOrElse(""))
-
+        }
         (field.innerValidations ::: $validations ::: $classDependentValidations) foreach { case (key, defaultValue) =>
           m.i18nKeyCollector.insert($compoundI18nKey + s"[$$key]", defaultValue)
         }

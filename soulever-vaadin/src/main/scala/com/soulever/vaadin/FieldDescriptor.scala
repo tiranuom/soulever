@@ -1,19 +1,20 @@
 package com.soulever.vaadin
 
+import java.util
+
 import com.soulever.makro.AbstractFieldDescriptor
 import com.soulever.makro.i18n.I18nKeyCollector
 import com.soulever.makro.Soulever._
 import com.soulever.vaadin.providers._
-import com.soulever.vaadin.types.{GeneratedField, TypeFieldProvider}
+import com.soulever.vaadin.types.{GeneratedField, FieldProvider}
 import com.typesafe.config.ConfigFactory
 import com.vaadin.ui.Button.{ClickEvent, ClickListener}
 import com.vaadin.ui._
+import scala.language.experimental.macros
 
 import scala.util.Try
 
 trait FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor] {
-
-  override type FD = com.soulever.vaadin.FieldDescriptor
 
   override type LayoutType = FormLayout
 
@@ -30,7 +31,7 @@ trait FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor] {
                               innerField: (A, GeneratedField[A, Obj]) => AbstractField[A],
                               validators: List[(A) => Either[String, A]],
                               secondaryValidators:List[(A, Obj) => Either[String, A]],
-                              css:String): FieldDescriptor#BaseFieldType[A, Obj] =
+                              css:String): GeneratedField[A, Obj] =
     new GeneratedField[A, Obj](init, caption, innerField, validators, secondaryValidators, css, this)
 
   override def formComponent(fields: List[GeneratedField[_, _]], buttons: List[Button]): FormLayout =
@@ -41,9 +42,9 @@ trait FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor] {
       def buttonClick(event: ClickEvent) = clickAction()
     })
 
-  def mappingFieldProvider[A](mapping: List[(String, A)]): TypeFieldProvider[Mapping[A]] = new MappingFieldProvider[A](mapping)
+  def mappingFieldProvider[A](mapping: List[(String, A)]): FieldProvider[Mapping[A]] = new MappingFieldProvider[A](mapping)
 
-  def enumFieldProvider[A <: Enumeration](enum: A): TypeFieldProvider[A#Value] = new EnumerationFieldProvider[A](enum)
+  def enumFieldProvider[A <: Enumeration](enum: A): FieldProvider[A#Value] = new EnumerationFieldProvider[A](enum)
 
   override val i18nKeyCollector: I18nKeyCollector = new I18nKeyCollector(Props.printableFile)
 }
@@ -59,13 +60,11 @@ object Props {
 
 trait FieldDescriptorImplicits extends com.soulever.makro.providers.FieldDescriptorImplicits {
 
-  implicit val stringFieldProvider = new TypeFieldProvider[String] {
-    override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: String, baseField: GeneratedField[_, _]): AbstractField[String] = {
-      val field: TextField = new TextField()
-      field.setValue(op)
-      field
-    }
-  }
+  import com.soulever.makro.providers.FieldProviderMacros
+
+  type FieldProvider[A] = com.soulever.vaadin.types.FieldProvider[A]
+
+  implicit val stringFieldProvider = new StringFieldProvider
 
   implicit val intFieldProvider = new IntFieldProvider
 
@@ -85,7 +84,15 @@ trait FieldDescriptorImplicits extends com.soulever.makro.providers.FieldDescrip
 
   implicit val longTextFieldProvider = new LongTextFieldProvider
 
-  implicit val optionFieldProvider = new OptionKindFieldProvider
+  implicit def optionFieldProvider[A : FieldProvider : EmptyProvider] = new OptionFieldProvider[A]
 
-  implicit val listFieldProvider = new ListKindFieldProvider
+  implicit def listFieldProvider[A : FieldProvider : EmptyProvider] = new ListFieldProvider[A]
+
+  implicit def enumFieldProvider[A <: Enumeration#Value]:FieldProvider[A] = macro FieldProviderMacros.enumFieldProviderMacro[A]
+}
+
+trait Descriptor extends FieldDescriptor with FieldDescriptorImplicits {
+
+  override type FieldDescriptor = com.soulever.vaadin.FieldDescriptor
+
 }

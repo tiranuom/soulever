@@ -1,11 +1,10 @@
 package com.soulever.makro
 
 import com.soulever.makro.i18n.I18nKeyCollector
-import com.soulever.makro.providers.{EmptyProvider, TypeFieldProvider}
+import com.soulever.makro.providers.{EmptyProvider, FieldProvider}
 import Soulever._
 
 trait AbstractFieldDescriptor[FieldDescriptor <: AbstractFieldDescriptor[FieldDescriptor]] {
-  type FD <: AbstractFieldDescriptor[FD]
   type LayoutType
   type FieldType[_]
   type ButtonType
@@ -13,26 +12,26 @@ trait AbstractFieldDescriptor[FieldDescriptor <: AbstractFieldDescriptor[FieldDe
   type RequestType
 
   def fieldComponent[A : Manifest, Obj](init:A,
-                               caption:String,
-                               innerField:(A, FieldDescriptor#BaseFieldType[A, Obj]) => FieldDescriptor#FieldType[A],
-                               validators:List[A => Either[String, A]] = List.empty,
-                               secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
-                               css:String = ""):FieldDescriptor#BaseFieldType[A, Obj]
+                                        caption:String,
+                                        innerField:(A, this.type#BaseFieldType[A, Obj]) => this.type#FieldType[A],
+                                        validators:List[A => Either[String, A]] = List.empty,
+                                        secondaryValidators:List[(A, Obj) => Either[String, A]] = List.empty,
+                                        css:String = ""):this.type#BaseFieldType[A, Obj]
 
-  def button(label:String, action:() => Any, fields:List[FieldDescriptor#BaseFieldType[_, _]]):FieldDescriptor#ButtonType
+  def button(label:String, action:() => Any, fields:List[this.type#BaseFieldType[_, _]]):this.type#ButtonType
 
   def i18n(msg:String, defaultValue:Option[String] = None):String = i18nKeyCollector.i18n(msg, defaultValue)
 
-  def formComponent(fields:List[FieldDescriptor#BaseFieldType[_, _]],
-                    buttons:List[FieldDescriptor#ButtonType]):FieldDescriptor#LayoutType
+  def formComponent(fields:List[this.type#BaseFieldType[_, _]],
+                    buttons:List[this.type#ButtonType]):this.type#LayoutType
 
   def mappingEmptyProvider[A](mapping:List[(String, A)]) = new EmptyProvider[Mapping[A]] {
     override def empty: Soulever.Mapping[A] = mapping.headOption.map(a => Mapping(a._2)).orNull
   }
 
-  def mappingFieldProvider[A](mapping:List[(String, A)]):TypeFieldProvider[Mapping[A], FieldDescriptor#FieldType, FieldDescriptor]
+  def mappingFieldProvider[A](mapping:List[(String, A)]):FieldProvider[Mapping[A], FieldDescriptor]
 
-  def enumFieldProvider[A <: Enumeration](enum:A):TypeFieldProvider[A#Value, FieldDescriptor#FieldType, FieldDescriptor]
+  def enumFieldProvider[A <: Enumeration](enum:A):FieldProvider[A#Value, FieldDescriptor]
 
   val i18nKeyCollector:I18nKeyCollector
 }

@@ -1,8 +1,8 @@
 package com.soulever.vaadin.providers
 
-import com.soulever.vaadin.types.{TypeFieldProvider, GeneratedField}
+
+import com.soulever.vaadin.types.{FieldProvider, GeneratedField}
 import com.soulever.vaadin.FieldDescriptor
-import com.soulever.makro.AbstractFieldDescriptor
 import com.vaadin.ui._
 import com.vaadin.data.Validator
 import scala.util.Try
@@ -35,8 +35,28 @@ trait BaseField[A] extends CustomField[A] with InlineValidationProvider {
   def initContent(): Component = innerField
 }
 
-class IntFieldProvider extends TypeFieldProvider[Int] {
-  override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: Int, baseField: GeneratedField[_,_]): AbstractField[Int] =
+class StringFieldProvider extends FieldProvider[String] {
+  override def field[FD <: FieldDescriptor](fieldDescriptor: FD)
+                                           (op: String, baseField: GeneratedField[_, _]): AbstractField[String] =
+  new BaseField[String] {
+
+    override def inlineValidations: List[(String, String)] = List.empty
+
+    override def getType: Class[_ <: String] = classOf[String]
+
+    val innerField = new TextField()
+    innerField.setValue(op.toString)
+
+    override def setValue(newFieldValue: String) = innerField.setValue(newFieldValue)
+
+    override def getValue: String = innerField.getValue
+
+  }
+
+}
+
+class IntFieldProvider extends FieldProvider[Int] {
+  override def field[FD <: FieldDescriptor](fieldDescriptor: FD)(op: Int, baseField: GeneratedField[_,_]): AbstractField[Int] =
     new BaseField[Int] {
       def getType: Class[_ <: Int] = classOf[Int]
 
@@ -54,10 +74,10 @@ class IntFieldProvider extends TypeFieldProvider[Int] {
     }
 }
 
-class LongFieldProvider extends TypeFieldProvider[Long] {
+class LongFieldProvider extends FieldProvider[Long] {
 
 
-  override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: Long, baseField: GeneratedField[_,_]): AbstractField[Long] =
+  override def field[FD <: FieldDescriptor](fieldDescriptor: FD)(op: Long, baseField: GeneratedField[_,_]): AbstractField[Long] =
     new BaseField[Long] {
       def getType: Class[_ <: Long] = classOf[Long]
 
@@ -75,9 +95,9 @@ class LongFieldProvider extends TypeFieldProvider[Long] {
     }
 }
 
-class FloatFieldProvider extends TypeFieldProvider[Float] {
+class FloatFieldProvider extends FieldProvider[Float] {
 
-  override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: Float, baseField: GeneratedField[_,_]): AbstractField[Float] =
+  override def field[FD <: FieldDescriptor](fieldDescriptor: FD)(op: Float, baseField: GeneratedField[_,_]): AbstractField[Float] =
     new BaseField[Float] {
       def getType: Class[_ <: Float] = classOf[Float]
 
@@ -95,10 +115,10 @@ class FloatFieldProvider extends TypeFieldProvider[Float] {
     }
 }
 
-class DoubleFieldProvider extends TypeFieldProvider[Double] {
+class DoubleFieldProvider extends FieldProvider[Double] {
 
 
-  override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: Double, baseField: GeneratedField[_,_]): AbstractField[Double] =
+  override def field[FD <: FieldDescriptor](fieldDescriptor: FD)(op: Double, baseField: GeneratedField[_,_]): AbstractField[Double] =
     new BaseField[Double] {
       def getType: Class[_ <: Double] = classOf[Double]
 
@@ -116,9 +136,9 @@ class DoubleFieldProvider extends TypeFieldProvider[Double] {
     }
 }
 
-class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
+class BooleanFieldProvider extends FieldProvider[Boolean] {
 
-  override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: Boolean, baseField: GeneratedField[_,_]): AbstractField[Boolean] =
+  override def field[FD <: FieldDescriptor](fieldDescriptor: FD)(op: Boolean, baseField: GeneratedField[_,_]): AbstractField[Boolean] =
     new CustomField[Boolean] with InlineKeyProvider {
       def getType: Class[_ <: Boolean] = classOf[Boolean]
       val i18nKey = baseField.i18nKey
@@ -153,9 +173,9 @@ class BooleanFieldProvider extends TypeFieldProvider[Boolean] {
     }
 }
 
-class ByteFieldProvider extends TypeFieldProvider[Byte]{
+class ByteFieldProvider extends FieldProvider[Byte]{
 
-  override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: Byte, baseField: GeneratedField[_,_]): AbstractField[Byte] =
+  override def field[FD <: FieldDescriptor](fieldDescriptor: FD)(op: Byte, baseField: GeneratedField[_,_]): AbstractField[Byte] =
     new BaseField[Byte] {
       def getType: Class[_ <: Byte] = classOf[Byte]
 
@@ -174,9 +194,9 @@ class ByteFieldProvider extends TypeFieldProvider[Byte]{
     }
 }
 
-class PasswordFieldProvider extends TypeFieldProvider[Password]{
+class PasswordFieldProvider extends FieldProvider[Password]{
 
-  override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: Password, baseField: GeneratedField[_,_]): AbstractField[Password] =
+  override def field[FD <: FieldDescriptor](fieldDescriptor: FD)(op: Password, baseField: GeneratedField[_,_]): AbstractField[Password] =
     new BaseField[Password] {
 
       val innerField = new PasswordField()
@@ -192,9 +212,9 @@ class PasswordFieldProvider extends TypeFieldProvider[Password]{
     }
 }
 
-class LongTextFieldProvider extends TypeFieldProvider[LongText]{
+class LongTextFieldProvider extends FieldProvider[LongText]{
 
-  override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: LongText, baseField: GeneratedField[_,_]): AbstractField[LongText] =
+  override def field[FD <: FieldDescriptor](fieldDescriptor: FD)(op: LongText, baseField: GeneratedField[_,_]): AbstractField[LongText] =
     new BaseField[LongText] {
       def getType: Class[_ <: LongText] = classOf[LongText]
 
@@ -212,9 +232,9 @@ class LongTextFieldProvider extends TypeFieldProvider[LongText]{
     }
 }
 
-class DateFieldProvider extends TypeFieldProvider[Date]{
+class DateFieldProvider extends FieldProvider[Date]{
 
-  override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: Date, baseField: GeneratedField[_,_]): AbstractField[Date] = {
+  override def field[FD <: FieldDescriptor](fieldDescriptor: FD)(op: Date, baseField: GeneratedField[_,_]): AbstractField[Date] = {
     val dateField = new DateField()
     dateField.setValue(op)
     dateField
