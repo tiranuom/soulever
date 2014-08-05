@@ -62,16 +62,3 @@ class EmptyProviderMacros(val c:Context) {
     tree
   }
 }
-
-class FieldProviderMacros(val c:Context) {
-  import c.universe._
-
-  def enumFieldProviderMacro[A:c.WeakTypeTag] = {
-    val tpe = c.weakTypeOf[A]
-    val pre = tpe match {
-      case TypeRef(a, _, _) => a
-      case _ => c.abort(c.enclosingPosition, "Cannot decode the position")
-    }
-    q"m.enumFieldProvider(${pre.termSymbol})"
-  }
-}

@@ -17,7 +17,6 @@ object Macros {
    *  - two buttons for submit and reset are created.
    *
    * @param instance
-   * @param action
    * @param moduleDesc
    * @tparam ClassType
    * @tparam FD
@@ -176,8 +175,24 @@ class MacrosImpl(val c:blackbox.Context) {
       case s if s.tree.tpe.typeConstructor =:= c.weakTypeOf[css] => s.tree.children.tail.head
     })
 
-
     val generatedImplicits = {
+      type TypeTransformer = PartialFunction[Type, Tree]
+
+      val enumTransformer:TypeTransformer = {
+        case t if t <:< typeOf[Enumeration#Value] =>
+          val pre = t match {
+            case TypeRef(a, _, _) => a
+            case _ => c.abort(c.enclosingPosition, "Cannot decode the position")
+          }
+          q"implicit val ${newTermName(c.freshName())} = m.enumFieldProvider(${pre.termSymbol})"
+      }
+
+      val transformers =  List(
+        enumTransformer
+      ).reduce(_ orElse _)
+
+      def recur(s:Type):List[Type] = s.typeArgs.foldLeft(List(s))((list, t) => t :: list)
+
       val mapping = Option(fieldSymbol).toList.flatMap(_.annotations.collect {
         case s if s.tree.tpe.typeConstructor =:= weakTypeOf[mapping[Any, Any]].typeConstructor =>
           s.tpe.typeArgs(1) -> q"${s.tree.children.tail.head}"
@@ -190,7 +205,7 @@ class MacrosImpl(val c:blackbox.Context) {
                 def empty = Mapping($code(m).head._2)
               }
            """
-      }.toList
+      }.toList ::: recur(valueType).collect(transformers)
 
       q"""
          ..$implicits

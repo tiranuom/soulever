@@ -69,10 +69,6 @@ trait LowPriorityFieldDescriptorImplicits extends com.soulever.makro.providers.F
                                              (op: A, baseField: FD#BaseFieldType[_, _]): AbstractField[A] =
       implicitly[GeneratedFieldProvider[A]].field[FD](fieldDescriptor)(op, baseField)
   }
-
-  import com.soulever.makro.providers.FieldProviderMacros
-
-  implicit def implicitEnumFieldProvider[A <: Enumeration#Value]:FieldProvider[A] = macro FieldProviderMacros.enumFieldProviderMacro[A]
 }
 
 trait FieldDescriptorImplicits extends LowPriorityFieldDescriptorImplicits {
