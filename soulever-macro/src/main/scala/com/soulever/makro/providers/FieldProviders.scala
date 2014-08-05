@@ -15,3 +15,8 @@ trait FieldProvider[A, IFD <: AbstractFieldDescriptor[IFD]] {
                       (op:A, baseField: FD#BaseFieldType[_, _]): IFD#FieldType[A]
 }
 
+@implicitNotFound("Cannot find TypeFieldProvider for ${A}")
+trait GeneratedFieldProvider[A, IFD <: AbstractFieldDescriptor[IFD]] {
+  def field[FD <: IFD](fieldDescriptor:FD)
+                      (op:A, baseField: FD#BaseFieldType[_, _]): IFD#FieldType[A]
+}

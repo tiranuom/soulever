@@ -1,7 +1,7 @@
 package com.soulever.makro
 
 import com.soulever.makro.i18n.I18nKeyCollector
-import com.soulever.makro.providers.{EmptyProvider, FieldProvider}
+import com.soulever.makro.providers.{GeneratedFieldProvider, EmptyProvider, FieldProvider}
 import Soulever._
 
 trait AbstractFieldDescriptor[FieldDescriptor <: AbstractFieldDescriptor[FieldDescriptor]] {
@@ -29,7 +29,7 @@ trait AbstractFieldDescriptor[FieldDescriptor <: AbstractFieldDescriptor[FieldDe
     override def empty: Soulever.Mapping[A] = mapping.headOption.map(a => Mapping(a._2)).orNull
   }
 
-  def mappingFieldProvider[A](mapping:List[(String, A)]):FieldProvider[Mapping[A], FieldDescriptor]
+  def mappingFieldProvider[A](mapping:List[(String, A)]):GeneratedFieldProvider[Mapping[A], FieldDescriptor]
 
   def enumFieldProvider[A <: Enumeration](enum:A):FieldProvider[A#Value, FieldDescriptor]
 

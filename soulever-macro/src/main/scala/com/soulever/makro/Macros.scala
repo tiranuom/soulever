@@ -186,7 +186,7 @@ class MacrosImpl(val c:blackbox.Context) {
     val mappingCode = {
       val implicits = mapping.map { case (tpe, code) =>
         q"""
-              implicit val ${newTermName(tpe.typeSymbol.name.toString + "FieldProvider")}:FieldProvider[Mapping[$tpe]] = m.mappingFieldProvider[$tpe]($code(m))
+              implicit val ${newTermName(tpe.typeSymbol.name.toString + "FieldProvider")}:GeneratedFieldProvider[Mapping[$tpe]] = m.mappingFieldProvider[$tpe]($code(m))
               implicit val ${newTermName(tpe.typeSymbol.name.toString + "EmptyProvider")}:EmptyProvider[Mapping[$tpe]] = new EmptyProvider[Mapping[$tpe]] {
                 def empty = Mapping($code(m).head._2)
               }

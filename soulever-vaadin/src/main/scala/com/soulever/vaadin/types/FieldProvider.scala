@@ -6,3 +6,5 @@ import com.soulever.vaadin.FieldDescriptor
 import com.vaadin.ui.AbstractField
 
 trait FieldProvider[A] extends makro.providers.FieldProvider[A, FieldDescriptor]
+
+trait GeneratedFieldProvider[A] extends makro.providers.GeneratedFieldProvider[A, FieldDescriptor]

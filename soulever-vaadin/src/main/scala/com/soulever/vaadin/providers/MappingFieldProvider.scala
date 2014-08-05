@@ -1,12 +1,12 @@
 package com.soulever.vaadin.providers
 
-import com.soulever.vaadin.types.{FieldProvider, GeneratedField}
+import com.soulever.vaadin.types.{GeneratedFieldProvider, FieldProvider, GeneratedField}
 import com.soulever.vaadin.FieldDescriptor
 import com.soulever.makro.{Soulever, AbstractFieldDescriptor}
 import com.vaadin.ui._
 import Soulever._
 
-class MappingFieldProvider[A](mapping:List[(String, A)]) extends FieldProvider[Mapping[A]]{
+class MappingFieldProvider[A](mapping:List[(String, A)]) extends GeneratedFieldProvider[Mapping[A]]{
 
   override def field[FD <: AbstractFieldDescriptor[_]](fieldDescriptor: FD)(op: Mapping[A], baseField: GeneratedField[_,_]): AbstractField[Mapping[A]] =
     new CustomField[Mapping[A]] {

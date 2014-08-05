@@ -3,7 +3,7 @@ package com.soulever.lift
 import java.io.File
 
 import com.soulever.lift.providers.{EnumerationFieldProvider, MappingFieldProvider}
-import com.soulever.lift.types.{GeneratedField, InnerField, FieldProvider}
+import com.soulever.lift.types.{GeneratedFieldProvider, GeneratedField, InnerField, FieldProvider}
 import com.soulever.makro.AbstractFieldDescriptor
 import com.soulever.makro.Soulever._
 import com.soulever.makro.i18n.I18nKeyCollector
@@ -11,7 +11,6 @@ import net.liftweb.http.js.JsCmd
 import net.liftweb.http.{S, SHtml}
 import net.liftweb.util.Props
 import scala.language.experimental.macros
-import com.soulever.makro.providers.FieldProviderMacros
 
 import scala.xml.{Elem, NodeSeq}
 
@@ -55,17 +54,34 @@ trait FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor]{
       </table>
     </span>
 
-  override def mappingFieldProvider[A](mapping: List[(String, A)]): FieldProvider[Mapping[A]] = new MappingFieldProvider(mapping)
+  override def mappingFieldProvider[A](mapping: List[(String, A)]): GeneratedFieldProvider[Mapping[A]] = new MappingFieldProvider(mapping)
 
   override def enumFieldProvider[A <: Enumeration](enum: A): FieldProvider[A#Value] = new EnumerationFieldProvider(enum)
 
   override val i18nKeyCollector: I18nKeyCollector = new I18nKeyCollector(Props.get("i18n.print.path").map( new File(".").getAbsolutePath + _))
 }
 
-trait FieldDescriptorImplicits extends com.soulever.makro.providers.FieldDescriptorImplicits {
-  import com.soulever.lift.providers._
+trait LowPriorityFieldDescriptorImplicits extends com.soulever.makro.providers.FieldDescriptorImplicits {
 
   type FieldProvider[A] = com.soulever.lift.types.FieldProvider[A]
+
+  type GeneratedFieldProvider[A] = com.soulever.lift.types.GeneratedFieldProvider[A]
+
+  override type FieldDescriptor = com.soulever.lift.FieldDescriptor
+
+  implicit def generatedFieldProvider[A](implicit $ev:GeneratedFieldProvider[A]) = new FieldProvider[A] {
+    override def field[FD <: FieldDescriptor](fieldDescriptor: FD)
+                                             (op: A, baseField: FD#BaseFieldType[_, _]): InnerField[A] =
+      implicitly[GeneratedFieldProvider[A]].field(fieldDescriptor)(op, baseField)
+  }
+
+  import com.soulever.makro.providers.FieldProviderMacros
+
+  implicit def implicitEnumFieldProvider[A <: Enumeration#Value]:FieldProvider[A] = macro FieldProviderMacros.enumFieldProviderMacro[A]
+}
+
+trait FieldDescriptorImplicits extends LowPriorityFieldDescriptorImplicits {
+  import com.soulever.lift.providers._
 
   implicit val stringFieldProvider = new StringFieldProvider
 
@@ -90,10 +106,6 @@ trait FieldDescriptorImplicits extends com.soulever.makro.providers.FieldDescrip
   implicit def optionFieldProvider[A : FieldProvider : EmptyProvider] = new OptionFieldProvider[A]
 
   implicit def listFieldProvider[A : FieldProvider : EmptyProvider] = new ListFieldProvider[A]
-
-  implicit def implicitEnumFieldProvider[A <: Enumeration#Value]:FieldProvider[A] = macro FieldProviderMacros.enumFieldProviderMacro[A]
 }
 
-trait Descriptor extends FieldDescriptor with FieldDescriptorImplicits {
-  override type FieldDescriptor = com.soulever.lift.FieldDescriptor
-}
+trait Descriptor extends FieldDescriptor with FieldDescriptorImplicits

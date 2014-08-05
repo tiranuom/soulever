@@ -1,12 +1,10 @@
 package com.soulever.vaadin
 
-import java.util
-
 import com.soulever.makro.AbstractFieldDescriptor
 import com.soulever.makro.i18n.I18nKeyCollector
 import com.soulever.makro.Soulever._
 import com.soulever.vaadin.providers._
-import com.soulever.vaadin.types.{GeneratedField, FieldProvider}
+import com.soulever.vaadin.types.{GeneratedFieldProvider, GeneratedField, FieldProvider}
 import com.typesafe.config.ConfigFactory
 import com.vaadin.ui.Button.{ClickEvent, ClickListener}
 import com.vaadin.ui._
@@ -42,7 +40,7 @@ trait FieldDescriptor extends AbstractFieldDescriptor[FieldDescriptor] {
       def buttonClick(event: ClickEvent) = clickAction()
     })
 
-  def mappingFieldProvider[A](mapping: List[(String, A)]): FieldProvider[Mapping[A]] = new MappingFieldProvider[A](mapping)
+  def mappingFieldProvider[A](mapping: List[(String, A)]): GeneratedFieldProvider[Mapping[A]] = new MappingFieldProvider[A](mapping)
 
   def enumFieldProvider[A <: Enumeration](enum: A): FieldProvider[A#Value] = new EnumerationFieldProvider[A](enum)
 
@@ -58,11 +56,26 @@ object Props {
   def isPrintable = Try(props.getBoolean("i18n.print.on")).getOrElse(false)
 }
 
-trait FieldDescriptorImplicits extends com.soulever.makro.providers.FieldDescriptorImplicits {
+trait LowPriorityFieldDescriptorImplicits extends com.soulever.makro.providers.FieldDescriptorImplicits {
+
+  type GeneratedFieldProvider[A] = com.soulever.vaadin.types.GeneratedFieldProvider[A]
+
+  type FieldProvider[A] = com.soulever.vaadin.types.FieldProvider[A]
+
+  override type FieldDescriptor = com.soulever.vaadin.FieldDescriptor
+
+  implicit def generatedFieldProvider[A: GeneratedFieldProvider] = new FieldProvider[A] {
+    override def field[FD <: FieldDescriptor](fieldDescriptor: FD)
+                                             (op: A, baseField: FD#BaseFieldType[_, _]): AbstractField[A] =
+      implicitly[GeneratedFieldProvider[A]].field[FD](fieldDescriptor)(op, baseField)
+  }
 
   import com.soulever.makro.providers.FieldProviderMacros
 
-  type FieldProvider[A] = com.soulever.vaadin.types.FieldProvider[A]
+  implicit def implicitEnumFieldProvider[A <: Enumeration#Value]:FieldProvider[A] = macro FieldProviderMacros.enumFieldProviderMacro[A]
+}
+
+trait FieldDescriptorImplicits extends LowPriorityFieldDescriptorImplicits {
 
   implicit val stringFieldProvider = new StringFieldProvider
 
@@ -87,12 +100,6 @@ trait FieldDescriptorImplicits extends com.soulever.makro.providers.FieldDescrip
   implicit def optionFieldProvider[A : FieldProvider : EmptyProvider] = new OptionFieldProvider[A]
 
   implicit def listFieldProvider[A : FieldProvider : EmptyProvider] = new ListFieldProvider[A]
-
-  implicit def enumFieldProvider[A <: Enumeration#Value]:FieldProvider[A] = macro FieldProviderMacros.enumFieldProviderMacro[A]
 }
 
-trait Descriptor extends FieldDescriptor with FieldDescriptorImplicits {
-
-  override type FieldDescriptor = com.soulever.vaadin.FieldDescriptor
-
-}
+trait Descriptor extends FieldDescriptor with FieldDescriptorImplicits

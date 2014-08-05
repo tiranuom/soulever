@@ -10,3 +10,5 @@ import com.soulever.makro.AbstractFieldDescriptor
  */
 
 trait FieldProvider[A] extends makro.providers.FieldProvider[A, FieldDescriptor]
+
+trait GeneratedFieldProvider[A] extends makro.providers.GeneratedFieldProvider[A, FieldDescriptor]

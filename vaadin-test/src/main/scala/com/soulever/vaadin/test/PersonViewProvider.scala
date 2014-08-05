@@ -38,17 +38,17 @@ class PersonViewProvider(ui:UI) extends ViewProvider {
   }
 }
 
-case class TestCaseClass(@css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2Field, "not-equal") enumerationField:Bool.Bool = Bool.TRUE,
-                         enumeration2Field:Bool.Bool = Bool.TRUE,
-                         @mapping[Imp, V](_.intMapping) mappedIntField:Mapping[V] = V(1),
-                         @nonEmpty[String] stringField:String,
-                         @nonEmpty[String] newStringField:String = "",
-                         @min(0) @max(60) intField:Int = 0,
-                         @min(0) @max(60) newIntField:Int = 0,
-                         booleanField:Boolean = false,
-                         passwordField:Password = "",
-                         @mapping[Imp, V](_.intMapping) @nonEmpty[List[Option[Mapping[V]]]] listField:List[Option[Mapping[V]]] = List(None),
-                         @custom[Option[Int]](TestCaseClass.customValidation, "all.positive") optionField:Option[Int] = None)
+case class TestCaseClass( @css("enum") @fieldDependent[Bool.Bool, TestCaseClass]((b, c) => b == c.enumeration2Field, "not-equal") enumerationField:Bool.Bool = Bool.TRUE,
+                         @hidden enumeration2Field:Bool.Bool = Bool.TRUE,
+                         @hidden @mapping[Imp, V](_.intMapping) mappedIntField:Mapping[V] = V(1),
+                         @hidden @nonEmpty[String] stringField:String,
+                         @hidden @nonEmpty[String] newStringField:String = "",
+                         @hidden @min(0) @max(60) intField:Int = 5,
+                         @hidden @min(0) @max(60) newIntField:Int = 0,
+                         @hidden booleanField:Boolean = false,
+                         @hidden passwordField:Password = "",
+                         @hidden @mapping[Imp, V](_.intMapping) @nonEmpty[List[Option[Mapping[V]]]] listField:List[Option[Mapping[V]]] = List(None),
+                         @hidden @custom[Option[Int]](TestCaseClass.customValidation, "all.positive") optionField:Option[Int] = None)
 
 object TestCaseClass {
   def customValidation(o:Option[Int]) = o.map(_ > 0).getOrElse(true)
