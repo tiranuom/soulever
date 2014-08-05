@@ -80,7 +80,7 @@ class MacrosImpl(val c:blackbox.Context) {
     val fieldCodeBlocks = fieldDataList.map(_.code)
     val fieldNamesList = fieldDataList.map(a => q"${a.fieldName}")
     val gettersList = fieldDataList.map(a => a.field -> q"${a.fieldName}.value")
-    val emptyValuesList = fieldDataList.map(a => (a.field, a.fieldName, a.empty))
+    val emptyValuesList = fieldDataList.map(a => (a.field, a.fieldName))
 
     val getterExpressions = classParamsList.map(gettersList.toMap.withDefault(s => q"$classExpr.${s.name.toTermName}"))
 
@@ -99,7 +99,7 @@ class MacrosImpl(val c:blackbox.Context) {
       } yield q"${field.name.toTermName} = ${emptyBlock(field, field.typeSignature)}.empty"
 
       val settersList = for {
-        (field, fieldName, _) <- emptyValuesList
+        (field, fieldName) <- emptyValuesList
       } yield q"$fieldName.value = empty.${field.name.toTermName}"
 
       val i18nKey = s"$classI18nKey.button"
@@ -145,7 +145,7 @@ class MacrosImpl(val c:blackbox.Context) {
 
     val className: String = ths.tree.tpe.typeSymbol.name.toString.dotNotation
 
-    val FieldData(code, fieldName, _, _) = generateFieldBlock[FD, ClassType](
+    val FieldData(code, fieldName, _) = generateFieldBlock[FD, ClassType](
       valueTree   = value.tree,
       fieldSymbol = value.tree.symbol,
       classI18nKey= q"$className",
@@ -170,24 +170,23 @@ class MacrosImpl(val c:blackbox.Context) {
 
     val valueType = fieldSymbol.typeSignature
 
-    val fieldType = c.weakTypeOf[FD].member(TypeName("FieldType")).asType.toType.dealias.typeConstructor
-
     val fieldName = TermName(c.freshName() + "Field")
 
     val css = Option(fieldSymbol).flatMap(_.annotations.collectFirst {
       case s if s.tree.tpe.typeConstructor =:= c.weakTypeOf[css] => s.tree.children.tail.head
     })
 
-    val mapping = Option(fieldSymbol).flatMap(_.annotations.collectFirst {
-      case s if s.tree.tpe.typeConstructor =:= weakTypeOf[mapping[Any, Any]].typeConstructor =>
-        s.tpe.typeArgs(1) -> q"${s.tree.children.tail.head}"
-    })
 
-    val mappingCode = {
+    val generatedImplicits = {
+      val mapping = Option(fieldSymbol).toList.flatMap(_.annotations.collect {
+        case s if s.tree.tpe.typeConstructor =:= weakTypeOf[mapping[Any, Any]].typeConstructor =>
+          s.tpe.typeArgs(1) -> q"${s.tree.children.tail.head}"
+      })
+
       val implicits = mapping.map { case (tpe, code) =>
         q"""
-              implicit val ${newTermName(tpe.typeSymbol.name.toString + "FieldProvider")}:GeneratedFieldProvider[Mapping[$tpe]] = m.mappingFieldProvider[$tpe]($code(m))
-              implicit val ${newTermName(tpe.typeSymbol.name.toString + "EmptyProvider")}:EmptyProvider[Mapping[$tpe]] = new EmptyProvider[Mapping[$tpe]] {
+              implicit val ${newTermName(c.freshName())}:GeneratedFieldProvider[Mapping[$tpe]] = m.mappingFieldProvider[$tpe]($code(m))
+              implicit val ${newTermName(c.freshName())}:EmptyProvider[Mapping[$tpe]] = new EmptyProvider[Mapping[$tpe]] {
                 def empty = Mapping($code(m).head._2)
               }
            """
@@ -196,37 +195,6 @@ class MacrosImpl(val c:blackbox.Context) {
       q"""
          ..$implicits
        """
-    }
-
-    val (innerField, emptyValue) = {
-
-      val fieldDescriptorType = {
-        val tpe = c.weakTypeOf[FD]
-        val mdfClass = typeOf[AbstractFieldDescriptor[_]].typeSymbol.asClass
-        val selfType = mdfClass.typeParams.head.asType.toType
-        selfType.asSeenFrom(tpe, mdfClass)
-      }
-
-      def expandParameters(s: Type = valueType, collector: List[(Tree, Tree)] = List.empty): List[(Tree, Tree)] = {
-        val (pre, args) = s match {
-          case NullaryMethodType(TypeRef(a:Type, _, b)) => a -> b
-          case NullaryMethodType(a:Type) => a -> List.empty
-          case TypeRef(a, _, b) => a -> b
-          case _ => c.abort(c.enclosingPosition, "Cannot decode the position")
-        }
-
-        args match {
-          case _ =>
-            (q"implicitly[providers.FieldProvider[$s, $fieldDescriptorType]]", emptyBlock(fieldSymbol, s)) ::
-            collector
-        }
-      }
-
-      val fieldProviders = expandParameters()
-      (fieldProviders.tail foldLeft (q"${fieldProviders.head._1}.field(m)", q"${fieldProviders.head._2}.empty")){
-        case ((underlyingFieldProvider, underlyingEmpty), thisFieldProvider) =>
-          (q"${thisFieldProvider._1}.field($underlyingFieldProvider, $underlyingEmpty, m)", q"${thisFieldProvider._2}.empty")
-      }
     }
 
     def createValidations(blockProvider: FieldBlockProvider) = {
@@ -254,11 +222,11 @@ class MacrosImpl(val c:blackbox.Context) {
         m.i18nKeyCollector.insert($compoundI18nKey, $fieldI18nKey.naturalNotation)
 
         val field = {
-        ..$mappingCode
+        ..$generatedImplicits
         fieldComponent[$valueType, ${ths.actualType}](
           init                = $valueTree,
           caption             = ($compoundI18nKey).trim,
-          innerField          = $innerField,
+          innerField          = implicitly[FieldProvider[$valueType]].field(m),
           validators          = $validatorFunctions,
           secondaryValidators = $classDependentValidatorFunctions,
           css                 = $css.getOrElse(""))
@@ -277,16 +245,14 @@ class MacrosImpl(val c:blackbox.Context) {
       """
     FieldData(code = code,
       fieldName = fieldName,
-      empty = emptyValue,
       field = fieldSymbol)
   }
 
   def emptyBlock(fieldSymbol:Symbol, valueType:Type) = {
-    val (pre, args) = valueType match {
-      case NullaryMethodType(TypeRef(a:Type, _, b)) => a -> b
-      case NullaryMethodType(a:Type) => a -> List.empty
-      case TypeRef(a, _, b) => a -> b
-      case _ => valueType -> List.empty
+    val args = valueType match {
+      case NullaryMethodType(TypeRef(_, _, b)) => b
+      case TypeRef(_, _, b) => b
+      case _ => List.empty
     }
 
     args match {
@@ -301,7 +267,7 @@ class MacrosImpl(val c:blackbox.Context) {
     }
   }
 
-  case class FieldData(code:Tree, fieldName:TermName, empty:Tree, field:Symbol) {
+  case class FieldData(code:Tree, fieldName:TermName, field:Symbol) {
     def fieldNameAsTree = q"$fieldName"
 
     def getter = q"$fieldName.value"
